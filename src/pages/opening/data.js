@@ -89,6 +89,9 @@
         { id: 'matthias', name: 'Matthias', sub: 'Le Grand Maître du Triangle', rarity: 'epic', stats: [94, 50, 99],
           img: 'memes/matthias.webp', frame: 'tall', focus: '50% 45%',
           text: 'Mains en triangle, regard du dessous, moustache de conspirateur : Matthias contrôle le jeu depuis le début. Le triangle sur les masques des gardes ? C\'était lui.' },
+        { id: 'les-jeux-video', name: '« Les jeux vidéo »', sub: 'Le surveillant suprême des écrans', rarity: 'legend', stats: [100, 20, 100],
+          img: 'memes/les-jeux-video.webp', frame: 'window', focus: '50% 50%',
+          text: 'Un téléphone sorti sous la table, et la sentence tombait : « Les jeux vidéo… ». Il voyait tous les écrans, même ceux cachés sous la trousse. Personne n\'a jamais fini une partie en sa présence.' },
         { id: 'eggorian', name: 'Eggorian', sub: 'Dorian, édition œuf de Pâques', rarity: 'legend', stats: [12, 99, 100],
           img: 'memes/eggorian.webp', frame: 'tall', focus: '50% 42%',
           text: 'Qui est arrivé en premier, Dorian ou l\'œuf ? La science a tranché : c\'est Eggorian. Ne jamais le poser sur des Shox à ressorts, il rebondit jusqu\'à l\'omelette.' },
@@ -128,12 +131,15 @@
         { id: 'theo-ancetre', name: 'Théo, l\'Ancêtre', sub: 'Doyen du peloton des légendes', rarity: 'epic', stats: [90, 60, 75],
           img: 'memes/theo-ancetre.webp', frame: 'tall', focus: '50% 28%',
           text: 'Maillot de course, casquette et lunettes : l\'Ancêtre roulait déjà avant l\'invention du vélo. Jack Shi lui-même l\'appelle « maître ».' },
-        { id: 'ott-potion', name: '.OTT', sub: 'La potion verte officielle', rarity: 'epic', stats: [85, 50, 95],
-          img: 'memes/ott-potion.webp', frame: 'tall', focus: '50% 35%',
-          text: 'Bouteille verte en main, regard de chimiste : .OTT prépare la potion officielle des Shox. Recette secrète, couleur suspecte, effets incandescents.' },
+        { id: 'ocb-potion', name: 'OCB', sub: 'La potion verte officielle', rarity: 'epic', stats: [85, 50, 95],
+          img: 'memes/ocb-potion.webp', frame: 'tall', focus: '50% 35%',
+          text: 'Bouteille verte en main, regard de chimiste : OCB prépare la potion officielle des Shox. Recette secrète, couleur suspecte, effets incandescents.' },
         { id: 'virgil', name: 'Virgil', sub: 'Une coupe, un sourcil, un empire', rarity: 'epic', stats: [70, 55, 88],
           img: 'memes/virgil.webp', frame: 'tall', focus: '50% 40%',
           text: 'Une coupe à la main et un sourcil levé, regard de PDG : Virgil fête quelque chose. Personne ne sait quoi, mais il le fête très bien.' },
+        { id: 'cafe-clope-ancien', name: 'Café-Clope', sub: 'Le rituel sacré de l\'Ancien, 7 h 58', rarity: 'epic', stats: [85, 10, 60],
+          img: 'memes/cafe-clope-ancien.webp', frame: 'window', focus: '50% 45%',
+          text: 'Un café noir, une clope, une montre qui tourne : avant chaque épreuve, l\'Ancien respecte le rituel. Les Shox chauffent toutes seules à côté de lui.' },
         { id: 'tchiki-brrrr', name: 'Tchiki Brrrrr', sub: 'Sourcils incandescents', rarity: 'epic', stats: [100, 72, 15],
           img: 'memes/tchiki-brrrr.webp', frame: 'tall', focus: '50% 35%',
           text: 'Zéro cheveu, un sourcil pour deux yeux, et un cri de guerre : « Tchiki brrrrr ». Quand il le prononce, toutes les Shox de la pièce se mettent à vibrer.' },
@@ -208,10 +214,10 @@
         { id: 'bismillah-tenebres', name: 'C\'est les Ténèbres', sub: 'La pancarte légendaire du blocus', rarity: 'legend', stats: [100, 66, 0],
           img: 'memes/bismillah-tenebres.webp', frame: 'tall', focus: '50% 45%',
           text: 'Selon la légende, la phrase est sortie de la bouche d\'un faux lycéen… qui était en fait un policier infiltré. Démasqué en trois mots, devenu un mème en trois secondes.' },
-        { id: 'ott-micro', name: '.OTT au Micro', sub: 'Blocus du lycée', rarity: 'legend', stats: [100, 61, 100], art: { emoji: '🎤', mark: 'BLOCUS DU LYCÉE' },
-          text: 'Une poubelle comme estrade, un micro à la main : le blocus avait enfin son porte-parole.' },
-        { id: 'le-y-megaphone', name: 'Le Y au Mégaphone', sub: 'Orateur incandescent', rarity: 'legend', ley: true, stats: [100, '∞', 100], art: { logo: true, mark: 'LE Y ! LE Y !' },
-          text: 'Quand il prend le mégaphone, les Shox se lèvent toutes seules. Même celles en vitrine.' },
+        { id: 'ocb-megaphone', name: 'OCB au Mégaphone', sub: 'Blocus du lycée', rarity: 'legend', stats: [100, 61, 100], art: { emoji: '📢', mark: 'BLOCUS DU LYCÉE' },
+          text: 'Une caisse en bois comme estrade, un mégaphone à la main : le blocus avait enfin son porte-parole.' },
+        { id: 'le-y-micro', name: 'Le Y au Micro', sub: 'Orateur incandescent', rarity: 'legend', ley: true, stats: [100, '∞', 100], art: { logo: true, mark: 'LE Y ! LE Y !' },
+          text: 'Quand il prend le micro, les Shox se lèvent toutes seules. Même celles en vitrine.' },
       ],
     },
   ];
@@ -227,7 +233,14 @@
     'lfi/assemblee': 'epic', 'lfi/hologramme': 'epic', 'lfi/grande-marche': 'legend',
   };
   // Cartes renommées : ancienne clé → nouvelle (la carte est conservée).
-  const aliases = { 'fire/le-mec': 'fire/le-y', 'lfi/mec-megaphone': 'lfi/le-y-megaphone' };
+  const aliases = {
+    'fire/le-mec': 'fire/le-y',
+    'lfi/mec-megaphone': 'lfi/le-y-micro',
+    'lfi/le-y-megaphone': 'lfi/le-y-micro',
+    'lfi/ott-micro': 'lfi/ocb-megaphone',
+    'lfi/ott-megaphone': 'lfi/ocb-megaphone',
+    'fire/ott-potion': 'fire/ocb-potion',
+  };
 
   // ------------------------------------------------------------ préparation automatique
   const hash = (s) => { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };

@@ -48,6 +48,26 @@ window.WIKI_CHAMPS = ['Nom complet', 'Surnom(s)', 'Première apparition', 'Spéc
 window.WIKI_ENTREES = [
   // -------------------------------------------------------------------
   {
+    slug: 'ocb',
+    titre: 'OCB',
+    ebauche: false,
+    statut: 'enrichissement',
+    resume: '<b>OCB</b> est le porte-parole officiel du blocus du lycée : une caisse en bois comme estrade, un mégaphone à la main, et toute la foule qui lève le poing.{{réf}} Il est aussi connu pour avoir mis au point la <b>potion verte officielle</b> des Shox.',
+    photo: '/assets/cards/lfi/ocb-megaphone.png',
+    legende: 'OCB au mégaphone, devant le portail du lycée bloqué.',
+    infobox: [['Nom complet', ''], ['Surnom(s)', ''], ['Rôle', 'Porte-parole du blocus'], ['Arme favorite', 'Le mégaphone rouge'], ['Spécialité', 'La potion verte officielle{{réf}}'], ['Citation fétiche', '']],
+    sections: [
+      ['Le porte-parole du blocus', '<p>Debout sur sa caisse en bois, OCB harangue la foule au mégaphone, entre les barrières, les fumigènes rouges et les confettis. Selon les témoins, il ne s\'est jamais arrêté de parler.{{réf}}</p>'],
+      ['La potion verte', '<p>Bouteille verte en main et regard de chimiste, OCB serait l\'inventeur de la potion officielle des Shox. Recette secrète, couleur suspecte, effets incandescents.{{réf}}</p>'],
+      ['Faits marquants', ''],
+      ['Citations célèbres', ''],
+    ],
+    galerie: [['/assets/memes/ocb-potion.webp', 'La potion verte officielle.']],
+    voirAussi: ['le-y', 'les-shoxs'],
+    categories: ['Blocus'],
+  },
+  // -------------------------------------------------------------------
+  {
     slug: 'ott',
     titre: '.OTT',
     ebauche: true,
