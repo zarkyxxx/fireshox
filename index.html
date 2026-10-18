@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fire Shox — le navigateur 100&#8239;% incandescent</title>
+<meta name="description" content="Fire Shox, le navigateur web pour Windows à amorti gravitationnel. Vrai moteur Chromium, ShoxBench, Shox Opening, Wiki Shox… 100&#8239;% incandescent, 0&#8239;€ et 0&#8239;% froid.">
+<meta name="theme-color" content="#ff6a00">
+<meta name="color-scheme" content="dark">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Fire Shox">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="Fire Shox — le navigateur 100&#8239;% incandescent">
+<meta property="og:description" content="L'amorti gravitationnel au service de votre navigation web. Gratuit, pour Windows.">
+<meta property="og:url" content="https://zarkyxxx.github.io/fireshox/">
+<meta property="og:image" content="https://zarkyxxx.github.io/fireshox/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" type="image/png" sizes="32x32" href="img/logo-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="img/logo-64.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="preload" href="fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="img/logo-720.webp" as="image" type="image/webp">
+<link rel="stylesheet" href="css/style.css">
+<script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+
+<!-- Pictogrammes (dessins maison, pas de logo de marque) -->
+<svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m6.5 10 5.5 5.5 5.5-5.5"/><path d="M4 20h16"/></symbol>
+  <symbol id="i-tabs" viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="16" rx="2.5"/><path d="M2.5 9h19"/><path d="M9 4v5"/><path d="M15 4v5"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.8l2.85 5.8 6.4.93-4.63 4.5 1.1 6.37L12 17.4l-5.72 3 1.1-6.37-4.63-4.5 6.4-.93z"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></symbol>
+  <symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 17V3"/><path d="m6 11 6 6 6-6"/><path d="M19 21H5"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
+  <symbol id="i-cards" viewBox="0 0 24 24"><rect x="3" y="7" width="12" height="15" rx="2"/><path d="M8 3.5h10a2 2 0 0 1 2 2V18"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/></symbol>
+  <symbol id="i-gamepad" viewBox="0 0 24 24"><path d="M6 11h4"/><path d="M8 9v4"/><path d="M15 12h.01"/><path d="M18 10h.01"/><path d="M17.32 5H6.68a4 4 0 0 0-3.98 3.59C2.6 9.42 2 14.46 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.41-1.41A2 2 0 0 1 9.83 16h4.34a2 2 0 0 1 1.41.59L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.54-.6-6.58-.69-7.26A4 4 0 0 0 17.32 5z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></symbol>
+  <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.2a3.4 3.4 0 1 0 0 5.6"/></symbol>
+  <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+</svg>
+
+<canvas id="embers" aria-hidden="true"></canvas>
+<div class="heat" aria-hidden="true"></div>
+
+<header class="topbar" id="topbar">
+  <a class="brand" href="#top" aria-label="Fire Shox, haut de page">
+    <img src="img/logo-64.png" width="34" height="34" alt="">
+    <span>FIRE SHOX</span>
+  </a>
+  <nav class="nav" aria-label="Sections">
+    <a href="#dedans">Dedans</a>
+    <a href="#comparatif">Comparatif</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+  <a class="btn-mini" href="https://github.com/zarkyxxx/fireshox/releases/latest/download/FireShox-Setup.exe" data-dl>
+    <svg class="ic"><use href="#i-download"/></svg><span>Télécharger</span>
+  </a>
+</header>
+
+<main>
+
+  <!-- ===================== HÉROS ===================== -->
+  <section class="hero" id="top">
+    <div class="hero-bg" aria-hidden="true"></div>
+
+    <div class="hero-logo" id="heroLogo">
+      <div class="hl-glow" aria-hidden="true"></div>
+      <div class="hl-halo" aria-hidden="true"></div>
+      <svg class="hl-orbit" viewBox="0 0 200 200" aria-hidden="true">
+        <circle cx="100" cy="100" r="97" />
+        <circle class="spark" cx="100" cy="3" r="2.2" />
+        <circle class="spark s2" cx="197" cy="100" r="1.6" />
+        <circle class="spark s3" cx="31.4" cy="168.6" r="1.4" />
+      </svg>
+      <button class="hl-img" id="logoBtn" type="button" aria-label="Allumer des braises">
+        <picture>
+          <source srcset="img/logo-720.webp" type="image/webp">
+          <img src="img/logo-512.png" width="512" height="512" alt="Logo Fire Shox : un pote de profil, entouré de Shox en flammes qui tourbillonnent">
+        </picture>
+      </button>
+    </div>
+
+    <p class="kicker hero-kicker"><svg class="ic"><use href="#i-flame"/></svg> Navigateur web · Windows · Gratuit</p>
+    <h1 class="title"><span class="t-fire">FIRE</span> <span class="t-shox">SHOX</span></h1>
+    <p class="tagline">L'amorti gravitationnel au service de votre navigation web.<br><strong>100&#8239;% incandescent.</strong></p>
+
+    <div class="cta">
+      <a class="btn-fire" href="https://github.com/zarkyxxx/fireshox/releases/latest/download/FireShox-Setup.exe" data-dl data-main>
+        <span class="bf-icon"><svg class="ic"><use href="#i-download"/></svg></span>
+        <span class="bf-text">
+          <span class="bf-big"><span class="for-desk">Télécharger pour Windows</span><span class="for-mob">Pour PC Windows</span></span>
+          <span class="bf-small"><span class="for-desk">Installeur .exe · gratuit</span><span class="for-mob for-mob-narrow">À installer depuis votre ordinateur</span><span class="for-mob for-mob-touch">Touchez pour envoyer le lien à votre PC</span></span>
+        </span>
+      </a>
+      <p class="dl-meta" data-meta>Windows 10 / 11 · 64 bits</p>
+      <p class="dl-note-mob"><svg class="ic"><use href="#i-monitor"/></svg> Fire Shox est un logiciel pour PC Windows. Sur téléphone, il ne prendra pas feu.</p>
+      <p class="dl-note-os"><svg class="ic"><use href="#i-monitor"/></svg> Fire Shox n'existe que pour Windows pour l'instant. Pas encore de version Mac ni Linux.</p>
+      <p class="dl-links">
+        <a href="#faq-smartscreen">Message bleu de Windows ?</a>
+        <span aria-hidden="true">·</span>
+        <a href="https://github.com/zarkyxxx/fireshox/releases">Toutes les versions</a>
+      </p>
+    </div>
+
+    <a class="scroll-hint" href="#apercu" aria-label="Voir la suite"><svg class="ic"><use href="#i-arrow-down"/></svg></a>
+  </section>
+
+  <!-- ===================== APERÇU =====================
+       Captures attendues dans img/shots/ (format conseillé 16:10, ex. 1600×1000) :
+         accueil.png · navigateur.png · shoxbench.png · opening.png · wiki.png · galerie.png · jeux.png
+       Tant qu'un fichier manque, une illustration de remplacement s'affiche. -->
+  <section class="preview" id="apercu">
+    <figure class="shot shot-xl reveal" data-shot>
+      <img src="img/shots/accueil.png" alt="Capture d'écran de Fire Shox : la page d'accueil" loading="lazy" decoding="async">
+      <div class="ph ph-accueil" aria-hidden="true">
+        <div class="ph-chrome">
+          <div class="ph-tabs">
+            <span class="ph-brand"><img src="img/logo-32.png" alt="">FIRE SHOX</span>
+            <span class="ph-tab on"><img src="img/logo-32.png" alt="">Fire Shox – Accueil<i>×</i></span>
+            <span class="ph-tab"><img src="img/logo-32.png" alt="">ShoxBench<i>×</i></span>
+            <span class="ph-plus">+</span>
+            <span class="ph-win"><i>—</i><i>▢</i><i>✕</i></span>
+          </div>
+          <div class="ph-url">
+            <span class="ph-navs"><i>‹</i><i>›</i><i>↻</i></span>
+            <span class="ph-addr"><b><svg class="ic"><use href="#i-shield"/></svg>ShoxGuard</b><span>fireshox://home</span></span>
+            <span class="ph-turbo"><svg class="ic"><use href="#i-zap"/></svg>TURBO</span>
+          </div>
+          <div class="ph-marks"><span>🔥 Accueil Fire Shox</span><span>ShoxBench</span><span>Shox Opening</span><span>Wiki Shox</span><span>Galerie</span></div>
+        </div>
+        <div class="ph-body">
+          <div class="pa-glow"></div>
+          <img class="pa-logo" src="img/logo-256.png" alt="">
+          <div class="pa-title">FIRE SHOX</div>
+          <div class="pa-sub">L'amorti gravitationnel au service de votre navigation web.</div>
+          <div class="pa-search"><span>Rechercher sur le Web ou taper une Shox-Requête…</span><b><svg class="ic"><use href="#i-zap"/></svg>SHOXBOOST</b></div>
+          <div class="pa-tiles"><i></i><i></i><i></i><i></i></div>
+        </div>
+      </div>
+    </figure>
+  </section>
+
+  <!-- ===================== BANDEAU ===================== -->
+  <div class="tape" aria-hidden="true">
+    <div class="tape-row tape-back"><div class="tape-track">
+      <span>RESSORTS CERTIFIÉS</span><span>ZÉRO FROID</span><span>MOTEUR CHROMIUM</span><span>BOOSTERS DE SHOX</span><span>SHOXGUARD</span><span>TURBO PLACEBO</span>
+    </div></div>
+    <div class="tape-row tape-front"><div class="tape-track">
+      <span>100&#8239;% INCANDESCENT</span><svg class="ic"><use href="#i-flame"/></svg><span>AMORTI GRAVITATIONNEL</span><svg class="ic"><use href="#i-flame"/></svg><span>9&#8239;999 SHOX/S</span><svg class="ic"><use href="#i-flame"/></svg><span>EXTINCTEUR NON FOURNI</span><svg class="ic"><use href="#i-flame"/></svg>
+    </div></div>
+  </div>
+
+  <!-- ===================== CE QU'IL Y A DEDANS ===================== -->
+  <section class="section" id="dedans">
+    <header class="sec-head reveal">
+      <p class="kicker"><svg class="ic"><use href="#i-flame"/></svg> Ce qu'il y a dedans</p>
+      <h2>Un vrai navigateur.<br><span class="fire-text">Avec du feu dedans.</span></h2>
+      <p class="lead">Fire Shox, c'est d'abord un navigateur sérieux. Ensuite, c'est beaucoup moins sérieux.</p>
+    </header>
+
+    <!-- 01 · Navigateur -->
+    <article class="feat">
+      <div class="feat-text reveal">
+        <span class="feat-num">01</span>
+        <p class="feat-tag"><svg class="ic"><use href="#i-tabs"/></svg> Le navigateur</p>
+        <h3>Chromium sous le capot, des flammes par-dessus.</h3>
+        <p>Le même moteur que les navigateurs les plus utilisés au monde&#8239;: vos sites, vos vidéos, vos mails, votre compte Google, tout marche. On a juste rajouté de quoi rester à température&#8239;: un panneau Claude sur le côté, un bloqueur de pubs, des mots de passe en un clic et des onglets qui se rangent tout seuls.</p>
+        <ul class="chips">
+          <li><svg class="ic"><use href="#i-tabs"/></svg>Onglets épinglés, groupes et détachables</li>
+          <li><svg class="ic"><use href="#i-shield"/></svg>ShoxBlock, le bloqueur de pubs</li>
+          <li><svg class="ic"><use href="#i-star"/></svg>ShoxVault&#8239;: mots de passe en 1 clic</li>
+          <li><svg class="ic"><use href="#i-zap"/></svg>Panneau Claude &amp; ShoxNotes</li>
+          <li><svg class="ic"><use href="#i-history"/></svg>Mode Fantôme (navigation privée)</li>
+          <li><svg class="ic"><use href="#i-image"/></svg>ShoxShot, captures d'écran</li>
+          <li><svg class="ic"><use href="#i-book"/></svg>Traduction des pages</li>
+          <li><svg class="ic"><use href="#i-flame"/></svg>Thèmes Fire, Squid et LFI</li>
+          <li><svg class="ic"><use href="#i-refresh"/></svg>Mises à jour automatiques</li>
+          <li><svg class="ic"><use href="#i-zap"/></svg>Bouton TURBO <em>(effet placebo garanti)</em></li>
+        </ul>
+      </div>
+      <figure class="shot reveal" data-shot style="--d:.1s">
+        <img src="img/shots/navigateur.png" alt="Capture d'écran de Fire Shox : onglets, favoris et téléchargements" loading="lazy" decoding="async">
+        <div class="ph ph-nav" aria-hidden="true">
+          <div class="ph-chrome">
+            <div class="ph-tabs">
+              <span class="ph-tab on"><img src="img/logo-32.png" alt="">Fire Shox – Accueil<i>×</i></span>
+              <span class="ph-tab"><img src="img/logo-32.png" alt="">Wiki Shox<i>×</i></span>
+              <span class="ph-tab"><img src="img/logo-32.png" alt="">Shox Opening<i>×</i></span>
+              <span class="ph-plus">+</span>
+              <span class="ph-win"><i>—</i><i>▢</i><i>✕</i></span>
+            </div>
+            <div class="ph-url">
+              <span class="ph-navs"><i>‹</i><i>›</i><i>↻</i></span>
+              <span class="ph-addr"><b><svg class="ic"><use href="#i-shield"/></svg>ShoxGuard</b><span>fireshox://home</span><svg class="ic star"><use href="#i-star"/></svg></span>
+              <span class="ph-dl-ic"><svg class="ic"><use href="#i-dl"/></svg></span>
+            </div>
+            <div class="ph-marks"><span>🔥 Accueil Fire Shox</span><span>ShoxBench</span><span>Shox Opening</span><span>Wiki Shox</span></div>
+          </div>
+          <div class="ph-body">
+            <div class="pn-page"><i class="w70"></i><i class="w90"></i><i class="w55"></i><i class="blk"></i><i class="w80"></i><i class="w40"></i></div>
+            <div class="pn-panel">
+              <div class="pn-h">Téléchargements</div>
+              <div class="pn-item"><span class="pn-file">FireShox-Setup.exe</span><span class="pn-bar"><b></b></span><span class="pn-sub">Mise à jour · en cours</span></div>
+              <div class="pn-item"><span class="pn-file">shox-dorees.png</span><span class="pn-sub ok">Terminé · 2,4&#8239;Mo</span></div>
+              <div class="pn-item"><span class="pn-file">ressort-v2.pdf</span><span class="pn-sub ok">Terminé · 870&#8239;Ko</span></div>
+            </div>
+            <div class="pn-toast"><svg class="ic"><use href="#i-refresh"/></svg>Mise à jour prête, elle s'installera à la fermeture</div>
+          </div>
+        </div>
+      </figure>
+    </article>
+
+    <!-- 02 · ShoxBench -->
+    <article class="feat flip">
+      <div class="feat-text reveal">
+        <span class="feat-num">02</span>
+        <p class="feat-tag"><svg class="ic"><use href="#i-gauge"/></svg> ShoxBench</p>
+        <h3>Votre connexion, enfin mesurée en shox/s.</h3>
+        <p>Le test de débit qui répond à la seule vraie question&#8239;: combien de Shox par seconde passent dans votre box&#8239;? Et pour les plus courageux, le <strong>Shoxomètre politique</strong>&#8239;: vingt clichés de repas de famille, et l'aiguille vous place de l'extrême gauche à l'extrême droite.</p>
+        <dl class="mini-stats">
+          <div><dt>Unité</dt><dd>shox/s</dd></div>
+          <div><dt>Shoxomètre</dt><dd>en surchauffe</dd></div>
+          <div><dt>Fiabilité</dt><dd>émotionnelle</dd></div>
+        </dl>
+      </div>
+      <figure class="shot reveal" data-shot style="--d:.1s">
+        <img src="img/shots/shoxbench.png" alt="Capture d'écran de ShoxBench, le test de débit en shox/s" loading="lazy" decoding="async">
+        <div class="ph ph-bench" aria-hidden="true">
+          <div class="ph-chrome">
+            <div class="ph-tabs">
+              <span class="ph-tab on"><img src="img/logo-32.png" alt="">ShoxBench<i>×</i></span>
+              <span class="ph-plus">+</span>
+              <span class="ph-win"><i>—</i><i>▢</i><i>✕</i></span>
+            </div>
+            <div class="ph-url">
+              <span class="ph-navs"><i>‹</i><i>›</i><i>↻</i></span>
+              <span class="ph-addr"><b><svg class="ic"><use href="#i-shield"/></svg>ShoxGuard</b><span>fireshox://shoxbench/</span></span>
+              <span class="ph-turbo"><svg class="ic"><use href="#i-zap"/></svg>TURBO</span>
+            </div>
+          </div>
+          <div class="ph-body">
+            <div class="pb-gauge">
+              <svg viewBox="0 0 220 130">
+                <defs>
+                  <linearGradient id="gArc" x1="0" x2="1" y1="0" y2="0">
+                    <stop offset="0" stop-color="#ff3d00"/><stop offset=".55" stop-color="#ff8a00"/><stop offset="1" stop-color="#ffd84a"/>
+                  </linearGradient>
+                </defs>
+                <path class="pb-track" d="M20 115 A90 90 0 0 1 200 115"/>
+                <path class="pb-arc" d="M20 115 A90 90 0 0 1 200 115"/>
+                <g class="pb-needle"><path d="M110 115 L108 40 L110 33 L112 40 Z"/><circle cx="110" cy="115" r="7"/></g>
+              </svg>
+              <div class="pb-num"><b data-count="9999">9&#8239;999</b><span>shox/s</span></div>
+            </div>
+            <div class="pb-row"><span><i>Ping</i>0,3&#8239;ms</span><span><i>Amorti</i>100&#8239;%</span><span><i>Température</i>1&#8239;200&#8239;°C</span></div>
+            <div class="pb-btn">RELANCER LE TEST</div>
+          </div>
+        </div>
+      </figure>
+    </article>
+
+    <!-- 03 · Shox Opening -->
+    <article class="feat">
+      <div class="feat-text reveal">
+        <span class="feat-num">03</span>
+        <p class="feat-tag"><svg class="ic"><use href="#i-cards"/></svg> Shox Opening</p>
+        <h3>Ouvrez des boosters. Collectionnez des Shox.</h3>
+        <p>Trois boosters, 60 cartes avec la tête de toute la bande, et ce petit frisson au moment de déchirer l'emballage. Les Légendaires tombent à 5&#8239;%, le catalogue montre tout ce qu'il reste à trouver, et les ShoxCoins se gagnent en jouant, pas avec votre carte bleue.</p>
+        <ul class="boosters">
+          <li class="b-squid"><span class="b-dot"></span>Squid Shox</li>
+          <li class="b-fire"><span class="b-dot"></span>Fire Shox</li>
+          <li class="b-lfi"><span class="b-dot"></span>LFI Shox</li>
+        </ul>
+        <p class="rarities"><span class="r1">Commune</span><span class="r2">Rare</span><span class="r3">Épique</span><span class="r4">Légendaire</span></p>
+      </div>
+      <figure class="shot reveal" data-shot style="--d:.1s">
+        <img src="img/shots/opening.png" alt="Capture d'écran de Shox Opening et de ses boosters" loading="lazy" decoding="async">
+        <div class="ph ph-open" aria-hidden="true">
+          <div class="ph-chrome">
+            <div class="ph-tabs">
+              <span class="ph-tab on"><img src="img/logo-32.png" alt="">Shox Opening<i>×</i></span>
+              <span class="ph-plus">+</span>
+              <span class="ph-win"><i>—</i><i>▢</i><i>✕</i></span>
+            </div>
+            <div class="ph-url">
+              <span class="ph-navs"><i>‹</i><i>›</i><i>↻</i></span>
+              <span class="ph-addr"><b><svg class="ic"><use href="#i-shield"/></svg>ShoxGuard</b><span>fireshox://opening/</span></span>
+              <span class="ph-coins"><svg class="ic"><use href="#i-coin"/></svg>1&#8239;250</span>
+            </div>
+          </div>
+          <div class="ph-body">
+            <div class="po-packs">
+              <div class="po-pack p-squid"><img src="img/logo-128.png" alt=""><b>SQUID<br>SHOX</b><i>○ △ □</i></div>
+              <div class="po-pack p-fire"><img src="img/logo-128.png" alt=""><b>FIRE<br>SHOX</b><i>★ LÉGENDAIRE ★</i></div>
+              <div class="po-pack p-lfi"><img src="img/logo-128.png" alt=""><b>LFI<br>SHOX</b><i>ÉDITION ROUGE</i></div>
+            </div>
+            <div class="po-btn">OUVRIR · 100 <svg class="ic"><use href="#i-coin"/></svg></div>
+          </div>
+        </div>
+      </figure>
+    </article>
+
+    <!-- 04-06 · Cartes -->
+    <div class="cards">
+      <article class="card reveal">
+        <figure class="shot" data-shot>
+          <img src="img/shots/wiki.png" alt="Capture d'écran du Wiki Shox" loading="lazy" decoding="async">
+          <div class="ph ph-wiki" aria-hidden="true">
+            <div class="ph-chrome slim">
+              <div class="ph-url"><span class="ph-addr"><b><svg class="ic"><use href="#i-shield"/></svg></b><span>fireshox://wiki/</span></span></div>
+            </div>
+            <div class="ph-body">
+              <div class="pw-side"><b>Wiki Shox</b><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="pw-art"><b>Amorti gravitationnel</b><i class="w95"></i><i class="w80"></i><i class="w90"></i><i class="w60"></i><i class="w85"></i><i class="w70"></i></div>
+              <div class="pw-box"><img src="img/logo-128.png" alt=""><i></i><i></i><i></i></div>
+            </div>
+          </div>
+        </figure>
+        <div class="card-body">
+          <p class="feat-tag"><svg class="ic"><use href="#i-book"/></svg> Wiki Shox</p>
+          <h3>L'encyclopédie brûlante.</h3>
+          <p>Le wiki de la bande, modifiable par tous comme Wikipédia&#8239;: chacun corrige, complète ou crée une page, et tout le monde voit les changements. L'historique garde chaque version.</p>
+        </div>
+      </article>
+
+      <article class="card reveal" style="--d:.08s">
+        <figure class="shot" data-shot>
+          <img src="img/shots/galerie.png" alt="Capture d'écran de la Galerie de Monsieur Claude" loading="lazy" decoding="async">
+          <div class="ph ph-gal" aria-hidden="true">
+            <div class="ph-chrome slim">
+              <div class="ph-url"><span class="ph-addr"><b><svg class="ic"><use href="#i-shield"/></svg></b><span>fireshox://galerie/</span></span></div>
+            </div>
+            <div class="ph-body">
+              <div class="pg-title">Galerie de Monsieur Claude</div>
+              <div class="pg-wall">
+                <i class="g1"></i><i class="g2"><img src="img/logo-128.png" alt=""></i><i class="g3"></i>
+                <i class="g4"></i><i class="g5"></i><i class="g6"></i>
+              </div>
+            </div>
+          </div>
+        </figure>
+        <div class="card-body">
+          <p class="feat-tag"><svg class="ic"><use href="#i-image"/></svg> Galerie</p>
+          <h3>La Galerie de Monsieur Claude.</h3>
+          <p>Les œuvres de Monsieur Claude, accrochées comme au musée. Entrée gratuite, flash autorisé, flammes conseillées.</p>
+        </div>
+      </article>
+
+      <article class="card reveal" style="--d:.16s">
+        <figure class="shot" data-shot>
+          <img src="img/shots/jeux.png" alt="Capture d'écran des jeux vidéo Fire Shox" loading="lazy" decoding="async">
+          <div class="ph ph-games" aria-hidden="true">
+            <div class="ph-body">
+              <svg class="pj-pad"><use href="#i-gamepad"/></svg>
+              <div class="pj-stamp">BIENTÔT</div>
+              <div class="pj-load"><span>Préchauffage des jeux…</span><b><i></i></b></div>
+            </div>
+          </div>
+        </figure>
+        <div class="card-body">
+          <p class="feat-tag"><svg class="ic"><use href="#i-gamepad"/></svg> Jeux vidéo</p>
+          <h3>Des jeux, directement dedans.</h3>
+          <p>Premier arrivé&#8239;: <strong>Shox Runner</strong>, Le Y qui saute les plots et les poubelles du blocus. Il s'affiche même tout seul quand internet coupe. Les cartes QR des boosters en débloqueront d'autres.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===================== COMPARATIF ===================== -->
+  <section class="section compare" id="comparatif">
+    <header class="sec-head reveal">
+      <p class="kicker"><svg class="ic"><use href="#i-flame"/></svg> Comparatif très scientifique</p>
+      <h2>Fire Shox face aux <span class="fire-text">autres navigateurs</span>.</h2>
+      <p class="lead">Mesures réalisées dans notre laboratoire (un garage), par nos ingénieurs (des potes), avec un thermomètre de cuisine.</p>
+    </header>
+
+    <div class="stats reveal">
+      <div class="stat"><b><span data-count="9999">9&#8239;999</span></b><span>shox/s en pointe</span></div>
+      <div class="stat"><b><span data-count="1200">1&#8239;200</span>&#8239;°C</b><span>au cœur du moteur</span></div>
+      <div class="stat"><b><span data-count="100">100</span>&#8239;%</b><span>incandescent</span></div>
+      <div class="stat"><b><span data-count="0">0</span>&#8239;€</b><span>pour tout ça</span></div>
+    </div>
+
+    <div class="versus reveal" role="table" aria-label="Comparatif Fire Shox contre les autres navigateurs">
+      <div class="vs-row vs-head" role="row">
+        <span role="columnheader" class="vs-crit"></span>
+        <span role="columnheader" class="vs-us"><img src="img/logo-64.png" width="28" height="28" alt="">Fire Shox</span>
+        <span role="columnheader" class="vs-them"><span class="them-ic">?</span>Les autres</span>
+      </div>
+
+      <div class="vs-row" role="row">
+        <span role="rowheader" class="vs-crit">Shox par seconde</span>
+        <span role="cell" class="vs-us has-bar"><span class="bar"><b style="--w:100%"></b></span><strong>9&#8239;999 shox/s</strong></span>
+        <span role="cell" class="vs-them has-bar"><span class="bar"><b style="--w:2%"></b></span>0 shox/s · aucun ressort détecté</span>
+      </div>
+      <div class="vs-row" role="row">
+        <span role="rowheader" class="vs-crit">Degré d'incandescence</span>
+        <span role="cell" class="vs-us has-bar"><span class="bar"><b style="--w:96%"></b></span><strong>1&#8239;200&#8239;°C</strong></span>
+        <span role="cell" class="vs-them has-bar"><span class="bar"><b style="--w:14%"></b></span>37,2&#8239;°C · tiède</span>
+      </div>
+      <div class="vs-row" role="row">
+        <span role="rowheader" class="vs-crit">Amorti gravitationnel</span>
+        <span role="cell" class="vs-us"><svg class="ic yes"><use href="#i-check"/></svg>De série</span>
+        <span role="cell" class="vs-them"><svg class="ic no"><use href="#i-x"/></svg>En option (jamais)</span>
+      </div>
+      <div class="vs-row" role="row">
+        <span role="rowheader" class="vs-crit">Un pote dans le logo</span>
+        <span role="cell" class="vs-us"><svg class="ic yes"><use href="#i-check"/></svg>Oui, de profil, en HD</span>
+        <span role="cell" class="vs-them"><svg class="ic no"><use href="#i-x"/></svg>Des formes abstraites</span>
+      </div>
+      <div class="vs-row" role="row">
+        <span role="rowheader" class="vs-crit">Boosters de Shox à ouvrir</span>
+        <span role="cell" class="vs-us"><svg class="ic yes"><use href="#i-check"/></svg>Squid, Fire et LFI</span>
+        <span role="cell" class="vs-them"><svg class="ic no"><use href="#i-x"/></svg>Aucun. Triste.</span>
+      </div>
+      <div class="vs-row" role="row">
+        <span role="rowheader" class="vs-crit">Bloqueur de pubs</span>
+        <span role="cell" class="vs-us"><svg class="ic yes"><use href="#i-check"/></svg>ShoxBlock, de série</span>
+        <span role="cell" class="vs-them"><svg class="ic meh"><use href="#i-check"/></svg>Extension à aller chercher</span>
+      </div>
+      <div class="vs-row" role="row">
+        <span role="rowheader" class="vs-crit">Moteur Chromium</span>
+        <span role="cell" class="vs-us"><svg class="ic yes"><use href="#i-check"/></svg>Oui</span>
+        <span role="cell" class="vs-them"><svg class="ic meh"><use href="#i-check"/></svg>Pour beaucoup, oui. Bon.</span>
+      </div>
+      <div class="vs-row" role="row">
+        <span role="rowheader" class="vs-crit">Mises à jour automatiques</span>
+        <span role="cell" class="vs-us"><svg class="ic yes"><use href="#i-check"/></svg>Oui</span>
+        <span role="cell" class="vs-them"><svg class="ic meh"><use href="#i-check"/></svg>Oui aussi. On est beaux joueurs.</span>
+      </div>
+      <div class="vs-row" role="row">
+        <span role="rowheader" class="vs-crit">Risque de prendre feu</span>
+        <span role="cell" class="vs-us has-pill"><span class="pill hot">Élevé</span>C'est voulu</span>
+        <span role="cell" class="vs-them has-pill"><span class="pill cold">Faible</span>C'est dommage</span>
+      </div>
+    </div>
+    <p class="fineprint reveal">* Aucun navigateur n'a été brûlé pendant ce comparatif. Les chiffres sont faux mais sincères.</p>
+  </section>
+
+  <!-- ===================== FAQ ===================== -->
+  <section class="section faq" id="faq">
+    <header class="sec-head reveal">
+      <p class="kicker"><svg class="ic"><use href="#i-flame"/></svg> Questions fréquentes</p>
+      <h2>Vous avez des questions.<br><span class="fire-text">On a des réponses.</span></h2>
+    </header>
+
+    <div class="faq-list reveal">
+      <details id="faq-smartscreen" open>
+        <summary><span>Windows affiche «&#8239;Windows a protégé votre ordinateur&#8239;». C'est grave&#8239;?</span><svg class="ic"><use href="#i-chev"/></svg></summary>
+        <div class="faq-a">
+          <p>Pas du tout. Ce message bleu (SmartScreen) apparaît parce que Fire Shox n'est pas <strong>signé numériquement</strong>&#8239;: un certificat de signature coûte plusieurs centaines d'euros par an, et on a préféré investir dans des ressorts. Pour lancer l'installation&#8239;:</p>
+          <ol class="steps">
+            <li><span class="step-n">1</span><span>Cliquez sur <strong>«&#8239;Informations complémentaires&#8239;»</strong> (le petit lien sous le texte).</span></li>
+            <li><span class="step-n">2</span><span>Cliquez sur le bouton <strong>«&#8239;Exécuter quand même&#8239;»</strong>. Et voilà, ça chauffe.</span></li>
+          </ol>
+          <div class="ss" aria-hidden="true">
+            <div class="ss-win">
+              <div class="ss-title">Windows a protégé votre ordinateur</div>
+              <div class="ss-text"><i></i><i></i><i class="short"></i></div>
+              <div class="ss-link"><span class="ss-hl">Informations complémentaires</span><span class="ss-n">1</span></div>
+              <div class="ss-btns"><span class="ss-btn ss-run">Exécuter quand même<span class="ss-n">2</span></span><span class="ss-btn">Ne pas exécuter</span></div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary><span>Comment se font les mises à jour&#8239;?</span><svg class="ic"><use href="#i-chev"/></svg></summary>
+        <div class="faq-a"><p>Toutes seules. Fire Shox vérifie au démarrage puis régulièrement s'il existe une nouvelle version et la télécharge en arrière-plan. Ensuite, un clic sur <strong>«&#8239;Mettre à jour&#8239;»</strong> redémarre le navigateur à jour avec vos onglets, sans aucune fenêtre d'installation&#8239;; sinon, elle s'installe toute seule à la fermeture. Votre seul travail&#8239;: rester incandescent.</p></div>
+      </details>
+
+      <details>
+        <summary><span>Comment désinstaller Fire Shox&#8239;?</span><svg class="ic"><use href="#i-chev"/></svg></summary>
+        <div class="faq-a"><p>Ouvrez <strong>Paramètres &gt; Applications</strong> (puis «&#8239;Applications installées&#8239;» sous Windows 11), cherchez <strong>Fire Shox</strong> et choisissez <strong>Désinstaller</strong>. On sera tristes, mais on respecte.</p></div>
+      </details>
+
+      <details>
+        <summary><span>C'est un vrai navigateur ou juste une blague&#8239;?</span><svg class="ic"><use href="#i-chev"/></svg></summary>
+        <div class="faq-a"><p>Les deux. C'est une grosse blague entre potes, mais un vrai navigateur&#8239;: moteur Chromium, connexion Google, mots de passe enregistrés et chiffrés, bloqueur de pubs, navigation privée, onglets, favoris, historique, téléchargements. Vous pouvez faire tout ce que vous faites d'habitude, avec des flammes en plus.</p></div>
+      </details>
+
+      <details>
+        <summary><span>Ça marche sur Mac, Linux ou téléphone&#8239;?</span><svg class="ic"><use href="#i-chev"/></svg></summary>
+        <div class="faq-a"><p>Pas pour l'instant&#8239;: Fire Shox tourne sur <strong>Windows 10 et 11, en 64 bits</strong>. Les autres systèmes n'ont pas encore passé le test de résistance au feu.</p></div>
+      </details>
+
+      <details>
+        <summary><span>C'est gratuit&#8239;?</span><svg class="ic"><use href="#i-chev"/></svg></summary>
+        <div class="faq-a"><p>Entièrement. 0&#8239;€, 0 pub, 0 abonnement. Même les ShoxCoins se gagnent en jouant.</p></div>
+      </details>
+
+      <details>
+        <summary><span>Mes données partent où&#8239;?</span><svg class="ic"><use href="#i-chev"/></svg></summary>
+        <div class="faq-a"><p>Nulle part chez nous&#8239;: favoris, historique, mots de passe (chiffrés par Windows) et progression restent sur votre ordinateur. Fire Shox Corp n'a pas de serveur, seulement des Shox. Ce qui sort&#8239;: les sites que vous visitez, GitHub quand Fire Shox cherche une mise à jour, les listes du bloqueur de pubs, Google Traduction si vous traduisez une page, et ce que vous écrivez dans le <strong>Wiki Shox</strong>, qui est public et lisible par tous.</p></div>
+      </details>
+
+      <details>
+        <summary><span>Fire Shox, c'est lié à Nike&#8239;?</span><svg class="ic"><use href="#i-chev"/></svg></summary>
+        <div class="faq-a"><p>Non, pas du tout. C'est un projet fun entre amis, sans aucune affiliation avec Nike ni personne. On aime juste beaucoup les ressorts.</p></div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ===================== DERNIER APPEL ===================== -->
+  <section class="final reveal" id="telecharger">
+    <div class="final-inner">
+      <img class="final-logo" src="img/logo-256.png" width="160" height="160" alt="">
+      <h2>Prêt à <span class="fire-text">prendre&nbsp;feu</span>&#8239;?</h2>
+      <p class="lead">Installation en moins d'une minute. Extincteur non fourni.</p>
+      <a class="btn-fire" href="https://github.com/zarkyxxx/fireshox/releases/latest/download/FireShox-Setup.exe" data-dl>
+        <span class="bf-icon"><svg class="ic"><use href="#i-download"/></svg></span>
+        <span class="bf-text">
+          <span class="bf-big"><span class="for-desk">Télécharger pour Windows</span><span class="for-mob">Pour PC Windows</span></span>
+          <span class="bf-small"><span class="for-desk">Installeur .exe · gratuit</span><span class="for-mob for-mob-narrow">À installer depuis votre ordinateur</span><span class="for-mob for-mob-touch">Touchez pour envoyer le lien à votre PC</span></span>
+        </span>
+      </a>
+      <p class="dl-meta" data-meta>Windows 10 / 11 · 64 bits</p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <img src="img/logo-64.png" width="44" height="44" alt="">
+      <div>
+        <b>FIRE SHOX</b>
+        <span>Le navigateur à amorti gravitationnel.</span>
+      </div>
+    </div>
+    <p class="foot-disclaimer">Projet fun entre amis, aucune affiliation avec Nike ni personne.</p>
+    <nav class="foot-links" aria-label="Liens">
+      <a href="https://github.com/zarkyxxx/fireshox">Code source sur GitHub</a>
+      <a href="https://github.com/zarkyxxx/fireshox/releases">Toutes les versions</a>
+      <a href="#faq">FAQ</a>
+      <a href="#top">Haut de page ↑</a>
+    </nav>
+    <p class="foot-small">© 2026 Fire Shox Corp, une entreprise qui n'existe pas. Fabriqué avec des ressorts et beaucoup trop de feu.</p>
+  </div>
+</footer>
+
+<div class="toast-wrap" id="toasts" aria-live="polite"></div>
+
+<script src="js/main.js" defer></script>
+</body>
+</html>
