@@ -1,0 +1,14 @@
+[
+  { "open": "fireshox://opening/?reset=1&force=epic", "size": [1024, 640] },
+  { "wait": 1500 },
+  { "js": "Opening.buy('lfi'); 'achat'" },
+  { "wait": 1800 },
+  { "js": "SO_OPEN._act(); 'tear'" },
+  { "wait": 2600 },
+  { "js": "(async () => { const w = ms => new Promise(r => setTimeout(r, ms)); while (SO_OPEN._state().idx < 7) { if (!SO_OPEN._state().revealed) { SO_OPEN._act(); await w(SO_OPEN._state().cards[SO_OPEN._state().idx].startsWith('legend') ? 3800 : 2400); } SO_OPEN._act(); await w(800); } return JSON.stringify(SO_OPEN._state()); })()" },
+  { "js": "SO_OPEN._act(); 'reveal'" },
+  { "wait": 3900 },
+  { "shot": ".cache/shots/opening/82-petit-derniere.png" },
+  { "js": "JSON.stringify({ errs: window.__errs, st: SO_OPEN._state() })" },
+  { "quit": true }
+]

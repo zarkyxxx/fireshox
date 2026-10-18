@@ -1,0 +1,13 @@
+[
+  { "open": "fireshox://opening/?reset=1", "size": [1280, 800] },
+  { "wait": 1500 },
+  { "js": "JSON.stringify({ errs: window.__errs, coins: Opening.state().coins, qr: SO_QR.matrix('fireshox://jeux/?game=squid','Q').version, bd: 'BarcodeDetector' in window })" },
+  { "shot": ".cache/shots/opening/01-boutique-1280.png" },
+  { "js": "Opening.go('collection'); 'ok'" },
+  { "wait": 700 },
+  { "shot": ".cache/shots/opening/02-collection-vide.png" },
+  { "js": "Opening.fill(30); Opening.go('collection'); JSON.stringify(window.__errs)" },
+  { "wait": 900 },
+  { "shot": ".cache/shots/opening/03-collection.png" },
+  { "quit": true }
+]

@@ -1,0 +1,21 @@
+[
+  { "open": "fireshox://shoxbench/#debit", "size": [1280, 800] },
+  { "wait": 1200 },
+  { "shot": ".cache/shots/shoxbench/09-debit-retour.png" },
+  { "js": "SB.timeScale = 0.12; SB.runSpeed(); 1" },
+  { "wait": 2600 },
+  { "js": "SB.runSpeed(); 1" },
+  { "wait": 2600 },
+  { "js": "SB.runSpeed(); 1" },
+  { "wait": 2600 },
+  { "js": "SB.timeScale = 1; SB.forceHeat = 'down'; SB.runSpeed(); 1" },
+  { "wait": 7400 },
+  { "shot": ".cache/shots/shoxbench/10-debit-surchauffe.png" },
+  { "wait": 10500 },
+  { "js": "SB.forceHeat = null; JSON.stringify({ err: window.__sbErrors, n: SB.speedHist().length, heat: SB.speedHist().slice(-1)[0].heat })" },
+  { "shot": ".cache/shots/shoxbench/11-debit-apres-surchauffe.png" },
+  { "js": "window.scrollTo(0, 690); 1" },
+  { "wait": 600 },
+  { "shot": ".cache/shots/shoxbench/12-debit-historique.png" },
+  { "quit": true }
+]

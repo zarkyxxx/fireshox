@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wiki Shox</title>
+<link rel="icon" href="/assets/logo-32.png">
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app" id="app">
+  <!-- Barre latérale façon historique de conversations -->
+  <aside class="side" id="side" aria-label="Entrées de Wiki Shox">
+    <div class="side-inner">
+      <div class="side-head">
+        <a class="brand" href="#" title="Accueil de Wiki Shox">
+          <img src="/assets/logo-64.png" alt="">
+          <span>Wiki Shox</span>
+        </a>
+        <button class="icon-btn" id="collapse" title="Fermer la barre latérale (Ctrl+B)" aria-label="Fermer la barre latérale">
+          <svg viewBox="0 0 24 24" width="20" height="20"><rect x="3.5" y="4.5" width="17" height="15" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9.5 4.5v15" stroke="currentColor" stroke-width="1.7"/><path d="M6 8.5h1.4M6 11h1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <nav class="side-nav">
+        <a class="nav-item" href="#" id="nav-home">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5H15v-5.5H9v5.5H5.5A1.5 1.5 0 0 1 4 19z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          <span>Accueil</span>
+        </a>
+        <button class="nav-item" id="random" type="button">
+          <svg viewBox="0 0 24 24" width="18" height="18"><rect x="4" y="4" width="16" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="9" r="1.4" fill="currentColor"/><circle cx="15" cy="15" r="1.4" fill="currentColor"/><circle cx="15" cy="9" r="1.4" fill="currentColor"/><circle cx="9" cy="15" r="1.4" fill="currentColor"/></svg>
+          <span>Article au hasard</span>
+        </button>
+      </nav>
+
+      <label class="search" for="q">
+        <svg viewBox="0 0 24 24" width="17" height="17"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input id="q" type="search" placeholder="Rechercher une entrée" autocomplete="off" spellcheck="false">
+        <kbd id="kbd">Ctrl K</kbd>
+        <button class="clear" id="clear" type="button" title="Effacer" aria-label="Effacer la recherche">×</button>
+      </label>
+
+      <div class="side-scroll" id="side-scroll">
+        <div class="group-title"><span id="group-label">Articles</span><span class="count" id="count"></span></div>
+        <ul class="list" id="list" role="listbox"></ul>
+        <div class="no-result" id="no-result" hidden>
+          <div class="nr-icon">🔍</div>
+          <p>Aucune entrée ne correspond à <b id="nr-q"></b>.</p>
+          <button class="nr-create" id="nr-create" type="button">Créer la page « <span id="nr-q2"></span> »</button>
+        </div>
+      </div>
+
+      <div class="side-foot">
+        <button class="plus" id="plus" type="button">
+          <span class="plus-ico"><img src="/assets/logo-64.png" alt=""></span>
+          <span class="plus-txt"><b>Wiki Shox Plus</b><small>Plus d'amorti, plus de références</small></span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Contenu façon encyclopédie -->
+  <main class="main" id="main">
+    <header class="topbar">
+      <button class="icon-btn" id="expand" title="Ouvrir la barre latérale (Ctrl+B)" aria-label="Ouvrir la barre latérale">
+        <svg viewBox="0 0 24 24" width="20" height="20"><rect x="3.5" y="4.5" width="17" height="15" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9.5 4.5v15" stroke="currentColor" stroke-width="1.7"/><path d="M6 8.5h1.4M6 11h1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <a class="wordmark" href="#">
+        <img src="/assets/logo-128.png" alt="">
+        <span><b>Wiki Shox</b><small>L'encyclopédie incandescente</small></span>
+      </a>
+      <div class="top-links">
+        <button type="button" class="tl" data-toast="Merci ! Les dons sont acceptés en ressorts, en semelles et en encouragements.">Faire un don de ressorts</button>
+        <button type="button" class="tl" data-toast="Wiki Shox est rédigé par le Grand Archiviste des Shox. Le recrutement est fermé (il rebondit trop).">À propos</button>
+      </div>
+    </header>
+    <div class="page" id="page"></div>
+  </main>
+</div>
+
+<div class="menu" id="menu" hidden>
+  <button type="button" data-act="open"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M14 4h6v6M20 4l-9 9M18 14v4.5A1.5 1.5 0 0 1 16.5 20h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Ouvrir dans un nouvel onglet</button>
+  <button type="button" data-act="copy"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Copier le lien</button>
+</div>
+
+<script src="/shared/fx.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Galerie de Monsieur Claude</title>
+<link rel="icon" href="/assets/logo-32.png">
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wall"></div>
+
+<header class="museum-top">
+  <div class="mt-left"><span class="dot"></span>Ouvert tous les jours, même la nuit</div>
+  <div class="mt-right">Entrée libre · Flash interdit (sauf flammes)</div>
+</header>
+
+<header class="hero">
+  <div class="medal"><img src="/assets/logo-256.png" alt=""></div>
+  <div class="hero-txt">
+    <div class="kicker">Galerie nationale</div>
+    <h1>de Monsieur Claude</h1>
+    <p class="sub">Collection permanente <span class="sep">◆</span> Salle des Incandescents</p>
+  </div>
+</header>
+
+<nav class="bar" id="bar">
+  <div class="stats">
+    <div class="stat"><b id="st-total">12</b><span>œuvres</span></div>
+    <div class="stat"><b id="st-shown">0</b><span>exposées</span></div>
+    <div class="stat"><b id="st-wait">12</b><span>en cours d'acquisition</span></div>
+    <div class="stat visitor"><b id="st-visit">000001</b><span>visiteur n°</span></div>
+  </div>
+  <div class="actions">
+    <div class="seg" role="tablist">
+      <button type="button" class="on" data-filter="all">Toute la collection</button>
+      <button type="button" data-filter="fav">Coups de cœur <span id="fav-count">0</span></button>
+    </div>
+    <button type="button" class="fs-btn fire tour" id="tour">
+      <svg viewBox="0 0 24 24" width="16" height="16"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
+      Visite guidée
+    </button>
+  </div>
+</nav>
+
+<main class="room">
+  <div class="grid" id="grid"></div>
+  <div class="fav-empty" id="fav-empty" hidden>
+    <div class="fe-ico">♡</div>
+    <p><b>Aucun coup de cœur pour l'instant.</b><br>Ouvre une œuvre et clique sur le cœur pour l'ajouter à ta sélection.</p>
+  </div>
+</main>
+
+<footer class="foot">
+  <img src="/assets/logo-64.png" alt="">
+  <div>
+    <b>Galerie nationale de Monsieur Claude</b>
+    <span>Une institution Fire Shox. Les œuvres sont exposées sous la surveillance d'un gardien à ressorts.</span>
+  </div>
+  <div class="foot-hint"><kbd>←</kbd><kbd>→</kbd> naviguer · <kbd>Échap</kbd> fermer · <kbd>+</kbd><kbd>−</kbd> zoom</div>
+</footer>
+
+<!-- Visionneuse plein écran -->
+<div class="viewer" id="viewer" hidden aria-modal="true" role="dialog" aria-label="Visionneuse">
+  <div class="v-progress" id="v-progress"><i></i></div>
+  <div class="v-top">
+    <div class="v-count"><b id="v-num">01</b><span>/</span><span id="v-tot">12</span></div>
+    <div class="v-title" id="v-title"></div>
+    <div class="v-tools">
+      <button type="button" class="v-btn" id="v-zout" title="Dézoomer (−)"><svg viewBox="0 0 24 24" width="18" height="18"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4M8 11h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      <button type="button" class="v-zoom" id="v-zval" title="Taille réelle (0)">100 %</button>
+      <button type="button" class="v-btn" id="v-zin" title="Zoomer (+)"><svg viewBox="0 0 24 24" width="18" height="18"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4M8 11h6M11 8v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      <span class="v-div"></span>
+      <button type="button" class="v-btn" id="v-fav" title="Coup de cœur (C)"><svg viewBox="0 0 24 24" width="19" height="19"><path d="M12 20s-7.5-4.6-7.5-10.1A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+      <button type="button" class="v-btn" id="v-play" title="Diaporama (Espace)"><svg class="i-play" viewBox="0 0 24 24" width="18" height="18"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg><svg class="i-pause" viewBox="0 0 24 24" width="18" height="18"><path d="M7.5 5.5h3v13h-3zM13.5 5.5h3v13h-3z" fill="currentColor"/></svg></button>
+      <button type="button" class="v-btn" id="v-close" title="Fermer (Échap)"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    </div>
+  </div>
+  <div class="v-stage" id="v-stage">
+    <div class="v-art" id="v-art"></div>
+    <button type="button" class="v-nav prev" id="v-prev" title="Précédente (←)"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button type="button" class="v-nav next" id="v-next" title="Suivante (→)"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div class="v-hint" id="v-hint">Molette ou double-clic pour zoomer · glisser pour se déplacer</div>
+  </div>
+  <div class="v-bottom">
+    <div class="v-cartel" id="v-cartel"></div>
+    <div class="v-thumbs" id="v-thumbs"></div>
+  </div>
+</div>
+
+<script src="/shared/fx.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

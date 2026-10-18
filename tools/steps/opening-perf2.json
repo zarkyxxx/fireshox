@@ -1,0 +1,11 @@
+[
+  { "open": "fireshox://opening/?reset=1&force=legend&coins=5000", "size": [1600, 900] },
+  { "wait": 1500 },
+  { "js": "window.__long = (ms) => new Promise((res) => { const out = []; let last = performance.now(); const t0 = last; const f = (now) => { if (now - last > 22) out.push(Math.round(now - t0) + ':' + Math.round(now - last)); last = now; if (now - t0 < ms) requestAnimationFrame(f); else res(out.join(' ')); }; requestAnimationFrame(f); }); 'ok'" },
+  { "js": "(async () => { const a = __long(1500); Opening.buy('squid'); return 'arrivee ' + await a; })()" },
+  { "js": "(async () => { const a = __long(2600); SO_OPEN._act(); return 'dechirure ' + await a; })()" },
+  { "js": "(async () => { const w = ms => new Promise(r => setTimeout(r, ms)); while (SO_OPEN._state().idx < 7) { SO_OPEN._act(); await w(900); if (SO_OPEN._state().idx === 7) break; SO_OPEN._act(); await w(2600); } await w(900); return JSON.stringify(SO_OPEN._state().cards); })()" },
+  { "js": "(async () => { const a = __long(4200); SO_OPEN._act(); return 'legendaire ' + await a; })()" },
+  { "js": "(async () => { const a = __long(2500); SO_OPEN._act(); return 'recap ' + await a; })()" },
+  { "quit": true }
+]

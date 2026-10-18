@@ -1,0 +1,12 @@
+[
+ {"open": "file:///F:/fireshox/site/index.html", "size": [1440, 900]},
+ {"wait": 800},
+ {"js": "localStorage.setItem('fireshox-release-v1', JSON.stringify({t: Date.now(), d: {tag:'v1.0.0', date:'2026-10-18T10:00:00Z', size: 96754321, url:'https://github.com/zarkyxxx/fireshox/releases/download/v1.0.0/FireShox-Setup-1.0.0.exe', downloads: 42}})); location.reload(); 1"},
+ {"wait": 2000},
+ {"js": "JSON.stringify({meta: document.querySelector('[data-meta]').textContent, href: document.querySelector('a[data-dl]').href})"},
+ {"js": "window.scrollTo({top:300,behavior:'instant'}); scrollY"},
+ {"wait": 800},
+ {"shot": ".cache/shots/site/release.png"},
+ {"js": "localStorage.removeItem('fireshox-release-v1'); 1"},
+ {"quit": true}
+]

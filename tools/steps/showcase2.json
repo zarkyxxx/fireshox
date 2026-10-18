@@ -1,0 +1,16 @@
+[
+  { "open": "fireshox://shoxbench/", "size": [1600, 1000] },
+  { "wait": 1500 },
+  { "ui": "document.querySelector('#b-turbo').click(); 1" },
+  { "wait": 500 },
+  { "js": "window.SB && (SB.timeScale = 2.5, SB.runSpeed()); 1" },
+  { "wait": 6500 },
+  { "shot": "site/img/shots/shoxbench.png" },
+  { "ui": "document.querySelector('#b-turbo').click(); 1" },
+  { "ui": "FS.open('https://duckduckgo.com/?q=nike+shox&ia=web'); 1" },
+  { "wait": 5000 },
+  { "ui": "FS.apps(); 1" },
+  { "wait": 500 },
+  { "shot": "site/img/shots/navigateur.png" },
+  { "quit": true }
+]

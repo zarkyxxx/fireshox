@@ -1,0 +1,11 @@
+[
+  { "open": "fireshox://shoxbench/", "size": [1280, 800] },
+  { "wait": 1500 },
+  { "js": "JSON.stringify({ err: window.__sbErrors, tab: SB.tab, turbo: SB.turbo, coins: FX.store.get('opening.coins', 'none'), speed: SB.speedHist().length })" },
+  { "shot": ".cache/shots/shoxbench/01-debit-accueil.png" },
+  { "js": "document.querySelector('[data-tab=shoxometre]').click(); 1" },
+  { "wait": 900 },
+  { "js": "JSON.stringify({ err: window.__sbErrors, tab: SB.tab })" },
+  { "shot": ".cache/shots/shoxbench/02-shoxometre-accueil.png" },
+  { "quit": true }
+]

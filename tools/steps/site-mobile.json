@@ -1,0 +1,114 @@
+[
+ {
+  "open": "file:///F:/fireshox/site/index.html",
+  "size": [
+   390,
+   844
+  ]
+ },
+ {
+  "wait": 1800
+ },
+ {
+  "js": "JSON.stringify({h:document.documentElement.scrollHeight,sw:document.documentElement.scrollWidth,w:innerWidth})"
+ },
+ {
+  "js": "window.scrollTo({top:0,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/m01.png"
+ },
+ {
+  "js": "window.scrollTo({top:1000,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/m02.png"
+ },
+ {
+  "js": "window.scrollTo({top:2300,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/m03.png"
+ },
+ {
+  "js": "window.scrollTo({top:3200,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/m04.png"
+ },
+ {
+  "js": "window.scrollTo({top:6000,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/m05.png"
+ },
+ {
+  "js": "window.scrollTo({top:6900,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/m06.png"
+ },
+ {
+  "js": "window.scrollTo({top:7700,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/m07.png"
+ },
+ {
+  "js": "document.documentElement.classList.add(\"is-touch\");window.scrollTo({top:0,behavior:\"instant\"});1"
+ },
+ {
+  "wait": 1200
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/m-touch.png"
+ },
+ {
+  "quit": true
+ }
+]

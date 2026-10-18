@@ -1,0 +1,162 @@
+[
+ {
+  "open": "file:///F:/fireshox/site/index.html",
+  "size": [
+   1440,
+   900
+  ]
+ },
+ {
+  "wait": 1800
+ },
+ {
+  "js": "JSON.stringify({h:document.documentElement.scrollHeight,w:innerWidth,sw:document.documentElement.scrollWidth,tape:document.querySelectorAll(\".tape-track.run\").length,meta:document.querySelector(\"[data-meta]\").textContent,font:document.fonts.check(\"16px Outfit\"),bungee:document.fonts.check(\"16px Bungee\"), shots:[...document.querySelectorAll(\"[data-shot]\")].map(f=>f.className).join(\"|\")})"
+ },
+ {
+  "js": "window.scrollTo({top:0,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/d01.png"
+ },
+ {
+  "js": "window.scrollTo({top:700,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/d02.png"
+ },
+ {
+  "js": "window.scrollTo({top:1400,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/d03.png"
+ },
+ {
+  "js": "window.scrollTo({top:2100,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/d04.png"
+ },
+ {
+  "js": "window.scrollTo({top:2800,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/d05.png"
+ },
+ {
+  "js": "window.scrollTo({top:3500,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/d06.png"
+ },
+ {
+  "js": "window.scrollTo({top:4200,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/d07.png"
+ },
+ {
+  "js": "window.scrollTo({top:4900,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/d08.png"
+ },
+ {
+  "js": "window.scrollTo({top:5600,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/d09.png"
+ },
+ {
+  "js": "window.scrollTo({top:6300,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/d10.png"
+ },
+ {
+  "js": "window.scrollTo({top:7000,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/d11.png"
+ },
+ {
+  "js": "window.scrollTo({top:7800,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/d12.png"
+ },
+ {
+  "quit": true
+ }
+]

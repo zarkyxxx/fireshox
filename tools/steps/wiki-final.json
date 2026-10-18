@@ -1,0 +1,19 @@
+[
+  { "open": "fireshox://wiki/#les-shoxs", "size": [1440, 860] },
+  { "wait": 900 },
+  { "js": "(() => { const m = document.getElementById('main'); const g = document.getElementById('sec-galerie'); m.scrollTop = g.getBoundingClientRect().top - m.getBoundingClientRect().top + m.scrollTop - 80; return m.scrollTop; })()" },
+  { "wait": 600 },
+  { "shot": ".cache/shots/wiki/final-wiki-shoxs-galerie.png" },
+  { "open": "fireshox://images/" },
+  { "wait": 1300 },
+  { "js": "GalerieClaude.open(4); 1" },
+  { "wait": 900 },
+  { "shot": ".cache/shots/wiki/final-images-visionneuse.png" },
+  { "open": "fireshox://jeux/" },
+  { "wait": 1000 },
+  { "shot": ".cache/shots/wiki/final-jeux-vide.png" },
+  { "open": "fireshox://jeux/?game=squid" },
+  { "wait": 1500 },
+  { "shot": ".cache/shots/wiki/final-jeux-squid.png" },
+  { "quit": true }
+]

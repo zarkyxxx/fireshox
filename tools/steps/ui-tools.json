@@ -1,0 +1,18 @@
+[
+  { "open": "fireshox://history/", "size": [1200, 760] },
+  { "wait": 900 },
+  { "shot": ".cache/shots/ui/10-history.png" },
+  { "open": "fireshox://settings/" },
+  { "wait": 900 },
+  { "shot": ".cache/shots/ui/11-settings.png" },
+  { "js": "location.hash = '#about'; 1" },
+  { "wait": 600 },
+  { "shot": ".cache/shots/ui/12-about.png" },
+  { "open": "fireshox://downloads/" },
+  { "wait": 700 },
+  { "shot": ".cache/shots/ui/13-downloads.png" },
+  { "open": "fireshox://nimportequoi/" },
+  { "wait": 600 },
+  { "shot": ".cache/shots/ui/14-404.png" },
+  { "quit": true }
+]

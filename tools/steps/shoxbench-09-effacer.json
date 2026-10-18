@@ -1,0 +1,21 @@
+[
+  { "open": "fireshox://shoxbench/#debit", "size": [1280, 800] },
+  { "wait": 1400 },
+  { "shot": ".cache/shots/shoxbench/42-debit-vide.png" },
+  { "js": "SB.timeScale = 0.12; SB.runSpeed(); 1" },
+  { "wait": 2700 },
+  { "js": "SB.runSpeed(); 1" },
+  { "wait": 2700 },
+  { "js": "SB.timeScale = 1; JSON.stringify({ speed: SB.speedHist().length })" },
+  { "wait": 2600 },
+  { "js": "document.querySelector('[data-clear=speed]').click(); 1" },
+  { "wait": 500 },
+  { "shot": ".cache/shots/shoxbench/43-confirmation-effacer-debit.png" },
+  { "js": "document.querySelector('.modal [data-ok]').click(); 1" },
+  { "wait": 900 },
+  { "js": "JSON.stringify({ speed: SB.speedHist().length, stored: FX.store.get('bench.speed', 'x').length, politics: SB.polHist().length, state: document.getElementById('speed').dataset.state })" },
+  { "js": "window.scrollTo(0, 360); 1" },
+  { "wait": 2600 },
+  { "shot": ".cache/shots/shoxbench/44-debit-historique-efface.png" },
+  { "quit": true }
+]

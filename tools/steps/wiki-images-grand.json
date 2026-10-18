@@ -1,0 +1,12 @@
+[
+  { "open": "fireshox://images/", "size": [1600, 900] },
+  { "wait": 1400 },
+  { "shot": ".cache/shots/wiki/images-20-grand.png" },
+  { "js": "window.scrollTo(0, 99999); 1" },
+  { "wait": 500 },
+  { "shot": ".cache/shots/wiki/images-21-grand-bas.png" },
+  { "js": "window.scrollTo(0, 0); GalerieClaude.open(0); 1" },
+  { "wait": 900 },
+  { "shot": ".cache/shots/wiki/images-22-grand-visionneuse.png" },
+  { "quit": true }
+]

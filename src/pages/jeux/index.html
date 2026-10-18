@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jeux vidéo</title>
+<link rel="icon" href="/assets/logo-32.png">
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="./" data-nav="home">
+    <img src="/assets/logo-64.png" alt="">
+    <span class="brand-txt"><b>Jeux vidéo</b><small>Fire Shox</small></span>
+  </a>
+  <nav class="tabs">
+    <a class="tab on" href="./" data-nav="home">Bibliothèque</a>
+    <button class="tab" type="button" data-toast="Le magasin ouvrira quand les ressorts seront livrés. En attendant, les jeux se gagnent avec les cartes QR.">Magasin</button>
+    <button class="tab" type="button" data-toast="La communauté est partie rebondir dehors. Elle revient bientôt.">Communauté</button>
+  </nav>
+  <div class="top-right">
+    <div class="coins" id="coins" title="Tes ShoxCoins (gagnés dans Shox Opening)">
+      <span class="coin"></span><b id="coins-val">0</b><span>ShoxCoins</span>
+    </div>
+    <div class="me"><img src="/assets/logo-64.png" alt=""><span>Joueur Shox<small><i class="on-dot"></i>En ligne</small></span></div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side">
+    <div class="side-search">
+      <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <input id="q" type="search" placeholder="Rechercher un jeu" autocomplete="off" spellcheck="false">
+    </div>
+    <a class="side-home" href="./" data-nav="home" id="side-home">
+      <svg viewBox="0 0 24 24" width="17" height="17"><path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5H15v-5.5H9v5.5H5.5A1.5 1.5 0 0 1 4 19z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+      Accueil de la bibliothèque
+    </a>
+    <div class="side-scroll" id="side-list"></div>
+    <button class="side-add" type="button" id="add-game">
+      <span>+</span> Ajouter un jeu
+    </button>
+  </aside>
+
+  <main class="main" id="main"></main>
+</div>
+
+<div class="launch" id="launch" hidden>
+  <div class="launch-box">
+    <img src="/assets/logo-256.png" alt="">
+    <div class="launch-title" id="launch-title">Lancement…</div>
+    <div class="launch-bar"><i></i></div>
+    <div class="launch-sub">Compression des ressorts en cours</div>
+  </div>
+</div>
+
+<script src="/shared/fx.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

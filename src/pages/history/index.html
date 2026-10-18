@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Historique</title>
+<link rel="icon" href="/assets/logo-32.png">
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="/shared/tools.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <img src="/assets/logo-128.png" alt="">
+    <h1>Historique</h1>
+    <div class="grow"></div>
+    <label class="searchbox"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input id="q" placeholder="Rechercher dans l'historique" spellcheck="false"></label>
+    <button class="fs-btn" id="clear">Tout effacer</button>
+  </div>
+  <div id="list"></div>
+  <button class="fs-btn more" id="more" hidden>Afficher plus</button>
+</div>
+<script src="/shared/fx.js"></script>
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const GLOBE = '<svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>';
+  const X = '<svg class="ic" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+  const NEWTAB = '<svg class="ic" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>';
+  let limit = 300;
+
+  function dayLabel(t) {
+    const d = new Date(t); const today = new Date(); today.setHours(0, 0, 0, 0);
+    const diff = Math.round((today - new Date(d).setHours(0, 0, 0, 0)) / 86400000);
+    if (diff === 0) return "Aujourd'hui";
+    if (diff === 1) return 'Hier';
+    return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  function host(u) { try { return new URL(u).host || u; } catch { return u; } }
+
+  function render() {
+    const all = FX.store.get('history', []) || [];
+    const q = $('#q').value.trim().toLowerCase();
+    const items = (q ? all.filter((h) => (h.title || '').toLowerCase().includes(q) || h.url.toLowerCase().includes(q)) : all);
+    const shown = items.slice(0, limit);
+    if (!shown.length) {
+      $('#list').innerHTML = `<div class="empty"><div class="big">🕳️</div><b>${q ? 'Aucun résultat' : 'Historique vide'}</b>${q ? 'Essaie une autre Shox-Requête.' : 'Tes pages visitées apparaîtront ici.'}</div>`;
+      $('#more').hidden = true;
+      return;
+    }
+    let html = '', cur = '';
+    shown.forEach((h, i) => {
+      const lab = dayLabel(h.t);
+      if (lab !== cur) { if (cur) html += '</div>'; cur = lab; html += `<div class="day">${esc(lab)}</div><div class="card">`; }
+      const time = new Date(h.t).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      html += `<div class="row" data-url="${esc(h.url)}" data-t="${h.t}">
+        <span class="time">${time}</span><span class="fav">${h.fav ? `<img src="${esc(h.fav)}" alt="" onerror="this.parentNode.innerHTML='${GLOBE.replace(/"/g, '&quot;')}'">` : GLOBE}</span>
+        <span class="t"><b>${esc(h.title || h.url)}</b><span>${esc(host(h.url))}</span></span>
+        <span class="act"><button class="iconbtn" data-new title="Ouvrir dans un nouvel onglet">${NEWTAB}</button><button class="iconbtn" data-del title="Supprimer de l'historique">${X}</button></span></div>`;
+    });
+    html += '</div>';
+    $('#list').innerHTML = html;
+    $('#more').hidden = items.length <= limit;
+  }
+
+  $('#list').addEventListener('click', (e) => {
+    const row = e.target.closest('.row');
+    if (!row) return;
+    if (e.target.closest('[data-del]')) {
+      const t = +row.dataset.t, url = row.dataset.url;
+      FX.store.set('history', (FX.store.get('history', []) || []).filter((h) => !(h.t === t && h.url === url)));
+      row.style.transition = 'opacity .2s'; row.style.opacity = '0';
+      setTimeout(render, 200);
+      return;
+    }
+    if (e.target.closest('[data-new]') || e.ctrlKey) { FX.open(row.dataset.url, { background: true }); return; }
+    location.href = row.dataset.url;
+  });
+  $('#list').addEventListener('auxclick', (e) => { const row = e.target.closest('.row'); if (row && e.button === 1) FX.open(row.dataset.url, { background: true }); });
+  $('#q').addEventListener('input', () => { limit = 300; render(); });
+  $('#more').addEventListener('click', () => { limit += 300; render(); });
+  $('#clear').addEventListener('click', () => {
+    if ($('#clear').dataset.confirm) { FX.store.set('history', []); delete $('#clear').dataset.confirm; $('#clear').textContent = 'Tout effacer'; render(); FX.toast('Historique effacé 🔥'); return; }
+    $('#clear').dataset.confirm = '1'; $('#clear').textContent = 'Confirmer ?'; $('#clear').classList.add('fire');
+    setTimeout(() => { delete $('#clear').dataset.confirm; $('#clear').textContent = 'Tout effacer'; $('#clear').classList.remove('fire'); }, 3000);
+  });
+  FX.store.onChange((k) => { if (k === 'history') render(); });
+  render();
+  $('#q').focus();
+})();
+</script>
+</body>
+</html>

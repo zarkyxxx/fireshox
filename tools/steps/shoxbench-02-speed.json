@@ -1,0 +1,20 @@
+[
+  { "open": "fireshox://shoxbench/#debit", "size": [1280, 800] },
+  { "wait": 1200 },
+  { "click": [634, 410] },
+  { "wait": 1700 },
+  { "shot": ".cache/shots/shoxbench/03-debit-ping.png" },
+  { "wait": 2600 },
+  { "shot": ".cache/shots/shoxbench/04-debit-descente.png" },
+  { "wait": 2500 },
+  { "shot": ".cache/shots/shoxbench/05-debit-descente-fin.png" },
+  { "wait": 4200 },
+  { "shot": ".cache/shots/shoxbench/06-debit-montee.png" },
+  { "wait": 5200 },
+  { "js": "JSON.stringify({ err: window.__sbErrors, state: document.querySelector('#speed').dataset.state, coins: FX.store.get('opening.coins'), last: SB.speedHist().slice(-1)[0] && Object.assign({}, SB.speedHist().slice(-1)[0], { sp: 0 }) })" },
+  { "shot": ".cache/shots/shoxbench/07-debit-fin.png" },
+  { "js": "window.scrollTo(0, 700); 1" },
+  { "wait": 500 },
+  { "shot": ".cache/shots/shoxbench/08-debit-historique-1.png" },
+  { "quit": true }
+]

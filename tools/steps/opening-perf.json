@@ -1,0 +1,23 @@
+[
+  { "open": "fireshox://opening/?reset=1&force=legend&coins=5000", "size": [1600, 900] },
+  { "wait": 1500 },
+  { "js": "window.__fps = (ms) => new Promise((res) => { let n = 0, worst = 0, last = performance.now(); const t0 = last; const f = (now) => { n++; worst = Math.max(worst, now - last); last = now; if (now - t0 < ms) requestAnimationFrame(f); else res({ fps: Math.round(n * 1000 / (now - t0)), pireImage: Math.round(worst) + ' ms' }); }; requestAnimationFrame(f); }); 'ok'" },
+  { "js": "(async () => { const a = __fps(1500); Opening.buy('fire'); return JSON.stringify({ arrivee: await a }); })()" },
+  { "js": "(async () => { const a = __fps(2600); SO_OPEN._act(); return JSON.stringify({ dechirure: await a }); })()" },
+  { "js": "(async () => { const w = ms => new Promise(r => setTimeout(r, ms)); while (SO_OPEN._state().idx < 7) { SO_OPEN._act(); await w(900); if (SO_OPEN._state().idx === 7) break; SO_OPEN._act(); await w(2600); } await w(900); return JSON.stringify(SO_OPEN._state().cards); })()" },
+  { "js": "(async () => { const a = __fps(4200); SO_OPEN._act(); return JSON.stringify({ legendaire: await a }); })()" },
+  { "js": "(async () => { const a = __fps(2500); SO_OPEN._act(); return JSON.stringify({ versRecap: await a, errs: window.__errs }); })()" },
+  { "js": "SO_OPEN.close('collection'); 'close'" },
+  { "wait": 1200 },
+  { "js": "SO_DATA.card('fire/le-mec').img = '/assets/logo-512.png'; SO_DATA.back = '/assets/logo-512.png'; SO_DATA.booster('squid').pack = '/assets/logo-512.png'; Opening.go('boutique'); 'swap'" },
+  { "wait": 900 },
+  { "shot": ".cache/shots/opening/70-image-paquet.png" },
+  { "js": "Opening.detail('fire/le-mec', ['fire/le-mec']); 'detail'" },
+  { "wait": 1200 },
+  { "js": "JSON.stringify({ img: !!document.querySelector('#dt-tilt .tc-img'), back: SO_CARDS.back().querySelector('.cb-img') ? 'img' : 'css' })" },
+  { "shot": ".cache/shots/opening/71-image-carte.png" },
+  { "js": "Opening.closeDetail(); Opening.go('collection'); document.querySelector('#col-grid').prepend(SO_CARDS.back()); document.querySelector('#col-grid > .cback').style.width = '160px'; 'back'" },
+  { "wait": 900 },
+  { "shot": ".cache/shots/opening/72-image-dos.png" },
+  { "quit": true }
+]

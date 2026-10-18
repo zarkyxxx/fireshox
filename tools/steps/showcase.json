@@ -1,0 +1,44 @@
+[
+  { "open": "fireshox://home/", "size": [1600, 1000] },
+  { "wait": 2500 },
+  { "ui": "document.activeElement && document.activeElement.blur(); 1" },
+  { "shot": "site/img/shots/accueil.png" },
+
+  { "ui": "FS.open('fireshox://opening/'); 1" },
+  { "wait": 2500 },
+  { "shot": "site/img/shots/opening.png" },
+  { "js": "location.href = 'fireshox://opening/?force=legend&open=fire&coins=5000'; 1" },
+  { "wait": 1800 },
+  { "js": "JSON.stringify({t: document.title, h: location.href})" },
+  { "shot": ".cache/shots/integ/opening-open.png" },
+
+  { "ui": "FS.open('fireshox://shoxbench/'); 1" },
+  { "wait": 1500 },
+  { "ui": "document.querySelector('#b-turbo').click(); 1" },
+  { "wait": 600 },
+  { "js": "JSON.stringify({turbo: FX.store.get('settings',{}).turbo, badge: !!document.querySelector('.turbo-on, body.turbo, [data-turbo=\"on\"]')})" },
+  { "js": "window.SB && (SB.timeScale = 3, SB.runSpeed()); 1" },
+  { "wait": 4500 },
+  { "shot": "site/img/shots/shoxbench.png" },
+  { "ui": "document.querySelector('#b-turbo').click(); 1" },
+
+  { "ui": "FS.open('fireshox://wiki/#les-shoxs'); 1" },
+  { "wait": 1800 },
+  { "shot": "site/img/shots/wiki.png" },
+
+  { "ui": "FS.open('fireshox://images/'); 1" },
+  { "wait": 1800 },
+  { "shot": "site/img/shots/galerie.png" },
+
+  { "ui": "FS.open('fireshox://jeux/'); 1" },
+  { "wait": 1800 },
+  { "shot": "site/img/shots/jeux.png" },
+
+  { "ui": "FS.open('https://fr.wikipedia.org/wiki/Chaussure'); 1" },
+  { "wait": 4000 },
+  { "ui": "FS.menu(); 1" },
+  { "wait": 500 },
+  { "shot": "site/img/shots/navigateur.png" },
+  { "ui": "JSON.stringify(FS.tabs().map(t => t.title))" },
+  { "quit": true }
+]

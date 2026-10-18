@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Téléchargements</title>
+<link rel="icon" href="/assets/logo-32.png">
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="/shared/tools.css">
+<style>
+  .dl { display: grid; grid-template-columns: 44px 1fr auto; gap: 14px; align-items: center; padding: 14px; border-bottom: 1px solid var(--line); }
+  .dl:last-child { border-bottom: 0; }
+  .dl .ico { width: 44px; height: 44px; border-radius: 12px; background: var(--surface-2); display: grid; place-items: center; color: var(--fire-2); font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .dl .n { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+  .dl .n:hover { color: var(--fire-3); }
+  .dl .n.off { text-decoration: line-through; color: var(--muted); cursor: default; }
+  .dl .u { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dl .s { font-size: 12.5px; color: var(--text-2); margin-top: 2px; }
+  .bar { height: 5px; border-radius: 4px; background: var(--surface-3); margin-top: 8px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--fire-grad); transition: width .3s; }
+  .acts { display: flex; gap: 6px; }
+  .acts .fs-btn { padding: .45em .9em; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <img src="/assets/logo-128.png" alt="">
+    <h1>Téléchargements</h1>
+    <div class="grow"></div>
+    <button class="fs-btn" id="clear">Effacer la liste</button>
+  </div>
+  <div id="list"></div>
+</div>
+<script src="/shared/fx.js"></script>
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const size = (n) => !n ? '?' : n < 1024 ? n + ' o' : n < 1048576 ? (n / 1024).toFixed(0) + ' Ko' : n < 1073741824 ? (n / 1048576).toFixed(1).replace('.', ',') + ' Mo' : (n / 1073741824).toFixed(2).replace('.', ',') + ' Go';
+  let timer = null;
+
+  async function render() {
+    if (!window.fireshox) { $('#list').innerHTML = '<div class="empty">Ouvre cette page dans Fire Shox.</div>'; return; }
+    const { active, past } = await fireshox.downloads();
+    const map = new Map();
+    past.forEach((d) => map.set(d.id, d));
+    active.forEach((d) => map.set(d.id, d));
+    const all = [...map.values()].sort((a, b) => b.start - a.start);
+    if (!all.length) {
+      $('#list').innerHTML = '<div class="empty"><div class="big">📦</div><b>Aucun téléchargement</b>Les fichiers que tu télécharges apparaîtront ici (dossier Téléchargements).</div>';
+    } else {
+      $('#list').innerHTML = '<div class="card">' + all.map((d) => {
+        const ext = (d.name.split('.').pop() || '').slice(0, 4);
+        const pct = d.total ? Math.round(d.received / d.total * 100) : 0;
+        const live = d.state === 'progressing';
+        const st = live ? `${size(d.received)} sur ${size(d.total)} · ${pct} %${d.paused ? ' · en pause' : ''}`
+          : d.state === 'completed' ? `${size(d.total || d.received)} · ${new Date(d.end || d.start).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}`
+          : d.state === 'cancelled' ? 'Annulé' : 'Échec du téléchargement';
+        return `<div class="dl" data-id="${d.id}"><span class="ico">${esc(ext)}</span><div style="min-width:0">
+          <div class="n ${d.state === 'completed' || live ? '' : 'off'}" data-a="open">${esc(d.name)}</div><div class="u">${esc(d.url)}</div><div class="s">${st}</div>
+          ${live ? `<div class="bar"><i style="width:${pct}%"></i></div>` : ''}</div><div class="acts">
+          ${live ? `<button class="fs-btn" data-a="${d.paused ? 'resume' : 'pause'}">${d.paused ? 'Reprendre' : 'Pause'}</button><button class="fs-btn" data-a="cancel">Annuler</button>`
+            : `${d.state === 'completed' ? '<button class="fs-btn" data-a="show">Afficher dans le dossier</button>' : ''}<button class="fs-btn" data-a="remove">Retirer</button>`}</div></div>`;
+      }).join('') + '</div>';
+    }
+    clearTimeout(timer);
+    if (active.length) timer = setTimeout(render, 700);
+  }
+  $('#list').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-a]');
+    if (!b) return;
+    const id = +b.closest('.dl').dataset.id;
+    if (b.classList.contains('off')) return;
+    fireshox.downloadAction(id, b.dataset.a);
+    setTimeout(render, 150);
+  });
+  $('#clear').addEventListener('click', () => { fireshox.clearDownloads(); setTimeout(render, 150); });
+  render();
+  setInterval(render, 4000);
+})();
+</script>
+</body>
+</html>

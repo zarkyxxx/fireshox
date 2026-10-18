@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ShoxBench</title>
+<link rel="icon" href="/assets/logo-32.png">
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Icônes (dessinées à la main, trait 2 px) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="g-fire" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff3d00"/><stop offset=".55" stop-color="#ff8a00"/><stop offset="1" stop-color="#ffd04a"/>
+    </linearGradient>
+  </defs>
+  <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4.2 17.5a9 9 0 1 1 15.6 0"/><path d="M12 13.5l4.2-4.2"/><circle cx="12" cy="14" r="1.6"/></symbol>
+  <symbol id="i-meter" viewBox="0 0 24 24"><path d="M3 17a9 9 0 0 1 18 0"/><path d="M12 17l-3.5-6"/><path d="M3 17h18"/><path d="M7.5 9.2 6.6 8M16.5 9.2l.9-1.2M12 8V6.5"/></symbol>
+  <symbol id="i-ping" viewBox="0 0 24 24"><path d="M2.5 12h4l2.2-6 4.6 12 2.4-6h5.8"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v9M8.2 12.8 12 16.6l3.8-3.8"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16.5v-9M8.2 11.2 12 7.4l3.8 3.8"/></symbol>
+  <symbol id="i-router" viewBox="0 0 24 24"><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 16.5h.01M10.5 16.5h.01"/><path d="M15 13V9.5"/><path d="M11.6 7.2a4.8 4.8 0 0 1 6.8 0M9.4 5a8 8 0 0 1 11.2 0"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><path d="M7 4 3.5 7.5 7 11"/><path d="M3.5 7.5H17"/><path d="M17 13l3.5 3.5L17 20"/><path d="M20.5 16.5H7"/></symbol>
+  <symbol id="i-watch" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 13.5V9.5"/><path d="M9.5 2.5h5M12 2.5V6"/><path d="M18.4 6.6l1.4-1.4"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9.5 7V4.5h5V7"/><path d="M6 7l1 12.5a1.5 1.5 0 0 0 1.5 1.5h7a1.5 1.5 0 0 0 1.5-1.5L18 7"/><path d="M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H4.5a3 3 0 0 0 3.6 4M16 6h3.5a3 3 0 0 1-3.6 4"/><path d="M12 13v3.5M8.5 20h7M9.5 20l.8-3.5h3.4l.8 3.5"/></symbol>
+  <symbol id="i-bars" viewBox="0 0 24 24"><path d="M4 20V11M10 20V5M16 20v-7M21 20H3"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.5 2.5 5 13.5h6l-1 8 8.5-11h-6z"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 21.5c-4 0-7-2.8-7-6.6 0-3.6 2.6-5.5 3.6-8.4.4 1.8 1.4 3 2.6 3.6C11.4 6.4 13 4 15.6 2.5c-.4 3 .8 4.9 2 6.6A8.2 8.2 0 0 1 19 14.9c0 3.8-3 6.6-7 6.6z"/><path d="M12 21.5c-1.7 0-3-1.2-3-2.9 0-1.7 1.6-2.6 2-4.3 1.6.8 4 2.3 4 4.3 0 1.7-1.3 2.9-3 2.9z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20.5 20.5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></symbol>
+  <symbol id="i-redo" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4v4.5H15"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.01"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><path d="M4 12h16"/></symbol>
+  <symbol id="i-spring" viewBox="0 0 24 24"><path d="M6 4h12M6 20h12"/><path d="M8 4l8 3-8 3 8 3-8 3 8 3"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="#debit" aria-label="ShoxBench, accueil">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M7.5 29.5a14.5 14.5 0 1 1 25 0" fill="none" stroke="url(#g-fire)" stroke-width="4.2" stroke-linecap="round"/>
+        <path d="M20 26.5 L22.6 23.4 L19.2 21.6 L23.6 19.4 L20.4 17.2 L25 15.4 L22.4 12.6 L26.6 10.6" fill="none" stroke="#fff3df" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="20" cy="27.5" r="3.2" fill="#fff3df"/>
+      </svg>
+      <span class="brand-word">SHOX<span>BENCH</span></span>
+      <span class="brand-by">par le Mec aux Shox</span>
+    </a>
+
+    <nav class="tabs" role="tablist" aria-label="Tests">
+      <button class="tab" role="tab" data-tab="debit"><svg class="ic"><use href="#i-gauge"/></svg>Test de débit</button>
+      <button class="tab" role="tab" data-tab="shoxometre"><svg class="ic"><use href="#i-meter"/></svg>Shoxomètre politique</button>
+      <span class="tab-ink" aria-hidden="true"></span>
+    </nav>
+
+    <div class="top-right">
+      <span class="turbo-pill" id="turboPill" hidden><svg class="ic"><use href="#i-bolt"/></svg>TURBO</span>
+      <button class="coins" id="coinsBtn" title="Ouvrir Shox Opening">
+        <span class="coin-dot" aria-hidden="true">S</span>
+        <span class="mono" id="coinsVal">1 000</span>
+        <span class="coins-lbl">ShoxCoins</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- ============================================================ TEST DE DÉBIT -->
+  <section class="sec" id="sec-debit" data-sec="debit">
+    <div class="wrap">
+      <div class="speed" id="speed" data-state="idle">
+
+        <div class="metrics">
+          <div class="metric m-ping" data-k="ping">
+            <div class="m-head"><svg class="ic"><use href="#i-ping"/></svg><span>Ping Shox</span><em>ms</em></div>
+            <div class="m-val mono">—</div>
+            <canvas class="spark"></canvas>
+            <div class="m-sub">gigue <b class="mono" data-jit>—</b> ms</div>
+          </div>
+          <div class="metric m-down" data-k="down">
+            <div class="m-head"><svg class="ic"><use href="#i-down"/></svg><span>Descente</span><em>shox/s</em></div>
+            <div class="m-val mono">—</div>
+            <canvas class="spark"></canvas>
+            <div class="m-sub" data-sub>vers ton ordinateur</div>
+          </div>
+          <div class="metric m-up" data-k="up">
+            <div class="m-head"><svg class="ic"><use href="#i-up"/></svg><span>Montée</span><em>shox/s</em></div>
+            <div class="m-val mono">—</div>
+            <canvas class="spark"></canvas>
+            <div class="m-sub" data-sub>vers le serveur</div>
+          </div>
+        </div>
+
+        <div class="stage" id="stage">
+          <canvas class="flames" id="flames"></canvas>
+          <div class="turbo-tag" id="turboTag" hidden><svg class="ic"><use href="#i-bolt"/></svg>TURBO ×1,5</div>
+          <button class="go" id="goBtn" aria-label="Lancer le test">
+            <span class="go-halo"></span>
+            <span class="go-ring"></span>
+            <span class="go-core"><img src="/assets/logo-256.png" alt="" draggable="false"></span>
+            <span class="go-txt">GO</span>
+          </button>
+          <div class="gauge" id="gauge">
+            <canvas id="gaugeCv"></canvas>
+            <div class="readout" id="readout">
+              <div class="ro-phase"><svg class="ic"><use href="#i-down"/></svg><span>Descente</span></div>
+              <div class="ro-val mono">0,00</div>
+              <div class="ro-unit">shox/s</div>
+            </div>
+          </div>
+          <div class="verdict" id="verdict" hidden></div>
+        </div>
+
+        <div class="conn">
+          <div class="conn-item">
+            <span class="conn-ic"><svg class="ic"><use href="#i-router"/></svg></span>
+            <div class="conn-txt">
+              <div class="conn-k">Fournisseur</div>
+              <div class="conn-t" id="ispName">—</div>
+              <div class="conn-s mono" id="ispIp">—</div>
+            </div>
+          </div>
+          <div class="conn-sep"></div>
+          <div class="conn-item">
+            <span class="conn-ic srv"><img src="/assets/logo-64.png" alt=""></span>
+            <div class="conn-txt">
+              <div class="conn-k">Serveur</div>
+              <div class="conn-t" id="srvCity">—</div>
+              <div class="conn-s" id="srvHost">—</div>
+            </div>
+            <button class="change" id="srvBtn"><svg class="ic"><use href="#i-swap"/></svg>Changer de serveur</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historique (tours de chrono) -->
+      <div class="hist" id="speedHist">
+        <div class="hist-head">
+          <h2><svg class="ic"><use href="#i-watch"/></svg>Historique des tests <span class="count mono" data-count>0</span></h2>
+          <button class="ghost-btn" data-clear="speed"><svg class="ic"><use href="#i-trash"/></svg>Effacer l’historique</button>
+        </div>
+        <div class="hist-grid">
+          <div class="card laps">
+            <div class="laps-scroll">
+              <table class="lap-table">
+                <thead><tr><th class="c-n">Tour</th><th>Quand · serveur</th><th class="r">Ping</th><th class="r">Descente</th><th class="r">Montée</th></tr></thead>
+                <tbody data-rows></tbody>
+              </table>
+              <div class="empty" data-empty>
+                <svg class="ic big"><use href="#i-watch"/></svg>
+                <b>Aucun tour pour l’instant</b>
+                <span>Appuie sur GO : chaque test s’ajoute ici comme un tour de chrono.</span>
+              </div>
+            </div>
+          </div>
+          <div class="side">
+            <div class="card podium">
+              <h3><svg class="ic"><use href="#i-trophy"/></svg>Classement <small>meilleures descentes</small></h3>
+              <ol class="rank" data-rank></ol>
+            </div>
+            <div class="card stats">
+              <h3><svg class="ic"><use href="#i-bars"/></svg>Statistiques</h3>
+              <div class="tiles" data-stats></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ SHOXOMÈTRE -->
+  <section class="sec" id="sec-shoxometre" data-sec="shoxometre" hidden>
+    <div class="wrap">
+      <div class="pol" id="pol" data-state="idle">
+        <div class="pol-main">
+          <div class="pol-title">
+            <h1>Shoxomètre <span class="fire-text">politique</span></h1>
+            <p>Le seul test d’orientation qui ne pose aucune question : il lit directement l’inclinaison de tes ressorts.</p>
+          </div>
+          <div class="pol-gauge">
+            <svg id="polSvg" viewBox="0 0 640 352" aria-label="Jauge du Shoxomètre"></svg>
+          </div>
+          <div class="pol-result" id="polResult">
+            <div class="pr-pos"><span class="mono" id="prPos">—</span><small>%</small></div>
+            <div class="pr-cat" id="prCat">En attente d’analyse</div>
+            <p class="pr-phrase" id="prPhrase">Lance l’analyse : l’aiguille hésitera un peu, puis se posera là où tes Shox l’ont décidé.</p>
+          </div>
+        </div>
+
+        <aside class="card pol-panel">
+          <div class="pp-head">
+            <h3><svg class="ic"><use href="#i-scan"/></svg>Analyse des ressorts</h3>
+            <span class="pp-pct mono" id="ppPct">0 %</span>
+          </div>
+          <div class="pp-bar"><i id="ppBar"></i></div>
+          <ol class="steps" id="polSteps"></ol>
+          <div class="pp-log mono" id="ppLog"><span>&gt; prêt. Pose tes Shox bien à plat.</span></div>
+          <button class="fs-btn fire big-btn" id="polBtn"><svg class="ic"><use href="#i-play"/></svg><span>Lancer l’analyse</span></button>
+          <p class="pp-note"><svg class="ic"><use href="#i-info"/></svg>Résultat 100 % hasard, garanti symétrique. Le Shoxomètre mesure tes semelles, pas tes idées.</p>
+        </aside>
+      </div>
+
+      <div class="hist" id="polHist">
+        <div class="hist-head">
+          <h2><svg class="ic"><use href="#i-watch"/></svg>Historique des analyses <span class="count mono" data-count>0</span></h2>
+          <button class="ghost-btn" data-clear="politics"><svg class="ic"><use href="#i-trash"/></svg>Effacer l’historique</button>
+        </div>
+        <div class="hist-grid">
+          <div class="card laps">
+            <div class="laps-scroll">
+              <table class="lap-table pol-table">
+                <thead><tr><th class="c-n">N°</th><th>Quand</th><th>Position</th><th class="r">%</th><th>Catégorie</th><th class="r">Écart</th></tr></thead>
+                <tbody data-rows></tbody>
+              </table>
+              <div class="empty" data-empty>
+                <svg class="ic big"><use href="#i-meter"/></svg>
+                <b>Aucune analyse pour l’instant</b>
+                <span>Chaque passage au Shoxomètre s’ajoutera ici.</span>
+              </div>
+            </div>
+          </div>
+          <div class="side">
+            <div class="card">
+              <h3><svg class="ic"><use href="#i-bars"/></svg>Répartition</h3>
+              <div class="distrib" data-distrib></div>
+            </div>
+            <div class="card stats">
+              <h3><svg class="ic"><use href="#i-meter"/></svg>Moyenne</h3>
+              <div data-polstats></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <div class="foot-brand">
+      <span class="brand-word">SHOX<span>BENCH</span></span>
+      <p>Le baromètre officieux du rebond numérique. Mesures 100 % fictives, ressorts 100 % sincères.</p>
+    </div>
+    <div class="foot-col">
+      <b>Tests</b>
+      <a href="#debit">Test de débit Shox</a>
+      <a href="#shoxometre">Shoxomètre politique</a>
+    </div>
+    <div class="foot-col">
+      <b>Le réseau</b>
+      <span id="footSrv">15 serveurs dans 15 villes inventées</span>
+      <span>Unité officielle : le shox/s</span>
+    </div>
+    <div class="foot-col">
+      <b>Méthodologie</b>
+      <span>Un dé à 9 999 faces</span>
+      <span>Un ressort étalon (rouillé)</span>
+    </div>
+  </div>
+  <div class="wrap foot-legal">© 2026 ShoxBench, une filiale imaginaire de Fire Shox. Aucune donnée ne quitte ton ordinateur, aucune donnée n’y entre non plus.</div>
+</footer>
+
+<!-- Fenêtre modale (choix du serveur, confirmation) -->
+<div class="modal-back" id="modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true"></div>
+</div>
+
+<script src="/shared/fx.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script src="speed.js"></script>
+<script src="politics.js"></script>
+</body>
+</html>

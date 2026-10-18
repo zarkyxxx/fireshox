@@ -1,0 +1,22 @@
+[
+  { "open": "fireshox://home/", "size": [1400, 860] },
+  { "wait": 1500 },
+  { "ui": "FS.open('https://example.com'); FS.open('https://fr.wikipedia.org/wiki/Nike_Shox'); 1" },
+  { "wait": 3500 },
+  { "ui": "document.querySelector('.tab').dispatchEvent(new PointerEvent('pointerdown', {button:0, bubbles:true})); 1" },
+  { "wait": 800 },
+  { "shot": ".cache/shots/ui/01-home.png" },
+  { "click": [700, 280] },
+  { "wait": 900 },
+  { "shot": ".cache/shots/ui/04-turbo.png" },
+  { "ui": "FS.apps(); 1" },
+  { "wait": 300 },
+  { "shot": ".cache/shots/ui/05-apps.png" },
+  { "ui": "document.querySelector('.scrim').dispatchEvent(new MouseEvent('mousedown')); 1" },
+  { "js": "document.querySelector('#toggle-img').click(); 1" },
+  { "wait": 900 },
+  { "shot": ".cache/shots/ui/06-hidden.png" },
+  { "js": "document.querySelector('#toggle-img').click(); document.querySelector('#logo-btn').click(); 1" },
+  { "wait": 300 },
+  { "quit": true }
+]

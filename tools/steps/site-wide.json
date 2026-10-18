@@ -1,0 +1,66 @@
+[
+ {
+  "open": "file:///F:/fireshox/site/index.html",
+  "size": [
+   1920,
+   1080
+  ]
+ },
+ {
+  "wait": 1800
+ },
+ {
+  "js": "JSON.stringify({h:document.documentElement.scrollHeight,w:innerWidth,sw:document.documentElement.scrollWidth})"
+ },
+ {
+  "js": "window.scrollTo({top:0,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/w01.png"
+ },
+ {
+  "js": "window.scrollTo({top:1000,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/w02.png"
+ },
+ {
+  "js": "window.scrollTo({top:2300,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/w03.png"
+ },
+ {
+  "js": "window.scrollTo({top:3600,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/w04.png"
+ },
+ {
+  "quit": true
+ }
+]

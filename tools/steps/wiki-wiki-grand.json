@@ -1,0 +1,14 @@
+[
+  { "open": "fireshox://wiki/#les-shoxs", "size": [1600, 900] },
+  { "wait": 900 },
+  { "shot": ".cache/shots/wiki/wiki-20-grand-shoxs.png" },
+  { "js": "location.hash = '#lenny-dupuis'; 1" },
+  { "wait": 700 },
+  { "shot": ".cache/shots/wiki/wiki-21-grand-ebauche.png" },
+  { "js": "location.hash = ''; 1" },
+  { "wait": 700 },
+  { "js": "document.getElementById('main').scrollTop = 500; 1" },
+  { "wait": 500 },
+  { "shot": ".cache/shots/wiki/wiki-22-grand-accueil.png" },
+  { "quit": true }
+]

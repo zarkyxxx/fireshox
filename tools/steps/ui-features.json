@@ -1,0 +1,18 @@
+[
+  { "open": "https://fr.wikipedia.org/wiki/Nike_Shox", "size": [1300, 820] },
+  { "wait": 3500 },
+  { "click": [400, 300], "button": "right" },
+  { "wait": 500 },
+  { "shot": ".cache/shots/ui/20-ctxmenu.png" },
+  { "key": "Escape" },
+  { "ui": "document.querySelector('.scrim') && document.querySelector('.scrim').dispatchEvent(new MouseEvent('mousedown')); 1" },
+  { "key": "F", "modifiers": ["control"] },
+  { "wait": 300 },
+  { "type": "Shox" },
+  { "wait": 800 },
+  { "shot": ".cache/shots/ui/21-find.png" },
+  { "ui": "document.querySelector('#address').focus(); document.querySelector('#address').value='wiki'; document.querySelector('#address').dispatchEvent(new Event('input')); 1" },
+  { "wait": 300 },
+  { "shot": ".cache/shots/ui/22-suggest.png" },
+  { "quit": true }
+]

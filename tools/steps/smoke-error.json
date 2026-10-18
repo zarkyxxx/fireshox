@@ -1,0 +1,8 @@
+[
+  { "open": "fireshox://error/?code=-105&url=https://exemple.invalid", "size": [1100, 700] },
+  { "wait": 800 },
+  { "js": "JSON.stringify({ fx: !!window.FX, api: !!window.fireshox, store: window.fireshox && fireshox.get('nope', 'defaut') , font: getComputedStyle(document.querySelector('h1')).fontFamily })" },
+  { "js": "FX.store.set('test.key', {a:1}); FX.store.get('test.key')" },
+  { "shot": ".cache/shots/smoke-error.png" },
+  { "quit": true }
+]

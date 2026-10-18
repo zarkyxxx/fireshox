@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Accueil Fire Shox</title>
+<link rel="icon" href="/assets/logo-32.png">
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="home.css">
+</head>
+<body>
+<canvas id="embers"></canvas>
+<div class="glow"></div>
+
+<main id="page">
+  <section id="hero">
+    <button id="logo-btn" aria-label="Activer le Turbo Shox">
+      <span class="ring r1"></span>
+      <span class="ring r2"></span>
+      <span class="disc"></span>
+      <img src="/assets/logo-512.png" alt="Fire Shox" id="logo" draggable="false">
+    </button>
+    <p class="cta" id="cta"><span>🔥</span> Clique pour activer le Turbo Shox <span>🔥</span></p>
+  </section>
+
+  <h1 class="title"><span class="fire-text">FIRE SHOX</span></h1>
+  <p class="tagline">L'amorti gravitationnel au service de votre navigation web.<br><b class="fire-text">100% Incandescent.</b></p>
+
+  <form id="search" autocomplete="off">
+    <svg class="sic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="q" placeholder="Rechercher sur le Web ou taper une Shox-Requête…" spellcheck="false">
+    <button type="submit" class="boost"><svg viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>SHOXBOOST</button>
+  </form>
+
+  <section id="folders" aria-label="Dossiers Fire Shox"></section>
+  <section id="favs" hidden></section>
+</main>
+
+<div id="ticker"><div class="tk-label">SHOX INFO</div><div class="tk-track"><div class="tk-run" id="tk-run"></div></div></div>
+
+<div id="corner">
+  <button id="toggle-img" class="corner-btn" title="Masquer / afficher l'image Fire Shox"></button>
+</div>
+
+<script src="/shared/fx.js"></script>
+<script src="home.js"></script>
+</body>
+</html>

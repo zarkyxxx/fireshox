@@ -1,0 +1,17 @@
+[
+  { "open": "fireshox://jeux/", "size": [1024, 640] },
+  { "wait": 1000 },
+  { "shot": ".cache/shots/wiki/jeux-10-petit-vide.png" },
+  { "open": "fireshox://jeux/?game=squid" },
+  { "wait": 1500 },
+  { "shot": ".cache/shots/wiki/jeux-11-petit-squid.png" },
+  { "open": "fireshox://jeux/" },
+  { "wait": 800 },
+  { "js": "JeuxShox.ajouterPourTest({ id: 'demo', titre: 'Shox Kart', image: '/assets/logo-512.png', genre: 'Course' }); JeuxShox.ajouterPourTest({ id: 'demo2', titre: 'Le Grand Rebond', genre: 'Plateforme' }); 1" },
+  { "wait": 800 },
+  { "shot": ".cache/shots/wiki/jeux-12-petit-avec-jeux.png" },
+  { "js": "history.pushState(null, '', '?game=demo'); JeuxShox.route(); 1" },
+  { "wait": 800 },
+  { "shot": ".cache/shots/wiki/jeux-13-petit-fiche.png" },
+  { "quit": true }
+]

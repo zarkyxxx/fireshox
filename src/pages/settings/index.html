@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Paramètres</title>
+<link rel="icon" href="/assets/logo-32.png">
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="/shared/tools.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="side">
+    <div class="brand"><img src="/assets/logo-64.png" alt=""><span class="fire-text">Paramètres</span></div>
+    <a href="#general"><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Général</a>
+    <a href="#apparence"><svg class="ic" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>Apparence</a>
+    <a href="#turbo"><svg class="ic" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>Turbo Shox</a>
+    <a href="#donnees"><svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2"/></svg>Confidentialité</a>
+    <a href="#autorisations"><svg class="ic" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Autorisations</a>
+    <a href="#about"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>À propos</a>
+  </nav>
+
+  <main>
+    <section class="set" id="general">
+      <h2>Général</h2>
+      <div class="fs-panel">
+        <div class="opt"><div class="l"><b>Moteur de recherche</b><small>Utilisé par la barre d'adresse et le bouton SHOXBOOST.</small></div>
+          <select class="sel" data-key="engine">
+            <option value="google">Google</option><option value="duckduckgo">DuckDuckGo</option><option value="bing">Bing</option>
+            <option value="qwant">Qwant</option><option value="ecosia">Ecosia</option><option value="brave">Brave Search</option>
+          </select></div>
+        <div class="opt"><div class="l"><b>Au démarrage</b><small>Ce que Fire Shox ouvre quand tu le lances.</small></div>
+          <select class="sel" data-key="startup"><option value="restore">Reprendre là où je m'étais arrêté</option><option value="home">Ouvrir l'accueil Fire Shox</option></select></div>
+        <div class="opt"><div class="l"><b>Navigateur par défaut</b><small>Ouvre les réglages de Windows : choisis « Fire Shox » comme navigateur web pour que tous les liens s'ouvrent dedans.</small></div>
+          <button class="fs-btn fire" id="default-browser">Définir par défaut…</button></div>
+      </div>
+    </section>
+
+    <section class="set" id="apparence">
+      <h2>Apparence</h2>
+      <div class="fs-panel">
+        <div class="opt"><div class="l"><b>Masquer l'image Fire Shox</b><small>Cache le logo géant de la page d'accueil (le mec avec les Shox).</small></div><label class="switch"><input type="checkbox" data-key="hideHero"><i></i></label></div>
+        <div class="opt"><div class="l"><b>Masquer le logo de la barre</b><small>Cache le petit logo en haut à gauche.</small></div><label class="switch"><input type="checkbox" data-key="hideLogo"><i></i></label></div>
+        <div class="opt"><div class="l"><b>Barre de favoris</b><small>Les dossiers raccourcis sous la barre d'adresse (Ctrl+Maj+B).</small></div><label class="switch"><input type="checkbox" data-key="bookmarksBar"><i></i></label></div>
+        <div class="opt"><div class="l"><b>Sons des sites Fire Shox</b><small>Boosters, ShoxBench, accueil…</small></div><label class="switch"><input type="checkbox" data-key="sound"><i></i></label></div>
+      </div>
+    </section>
+
+    <section class="set" id="turbo">
+      <h2>Turbo Shox</h2>
+      <div class="fs-panel">
+        <div class="opt"><div class="l"><b>Mode Turbo</b><small>Ressorts en surchauffe : flammes dans la barre, logo qui tourne, scores ShoxBench ×1,5. Aucune garantie d'incendie.</small></div><label class="switch"><input type="checkbox" data-key="turbo"><i></i></label></div>
+      </div>
+    </section>
+
+    <section class="set" id="donnees">
+      <h2>Confidentialité et données</h2>
+      <div class="fs-panel">
+        <div class="checks">
+          <label><input type="checkbox" id="c-history" checked> Historique de navigation</label>
+          <label><input type="checkbox" id="c-cookies"> Cookies et données des sites (déconnecte des sites)</label>
+          <label><input type="checkbox" id="c-cache" checked> Images et fichiers en cache</label>
+          <label><input type="checkbox" id="c-downloads"> Liste des téléchargements</label>
+          <label><input type="checkbox" id="c-permissions"> Autorisations des sites</label>
+        </div>
+        <div class="opt"><div class="l"><small>Tes scores ShoxBench, tes cartes Shox Opening et tes favoris ne sont jamais effacés ici.</small></div><button class="fs-btn fire" id="clear">Effacer les données</button></div>
+      </div>
+    </section>
+
+    <section class="set" id="autorisations">
+      <h2>Autorisations des sites</h2>
+      <div class="fs-panel" id="perms"></div>
+    </section>
+
+    <section class="set" id="about">
+      <h2>À propos</h2>
+      <div class="fs-panel">
+        <div class="about">
+          <img src="/assets/logo-256.png" alt="">
+          <div>
+            <h3 class="fire-text">Fire Shox</h3>
+            <p>L'amorti gravitationnel au service de votre navigation web.</p>
+            <p class="mono" id="ver">…</p>
+            <div class="status-line" id="upd-status"></div>
+            <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+              <button class="fs-btn fire" id="upd">Rechercher des mises à jour</button>
+              <button class="fs-btn" id="site">Site officiel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="/shared/fx.js"></script>
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const DEF = { engine: 'google', startup: 'restore', bookmarksBar: true, sound: true, turbo: false, hideHero: false, hideLogo: false };
+  const get = () => ({ ...DEF, ...(FX.store.get('settings', {}) || {}) });
+  function load() {
+    const s = get();
+    document.querySelectorAll('[data-key]').forEach((el) => {
+      if (el.type === 'checkbox') el.checked = !!s[el.dataset.key];
+      else el.value = s[el.dataset.key];
+    });
+  }
+  document.querySelectorAll('[data-key]').forEach((el) => el.addEventListener('change', () => {
+    const v = el.type === 'checkbox' ? el.checked : el.value;
+    FX.store.set('settings', { ...get(), [el.dataset.key]: v });
+    FX.sound('click');
+    FX.toast('Réglage enregistré');
+  }));
+  FX.store.onChange((k) => { if (k === 'settings') load(); if (k === 'permissions') perms(); });
+
+  // Menu latéral : surligne la section visible
+  const links = [...document.querySelectorAll('.side a')];
+  const mark = () => {
+    let cur = links[0];
+    for (const a of links) { const sec = document.querySelector(a.getAttribute('href')); if (sec && sec.getBoundingClientRect().top < 140) cur = a; }
+    links.forEach((a) => a.classList.toggle('on', a === cur));
+  };
+  addEventListener('scroll', mark, { passive: true });
+  addEventListener('hashchange', mark);
+
+  $('#clear').addEventListener('click', async () => {
+    const what = { history: $('#c-history').checked, cookies: $('#c-cookies').checked, cache: $('#c-cache').checked, downloads: $('#c-downloads').checked, permissions: $('#c-permissions').checked };
+    if (!Object.values(what).some(Boolean)) { FX.toast('Coche au moins une case'); return; }
+    if (window.fireshox) await fireshox.clearData(what);
+    FX.sound('whoosh');
+    FX.toast('Données effacées 🔥');
+    perms();
+  });
+
+  function perms() {
+    const saved = FX.store.get('permissions', {}) || {};
+    const keys = Object.keys(saved);
+    const NAMES = { media: 'Caméra / micro', geolocation: 'Position', notifications: 'Notifications', 'clipboard-read': 'Presse-papiers', 'display-capture': 'Partage d\'écran', midi: 'MIDI', midiSysex: 'MIDI', hid: 'Périphériques', serial: 'Ports série', usb: 'USB', 'idle-detection': 'Inactivité' };
+    $('#perms').innerHTML = keys.length ? keys.map((k) => {
+      const [origin, p] = k.split('|');
+      return `<div class="opt"><div class="l"><b>${origin.replace(/[<>&]/g, '')}</b><small>${NAMES[p] || p} — ${saved[k] ? 'autorisé' : 'bloqué'}</small></div><button class="fs-btn" data-k="${k.replace(/"/g, '&quot;')}">Réinitialiser</button></div>`;
+    }).join('') : '<div class="opt"><div class="l"><small>Aucun site n\'a encore demandé d\'autorisation (caméra, micro, position…).</small></div></div>';
+    $('#perms').querySelectorAll('[data-k]').forEach((b) => b.addEventListener('click', () => {
+      const s = { ...(FX.store.get('permissions', {}) || {}) }; delete s[b.dataset.k]; FX.store.set('permissions', s); perms();
+    }));
+  }
+
+  async function about() {
+    if (!window.fireshox) return;
+    const i = await fireshox.info();
+    $('#ver').textContent = `Version ${i.version} · Chromium ${i.chrome} · Electron ${i.electron}`;
+  }
+  $('#upd').addEventListener('click', async () => {
+    if (!window.fireshox) return;
+    $('#upd-status').textContent = 'Recherche en cours…';
+    const r = await fireshox.checkUpdate();
+    $('#upd-status').textContent = r.state === 'dev' ? 'Version de développement : pas de mise à jour automatique.'
+      : r.state === 'error' ? 'Impossible de vérifier pour le moment.' : 'Vérification lancée : si une version existe, elle se télécharge et un bouton « Mettre à jour » apparaît en haut.';
+  });
+  $('#site').addEventListener('click', () => FX.open('https://zarkyxxx.github.io/fireshox/'));
+  $('#default-browser').addEventListener('click', () => {
+    if (window.fireshox && fireshox.openDefaultApps) { fireshox.openDefaultApps(); FX.toast('Dans « Navigateur web », choisis Fire Shox 🔥'); }
+  });
+
+  load(); perms(); about();
+  setTimeout(() => { if (location.hash) document.querySelector(location.hash)?.scrollIntoView(); mark(); }, 50);
+})();
+</script>
+</body>
+</html>

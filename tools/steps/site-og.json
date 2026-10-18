@@ -1,0 +1,24 @@
+[
+ {
+  "open": "file:///F:/fireshox/site/index.html",
+  "size": [
+   1200,
+   630
+  ]
+ },
+ {
+  "wait": 1200
+ },
+ {
+  "js": "(function(){var s=document.createElement('style');s.textContent='html{overflow:hidden!important}.topbar,.dl-links,.dl-meta,.scroll-hint,.dl-note-os,.hero-kicker{display:none!important}.hero{min-height:630px!important;padding:24px 20px 20px!important;--logo:300px!important}.hero-logo{margin-bottom:8px!important}.title{font-size:96px!important;margin-bottom:8px!important}.tagline{margin-bottom:22px!important}.btn-fire::after{display:none}';document.head.appendChild(s);window.scrollTo(0,0);return document.documentElement.scrollHeight})()"
+ },
+ {
+  "wait": 2500
+ },
+ {
+  "shot": "site/img/og.png"
+ },
+ {
+  "quit": true
+ }
+]

@@ -1,0 +1,90 @@
+[
+ {
+  "open": "file:///F:/fireshox/site/index.html",
+  "size": [
+   1024,
+   640
+  ]
+ },
+ {
+  "wait": 1800
+ },
+ {
+  "js": "JSON.stringify({h:document.documentElement.scrollHeight,w:innerWidth,sw:document.documentElement.scrollWidth})"
+ },
+ {
+  "js": "window.scrollTo({top:0,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/s01.png"
+ },
+ {
+  "js": "window.scrollTo({top:700,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/s02.png"
+ },
+ {
+  "js": "window.scrollTo({top:1700,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/s03.png"
+ },
+ {
+  "js": "window.scrollTo({top:2500,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/s04.png"
+ },
+ {
+  "js": "window.scrollTo({top:3300,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/s05.png"
+ },
+ {
+  "js": "window.scrollTo({top:4600,behavior:\"instant\"});scrollY"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "js": "document.visibilityState"
+ },
+ {
+  "shot": ".cache/shots/site/s06.png"
+ },
+ {
+  "quit": true
+ }
+]
