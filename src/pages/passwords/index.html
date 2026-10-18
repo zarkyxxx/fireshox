@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Mots de passe</title>
+<link rel="icon" href="/assets/logo-32.png">
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="/shared/tools.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap pw">
+  <div class="head">
+    <div class="logo"><img src="/assets/logo-128.png" alt=""><span class="lock"><svg class="ic" viewBox="0 0 24 24"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg></span></div>
+    <div class="titles">
+      <h1>Mots de passe</h1>
+      <div class="sub"><span class="badge">🔥 ShoxVault</span><span>Chiffrés par Windows sur ce PC · jamais envoyés sur internet</span></div>
+    </div>
+    <div class="grow"></div>
+    <label class="searchbox"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input id="q" placeholder="Rechercher un site ou un identifiant" spellcheck="false" autocomplete="off"></label>
+  </div>
+
+  <div class="warn" id="warn" hidden>
+    <b>Chiffrement Windows indisponible.</b>
+    ShoxVault refuse d'enregistrer un mot de passe en clair : tant que Windows ne fournit pas son coffre (DPAPI), rien ne peut être ajouté ni modifié.
+  </div>
+
+  <div class="bar">
+    <div class="day">Comptes enregistrés <span class="count" id="count"></span></div>
+    <div class="grow"></div>
+    <button class="fs-btn" id="import" title="Fichier exporté par Chrome ou Edge : Paramètres › Mots de passe › Exporter">Importer depuis Chrome (CSV)</button>
+    <button class="fs-btn fire" id="add">Ajouter</button>
+  </div>
+
+  <form class="card addcard" id="addform" hidden autocomplete="off">
+    <div class="grid3">
+      <label>Site<input id="a-url" placeholder="exemple.com ou https://exemple.com" spellcheck="false"></label>
+      <label>Identifiant<input id="a-user" placeholder="nom ou e-mail" spellcheck="false"></label>
+      <label>Mot de passe<span class="pwfield"><input id="a-pass" type="password" autocomplete="new-password"><button type="button" class="iconbtn" data-toggle="a-pass" title="Afficher"></button></span></label>
+    </div>
+    <div class="formfoot"><span class="hint">Seuls les sites en https (ou localhost) peuvent être remplis.</span><div class="grow"></div><button type="button" class="fs-btn" id="a-cancel">Annuler</button><button type="submit" class="fs-btn fire">Ajouter au coffre</button></div>
+  </form>
+
+  <div id="list"></div>
+
+  <div class="day">Sites jamais enregistrés</div>
+  <div class="card" id="never"></div>
+
+  <div class="day">Réglages</div>
+  <div class="card opts">
+    <div class="opt"><div class="l"><b>Proposer d'enregistrer les mots de passe</b><small>Après une connexion, une bulle sous la barre d'adresse propose de garder le mot de passe.</small></div><label class="switch"><input type="checkbox" data-key="pwSave"><i></i></label></div>
+    <div class="opt"><div class="l"><b>Connexion automatique</b><small>Remplit tout seul l'identifiant et le mot de passe quand le site n'a qu'un compte enregistré. La pastille « 🔥 ShoxVault » reste là pour la connexion en 1&nbsp;clic.</small></div><label class="switch"><input type="checkbox" data-key="pwAutofill"><i></i></label></div>
+  </div>
+</div>
+<script src="/shared/fx.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

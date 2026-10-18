@@ -1,0 +1,214 @@
+/* Fire Shox — panneau Claude, ShoxBlock, ShoxShot, traduction, mode Fantôme (panel.js, extras.js).
+   Toutes les couleurs passent par les variables de ui.css / themes.css : les thèmes s'appliquent aussi ici. */
+
+/* ---------------------------------------------------------------- boutons de la barre d'outils */
+#b-claude.on { color: var(--fire-3); background: rgba(var(--acc-rgb), .14); box-shadow: inset 0 0 0 1px rgba(var(--acc-rgb), .35); }
+#b-claude .ic { transition: transform .3s cubic-bezier(.2, 1.4, .4, 1); }
+#b-claude:hover .ic { transform: rotate(18deg) scale(1.08); }
+#b-claude.on .ic { fill: currentColor; fill-opacity: .25; }
+
+#b-block .blk-n {
+  position: absolute; right: 1px; bottom: 3px; min-width: 15px; height: 14px; padding: 0 3px; border-radius: 7px;
+  background: var(--fire-grad); color: var(--on-acc); font: 800 9.5px/14px var(--font); text-align: center; letter-spacing: -.02em;
+  box-shadow: 0 0 0 2px var(--bar); pointer-events: none; animation: blk-pop .3s cubic-bezier(.2, 1.5, .4, 1);
+}
+@keyframes blk-pop { from { transform: scale(.4); opacity: 0; } }
+#b-block:not(.off):has(.blk-n:not([hidden])) .ic { color: var(--fire-2); }
+#b-block.off .ic { color: var(--muted); }
+
+#b-shot.busy .ic { animation: shot-busy .8s ease-in-out infinite; color: var(--fire-3); }
+@keyframes shot-busy { 50% { transform: scale(.82); opacity: .6; } }
+
+#b-translate.on { color: var(--fire-3); background: rgba(var(--acc-rgb), .14); }
+#b-translate .ic { width: 17px; height: 17px; }
+
+#ghost-badge {
+  display: inline-flex; align-items: center; gap: 2px; height: 26px; padding: 0 11px; margin: 0 4px 0 2px; border-radius: 999px; flex: none;
+  font-weight: 800; font-size: 12px; letter-spacing: .02em; white-space: nowrap; color: #ece7ff;
+  background: linear-gradient(90deg, rgba(120, 100, 255, .38), rgba(143, 227, 255, .16));
+  box-shadow: inset 0 0 0 1px rgba(170, 150, 255, .6), 0 0 16px -4px rgba(120, 100, 255, .85);
+  animation: gh-float 3.2s ease-in-out infinite;
+}
+@keyframes gh-float { 50% { transform: translateY(-1.5px); box-shadow: inset 0 0 0 1px rgba(190, 175, 255, .75), 0 0 20px -3px rgba(130, 110, 255, 1); } }
+
+/* Menus longs (menu principal en petite fenêtre) : ils défilent au lieu de déborder. */
+.menu { max-height: calc(100vh - 12px); overflow-y: auto; overscroll-behavior: contain; }
+.menu::-webkit-scrollbar { width: 8px; }
+.menu::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 8px; border: 2px solid var(--menu); }
+
+/* Interrupteur des popovers */
+.xs-switch { position: relative; width: 38px; height: 22px; flex: none; }
+.xs-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.xs-switch i { position: absolute; inset: 0; border-radius: 11px; background: var(--raise-2); transition: background .2s, box-shadow .2s; }
+.xs-switch i::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--knob); transition: transform .22s cubic-bezier(.2, 1.4, .4, 1), background .2s; }
+.xs-switch input:checked + i { background: var(--fire-2); box-shadow: 0 0 12px rgba(var(--glow-rgb), .45); }
+.xs-switch input:checked + i::after { transform: translateX(16px); background: #fff; }
+.xs-switch input:disabled + i { opacity: .5; }
+.xs-switch input:focus-visible + i { outline: 2px solid rgba(var(--acc-rgb), .8); outline-offset: 2px; }
+
+/* ---------------------------------------------------------------- panneau Claude */
+body.cp-open #views { margin-right: var(--cp-w, 400px); }
+#claude-panel {
+  position: fixed; right: 0; bottom: 0; top: 130px; width: var(--cp-w, 400px); z-index: 30;
+  display: flex; flex-direction: column; background: var(--bar); border-left: 1px solid var(--line);
+  box-shadow: -14px 0 34px -22px rgba(0, 0, 0, .9);
+}
+#claude-panel::before { content: ''; position: absolute; left: -1px; top: 0; width: 1px; height: 120px; background: linear-gradient(180deg, rgba(var(--acc-rgb), .8), transparent); pointer-events: none; }
+#claude-panel.cp-in { animation: cp-in .24s cubic-bezier(.2, .9, .3, 1); }
+@keyframes cp-in { from { transform: translateX(28px); opacity: 0; } }
+.cp-grip { position: absolute; left: -5px; top: 0; bottom: 0; width: 9px; cursor: col-resize; z-index: 3; }
+.cp-grip::after { content: ''; position: absolute; left: 3px; top: 50%; width: 3px; height: 42px; margin-top: -21px; border-radius: 3px; background: var(--line-2); opacity: 0; transition: opacity .15s, background .15s; }
+.cp-grip:hover::after, .cp-resizing .cp-grip::after { opacity: 1; background: rgba(var(--acc-rgb), .85); box-shadow: 0 0 10px rgba(var(--glow-rgb), .6); }
+.cp-shield { position: fixed; inset: 0; z-index: 300; cursor: col-resize; }
+.cp-head { display: flex; align-items: center; gap: 2px; height: 46px; padding: 0 6px 0 8px; border-bottom: 1px solid var(--edge); flex: none; min-width: 0; }
+.cp-tabs { display: flex; gap: 2px; padding: 3px; border-radius: 11px; background: var(--field); border: 1px solid var(--line); min-width: 0; }
+.cp-tab { display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 11px 0 9px; border-radius: 8px; color: var(--text-2); font-weight: 700; font-size: 12.5px; white-space: nowrap; transition: background .15s, color .15s; }
+.cp-tab .ic { width: 15px; height: 15px; }
+.cp-tab:hover:not(.on) { color: var(--text); background: var(--hover); }
+.cp-tab.on { color: var(--on-acc); background: var(--fire-grad); box-shadow: 0 2px 12px -3px rgba(var(--glow-rgb), .7), inset 0 1px 0 rgba(255, 255, 255, .3); }
+.cp-grow { flex: 1; min-width: 4px; }
+.cp-body { position: relative; flex: 1; min-height: 0; background: var(--views); }
+.cp-view { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; visibility: hidden; background: var(--views); }
+.cp-view.on { visibility: visible; }
+.cp-wait { position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; justify-items: center; gap: 14px; color: var(--muted); font-weight: 600; background: var(--views); pointer-events: none; animation: cp-fade .3s ease-out; }
+@keyframes cp-fade { from { opacity: 0; } }
+.cp-spin { width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(var(--acc-rgb), .18); border-top-color: var(--fire-2); animation: spin .8s linear infinite; box-shadow: 0 0 22px -6px rgba(var(--glow-rgb), .8); }
+.cp-fail { position: absolute; inset: 0; z-index: 3; display: grid; place-content: center; justify-items: center; gap: 6px; padding: 24px; text-align: center; background: var(--views); }
+.cp-fail-ic { width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; margin-bottom: 6px; color: var(--fire-2); background: rgba(var(--acc-rgb), .1); box-shadow: inset 0 0 0 1px rgba(var(--acc-rgb), .3); }
+.cp-fail-ic .ic { width: 26px; height: 26px; }
+.cp-fail b { font-size: 15px; }
+.cp-fail small { color: var(--muted); font-size: 12.5px; }
+.cp-retry { margin-top: 10px; height: 32px; padding: 0 16px; border-radius: 9px; background: var(--fire-grad); color: var(--on-acc); font-weight: 800; }
+body.html-fullscreen #claude-panel { display: none; }
+body.html-fullscreen.cp-open #views { margin-right: 0; }
+
+/* ---------------------------------------------------------------- ShoxBlock */
+.pop.sb-popover { width: 320px; }
+.sb-head { display: flex; align-items: center; gap: 8px; margin: 0 2px 10px 4px; }
+.sb-head .ic { width: 18px; height: 18px; color: var(--fire-2); }
+.sb-head b { font-size: 14px; }
+.sb-grow { flex: 1; }
+.sb-gl { color: var(--muted); font-size: 12px; font-weight: 600; }
+.sb-hero { position: relative; overflow: hidden; text-align: center; padding: 18px 12px 14px; border-radius: 13px; border: 1px solid var(--line);
+  background: radial-gradient(120% 100% at 50% 0%, rgba(var(--glow-rgb), .22), transparent 70%), var(--field); }
+.sb-n { font: 800 46px/1 var(--font); letter-spacing: -.03em; background: var(--fire-grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 2px 12px rgba(var(--glow-rgb), .45)); font-variant-numeric: tabular-nums; }
+.sb-n.bump { animation: sb-bump .4s cubic-bezier(.2, 1.5, .4, 1); }
+@keyframes sb-bump { 40% { transform: scale(1.12); } }
+.sb-l { margin-top: 8px; color: var(--text-2); font-weight: 600; font-size: 12.5px; line-height: 1.35; }
+.sb-hero.off { background: var(--field); }
+.sb-hero.off .sb-n, .sb-hero.calm .sb-n { background: none; color: var(--muted); filter: none; font-size: 38px; }
+.sb-hero.calm .sb-n { color: var(--fire-3); }
+.sb-site { display: flex; align-items: center; gap: 12px; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: var(--raise); }
+.sb-site.dis { opacity: .55; }
+.sb-site-t { flex: 1; min-width: 0; display: grid; }
+.sb-site-t b { font-weight: 700; }
+.sb-site-t small { color: var(--muted); font: 600 11.5px var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sb-foot { display: flex; align-items: baseline; flex-wrap: wrap; margin: 12px 4px 2px; color: var(--muted); font-size: 12px; }
+.sb-foot b { color: var(--fire-3); margin-left: 4px; font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- ShoxShot */
+.ss-head { display: flex; align-items: center; gap: 10px; padding: 8px 10px 10px; }
+.ss-head > .ic { width: 30px; height: 30px; padding: 6px; border-radius: 9px; color: var(--on-acc); background: var(--fire-grad); box-shadow: 0 0 14px -2px rgba(var(--glow-rgb), .6); }
+.ss-head b { display: block; font-size: 14px; }
+.ss-head small { color: var(--muted); font-size: 11.5px; }
+.pop.ss-popover { width: 384px; }
+.ss-pop h3 .ss-kind { margin-left: auto; padding: 2px 8px; border-radius: 999px; background: rgba(var(--acc-rgb), .12); color: var(--fire-3); font-size: 11px; font-weight: 700; }
+.ss-prev { position: relative; height: 210px; display: grid; place-items: center; overflow: hidden; border-radius: 11px; border: 1px solid var(--line);
+  background: repeating-conic-gradient(var(--field) 0% 25%, var(--raise) 0% 50%) 50% / 16px 16px; animation: ss-prev-in .35s cubic-bezier(.2, 1.2, .4, 1); }
+@keyframes ss-prev-in { from { transform: scale(.94); opacity: 0; } }
+.ss-prev img { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 6px 22px rgba(0, 0, 0, .5); }
+.ss-prev.cut img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.ss-prev.cut::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 46px; background: linear-gradient(transparent, var(--menu)); }
+.ss-info { display: grid; gap: 2px; margin: 8px 2px 10px; color: var(--text-2); font: 600 12px var(--mono); }
+.ss-info small { color: var(--muted); font: 500 11.5px var(--font); }
+.ss-acts { display: grid; grid-template-columns: 1fr 1.15fr 1.35fr; gap: 6px; }
+.ss-btn { display: flex; align-items: center; justify-content: center; gap: 6px; height: 34px; padding: 0 8px; border-radius: 9px; background: var(--raise); font-weight: 700; font-size: 12.5px; white-space: nowrap; transition: background .15s, filter .15s; }
+.ss-btn:hover { background: var(--raise-2); }
+.ss-btn .ic { width: 15px; height: 15px; }
+.ss-btn.primary { background: var(--fire-grad); color: var(--on-acc); box-shadow: 0 4px 14px -5px rgba(var(--glow-rgb), .8), inset 0 1px 0 rgba(255, 255, 255, .3); }
+.ss-btn.primary:hover { filter: brightness(1.08); }
+.ss-btn.done { color: #5be08a; }
+.ss-btn.primary.done { color: var(--on-acc); }
+.ss-saved { margin: 9px 2px 0; color: var(--muted); font: 500 11.5px var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ss-flash { position: fixed; z-index: 160; pointer-events: none; background: #fff; border-radius: 2px; animation: ss-flash .5s ease-out forwards; }
+@keyframes ss-flash { 0% { opacity: .92; } 100% { opacity: 0; } }
+.ss-veil { position: fixed; z-index: 150; cursor: crosshair; overflow: hidden; outline: 0; background: rgba(5, 4, 9, .45); animation: cp-fade .18s ease-out; }
+.ss-veil.drawing { background: transparent; }
+.sv-hint { position: absolute; left: 50%; top: 16px; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px;
+  background: var(--menu); border: 1px solid var(--line-2); box-shadow: 0 10px 30px rgba(0, 0, 0, .5); font-weight: 600; white-space: nowrap; pointer-events: none; transition: opacity .15s; }
+.sv-hint .ic { width: 16px; height: 16px; color: var(--fire-2); }
+.sv-hint kbd { padding: 1px 6px; border-radius: 5px; background: var(--raise); border: 1px solid var(--line-2); font: 700 11px var(--mono); }
+.sv-dim { color: var(--muted); }
+.ss-veil.drawing .sv-hint { opacity: 0; }
+.sv-box { position: absolute; border: 1.5px solid var(--fire-3); border-radius: 2px; box-shadow: 0 0 0 9999px rgba(5, 4, 9, .52), 0 0 18px rgba(var(--glow-rgb), .55); }
+.sv-size { position: absolute; left: -1px; top: -27px; padding: 3px 8px; border-radius: 6px; background: var(--fire-grad); color: var(--on-acc); font: 700 11px var(--mono); white-space: nowrap; }
+.sv-box.below .sv-size { top: 6px; left: 6px; }
+
+/* ---------------------------------------------------------------- barre de traduction */
+#translate-bar {
+  flex: none; display: flex; align-items: center; gap: 8px; height: 42px; padding: 0 10px 0 14px; overflow: hidden; white-space: nowrap;
+  background: linear-gradient(90deg, rgba(var(--acc-rgb), .12), transparent 55%), var(--bar); border-bottom: 1px solid var(--edge);
+  animation: tr-in .26s cubic-bezier(.2, .9, .3, 1);
+}
+@keyframes tr-in { from { height: 0; opacity: 0; } }
+.tr-ic { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; color: var(--fire-2); background: rgba(var(--acc-rgb), .12); flex: none; }
+.tr-ic .ic { width: 15px; height: 15px; }
+.tr-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); font-size: 13px; }
+.tr-t b { color: var(--text); }
+.tr-grow { flex: 1; min-width: 6px; }
+.tr-btn { height: 28px; padding: 0 12px; border-radius: 8px; background: var(--raise); font-weight: 700; font-size: 12.5px; flex: none; transition: background .15s, filter .15s; }
+.tr-btn:hover { background: var(--raise-2); }
+.tr-btn.primary { background: var(--fire-grad); color: var(--on-acc); box-shadow: 0 3px 12px -4px rgba(var(--glow-rgb), .8); }
+.tr-btn.primary:hover { filter: brightness(1.08); }
+.tr-btn.ghost { background: transparent; color: var(--text-2); padding: 0 10px; }
+.tr-btn.ghost:hover { background: var(--hover); color: var(--text); }
+body.fullscreen #translate-bar, body.html-fullscreen #translate-bar { display: none; }
+@media (max-width: 860px) { .tr-btn[data-a=always] { display: none; } }
+
+/* ---------------------------------------------------------------- popover Fantôme */
+.gh-pop p { margin: 4px 4px 10px; color: var(--text-2); line-height: 1.45; }
+.gh-pop p b { color: var(--text); }
+.gh-pop .gh-dim { color: var(--muted); font-size: 12px; }
+
+/* ================================================================ thème Fantôme (fenêtre privée)
+   Prend le pas sur le thème choisi (fire / squid / lfi) : bleu nuit, violet et lueurs spectrales. */
+html.ghost, html.ghost[data-theme] {
+  --strip: #0b0a18;
+  --bar: #11102a;
+  --bar-2: #161536;
+  --tab: #121130;
+  --tab-hover: #19183f;
+  --tab-active: #1f1d4a;
+  --line: #25234a;
+  --line-2: #33305e;
+  --text: #efebff;
+  --text-2: #bbb5de;
+  --muted: #8681b0;
+  --fire-1: #6b5bff;
+  --fire-2: #9a87ff;
+  --fire-3: #c9bbff;
+  --fire-grad: linear-gradient(90deg, #5d4eff, #8f7cff 55%, #c3b2ff);
+  --brand-grad: linear-gradient(90deg, #9a87ff, #c9bbff 50%, #8fe3ff);
+  --menu: #15143a;
+  --acc-rgb: 150, 132, 255;
+  --glow-rgb: 118, 98, 255;
+  --on-acc: #0b0726;
+  --hover: #1c1a45;
+  --press: #24224f;
+  --field: #08071a;
+  --edge: #1a1840;
+  --raise: #211f50;
+  --raise-2: #2a2760;
+  --chip: #1d1b47;
+  --pop: #0e0d27;
+  --views: #0a0918;
+  --status: #15143a;
+  --placeholder: #6e69a0;
+  --knob: #a7a2d4;
+  --avatar-bg: radial-gradient(circle, #1d1452, #0b0a18 70%);
+  --flames: linear-gradient(90deg, #5d4eff, #8fe3ff, #9a87ff, #c9bbff, #5d4eff);
+}
+html.ghost .brand img, html.ghost[data-theme] .brand img, html.ghost .avatar img, html.ghost .mhead img { filter: hue-rotate(235deg) saturate(.85) drop-shadow(0 0 7px rgba(120, 100, 255, .7)); }
+html.ghost .brand-name { background: var(--brand-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+html.ghost #tabstrip { background: radial-gradient(60% 140% at 12% 0%, rgba(110, 90, 255, .16), transparent 70%), var(--strip); }

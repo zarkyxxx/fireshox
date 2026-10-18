@@ -15,23 +15,57 @@
   p { color: var(--text-2); margin: 0 0 6px; }
   code { font-family: var(--font-mono); color: var(--fire-3); font-size: 13px; word-break: break-all; }
   .actions { margin-top: 26px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  /* ---- hors ligne : le message puis Shox Runner dessous ---- */
+  body.offline { overflow-x: hidden; overflow-y: auto; place-items: start center;
+    background: radial-gradient(55% 40% at 50% 18%, rgba(255,90,0,.15), transparent 70%), radial-gradient(60% 40% at 50% 85%, rgba(255,90,0,.08), transparent 70%), var(--bg); }
+  body.offline main { max-width: none; width: 100%; padding: clamp(14px, 4.5vh, 48px) 24px 28px; }
+  body.offline .shoe { font-size: 52px; }
+  body.offline h1 { font-size: clamp(30px, 4.6vh, 40px); margin: 4px 0 4px; }
+  body.offline .msg { max-width: 600px; margin: 0 auto; }
+  body.offline .actions { margin-top: clamp(12px, 2.6vh, 22px); }
+  .game { display: none; }
+  body.offline .game { display: block; width: min(860px, 100%); margin: clamp(18px, 4vh, 36px) auto 0; }
+  .stage { position: relative; width: 100%; aspect-ratio: 3 / 1; min-height: 200px; max-height: calc(100vh - 345px);
+    border-radius: 16px; overflow: hidden; background: #140a10;
+    box-shadow: 0 0 0 1px rgba(255,122,0,.32), 0 26px 70px -30px rgba(255,80,0,.55); }
+  .stage:focus-within { box-shadow: 0 0 0 1.5px rgba(255,150,40,.75), 0 26px 70px -30px rgba(255,80,0,.65); }
+  @media (max-height: 700px) { body.offline .shoe { font-size: 40px; } body.offline main { padding-top: 12px; } }
+  .hint { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 14px; margin-top: 12px; font-size: 13px; color: var(--muted); }
+  .hint b { color: var(--text); font-weight: 700; }
+  .hint .sep { opacity: .4; }
+  .hint .rec { font-family: var(--font-mono); color: var(--fire-4); }
+  kbd { display: inline-grid; place-items: center; min-width: 26px; height: 23px; padding: 0 7px; border-radius: 7px; font: 700 11.5px var(--font-mono); color: var(--text);
+    background: linear-gradient(180deg, #2a2632, #1d1a23); box-shadow: inset 0 -2px 0 rgba(0,0,0,.45), inset 0 0 0 1px #3d3848; }
+  .back-online { display: none; align-items: center; gap: 10px; justify-content: center; margin: 0 auto 10px; width: fit-content; padding: 7px 8px 7px 14px; border-radius: 999px;
+    background: rgba(61,220,132,.1); border: 1px solid rgba(61,220,132,.35); color: #bff3d6; font-size: 13px; font-weight: 600; }
+  .back-online.on { display: flex; }
+  .back-online button { border: 0; border-radius: 999px; padding: 4px 12px; background: var(--ok); color: #062814; font-weight: 800; font-size: 12.5px; }
 </style>
 </head>
 <body>
 <main>
-  <div class="shoe">👟</div>
-  <h1 class="fire-text" id="title">Shox perdue</h1>
-  <p id="msg">Cette page a pris trop d'amorti et a rebondi hors de la carte.</p>
-  <p><code id="detail"></code></p>
-  <div class="actions">
-    <button class="fs-btn fire" id="retry">Réessayer</button>
-    <button class="fs-btn" id="home">Accueil Fire Shox</button>
+  <div class="msg">
+    <div class="shoe">👟</div>
+    <h1 class="fire-text" id="title">Shox perdue</h1>
+    <p id="msg">Cette page a pris trop d'amorti et a rebondi hors de la carte.</p>
+    <p><code id="detail"></code></p>
+    <div class="actions">
+      <button class="fs-btn fire" id="retry">Réessayer</button>
+      <button class="fs-btn" id="home">Accueil Fire Shox</button>
+    </div>
   </div>
+  <section class="game" id="game" aria-label="Shox Runner, le jeu hors ligne">
+    <div class="back-online" id="back-online">📶 Connexion retrouvée ! <button type="button" id="reload-now">Recharger la page</button></div>
+    <div class="stage" id="stage"></div>
+    <p class="hint"><span>Appuie sur <kbd>Espace</kbd> pour jouer</span><span class="sep">·</span><span>Record <span class="rec" id="rec">00000</span></span><span class="sep">·</span><a href="fireshox://runner/" id="big">Ouvrir Shox Runner en grand</a></p>
+  </section>
 </main>
 <script src="/shared/fx.js"></script>
 <script>
   // Utilisée pour les adresses internes inconnues ET pour les erreurs réseau :
   // fireshox://error/?url=…&code=…&desc=…
+  // Pas de connexion / délai dépassé → le message + Shox Runner (fireshox://runner/game.js) dessous.
   const q = new URLSearchParams(location.search);
   const url = q.get('url'); const code = q.get('code'); const desc = q.get('desc') || '';
   const NET = {
@@ -39,11 +73,16 @@
     '-106': ['Pas de connexion', "Internet est débranché. Même le Turbo Shox ne peut rien pour toi."],
     '-102': ['Connexion refusée', 'Le site a refusé de rebondir.'],
     '-118': ['Trop lent', 'Le site met plus de temps à répondre qu\'un ressort rouillé.'],
+    '-21': ['Connexion changée', 'Ton réseau a changé en plein rebond. Réessaie dans un instant.'],
+    '-109': ['Adresse injoignable', "Impossible d'atteindre ce site : le réseau ne trouve pas le chemin."],
+    '-130': ['Proxy en panne', 'Le serveur proxy ne répond pas. Vérifie ta connexion ou tes réglages réseau.'],
     '-137': ['Adresse introuvable', "Le nom de domaine n'a pas pu être résolu."],
     '-200': ['Connexion non sécurisée', 'Le certificat de ce site est invalide. ShoxGuard a bloqué la page.'],
     '-201': ['Horloge déréglée', 'La date de ton ordinateur ne correspond pas au certificat du site.'],
     '-202': ['Connexion non sécurisée', "Le certificat n'est pas reconnu. ShoxGuard a bloqué la page."],
   };
+  // Codes « pas de connexion » ou « délai dépassé » : on propose le jeu hors ligne.
+  const OFFLINE = ['-106', '-105', '-118', '-21', '-109', '-130', '-137'];
   if (code) {
     const [t, m] = NET[code] || ['Chargement impossible', 'La page a fait un faux rebond.'];
     document.getElementById('title').textContent = t;
@@ -51,8 +90,30 @@
     document.title = t;
   }
   document.getElementById('detail').textContent = [url, desc && `(${desc})`].filter(Boolean).join(' ') || location.href;
-  document.getElementById('retry').onclick = () => { if (url) location.replace(url); else location.reload(); };
+  const retry = () => { if (url) location.replace(url); else location.reload(); };
+  document.getElementById('retry').onclick = retry;
   document.getElementById('home').onclick = () => location.replace('fireshox://home/');
+
+  if (code && OFFLINE.includes(code)) {
+    document.body.classList.add('offline');
+    const pad = (n) => String(Math.max(0, Math.floor(n || 0))).padStart(5, '0');
+    const rec = () => { document.getElementById('rec').textContent = pad(FX.store.get('jeux.runner.best', 0)); };
+    rec();
+    const s = document.createElement('script');
+    s.src = 'fireshox://runner/game.js';
+    s.onload = () => {
+      window.offlineGame = ShoxRunner.mount(document.getElementById('stage'), { compact: true, onEnd: () => setTimeout(rec, 50) });
+    };
+    document.head.appendChild(s);
+    document.getElementById('big').addEventListener('click', (e) => { e.preventDefault(); location.href = 'fireshox://runner/'; });
+    // Retour de la connexion : on recharge tout seul, sauf en pleine partie (on propose alors un bouton).
+    addEventListener('online', () => {
+      const g = window.offlineGame;
+      if (g && (g.state === 'run' || g.state === 'pause')) document.getElementById('back-online').classList.add('on');
+      else setTimeout(retry, 600);
+    });
+    document.getElementById('reload-now').onclick = retry;
+  }
 </script>
 </body>
 </html>

@@ -31,6 +31,11 @@
   --fire-grad: linear-gradient(90deg, #ff4800 0%, #ff8a00 50%, #ffc21a 100%);
   --fire-grad-v: linear-gradient(180deg, #ffd04a 0%, #ff8a00 45%, #ff3d00 100%);
   --glow: 0 0 0 1px rgba(255, 122, 0, .35), 0 8px 40px -8px rgba(255, 90, 0, .55);
+  /* Accent du thème en « r, g, b » : rgba(var(--acc-rgb), .2) suit le thème (fire, squid, lfi) */
+  --acc-rgb: 255, 122, 0;
+  --glow-rgb: 255, 90, 0;
+  --on-fire: #1a0a00;          /* texte posé sur --fire-grad */
+  --scroll-thumb: #2f2b38;
   /* Raretés (Shox Opening et ailleurs) */
   --r-common: #9aa3ad;
   --r-rare: #3d9bff;
@@ -64,11 +69,11 @@ a { color: var(--fire-3); text-decoration: none; }
 a:hover { text-decoration: underline; }
 button { font: inherit; color: inherit; cursor: pointer; }
 input, textarea, select { font: inherit; color: inherit; }
-::selection { background: rgba(255, 122, 0, .45); color: #fff; }
+::selection { background: rgba(var(--acc-rgb), .45); color: #fff; }
 
 ::-webkit-scrollbar { width: 12px; height: 12px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #2f2b38; border-radius: 10px; border: 3px solid var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 10px; border: 3px solid var(--bg); }
 ::-webkit-scrollbar-thumb:hover { background: #4a4455; }
 
 /* Texte en dégradé de feu */
@@ -91,8 +96,8 @@ input, textarea, select { font: inherit; color: inherit; }
 .fs-btn:hover { background: var(--surface-3); }
 .fs-btn:active { transform: translateY(1px) scale(.98); }
 .fs-btn.fire {
-  background: var(--fire-grad); color: #1a0a00;
-  box-shadow: 0 6px 24px -6px rgba(255, 100, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .35);
+  background: var(--fire-grad); color: var(--on-fire);
+  box-shadow: 0 6px 24px -6px rgba(var(--glow-rgb), .7), inset 0 1px 0 rgba(255, 255, 255, .35);
 }
 .fs-btn.fire:hover { filter: brightness(1.08) saturate(1.1); }
 .fs-btn[disabled] { opacity: .45; cursor: not-allowed; filter: grayscale(.4); }
@@ -109,9 +114,9 @@ input, textarea, select { font: inherit; color: inherit; }
   position: relative; overflow: hidden;
   display: grid; place-items: center; text-align: center;
   background:
-    repeating-linear-gradient(135deg, rgba(255,122,0,.07) 0 12px, transparent 12px 24px),
+    repeating-linear-gradient(135deg, rgba(var(--acc-rgb), .07) 0 12px, transparent 12px 24px),
     var(--surface-2);
-  border: 2px dashed rgba(255, 140, 0, .35);
+  border: 2px dashed rgba(var(--acc-rgb), .35);
   border-radius: var(--radius);
   color: var(--muted); font-size: 13px; font-weight: 600;
 }
@@ -125,6 +130,68 @@ input, textarea, select { font: inherit; color: inherit; }
   box-shadow: 0 10px 40px rgba(0,0,0,.5); animation: fs-toast-in .35s cubic-bezier(.2,1.4,.4,1);
 }
 @keyframes fs-toast-in { from { opacity: 0; transform: translateY(14px) scale(.96); } }
+
+/* ---------------------------------------------------------------------------------------------
+   Thèmes du navigateur : fx.js pose <html data-theme="fire|squid|lfi"> (réglage « settings.theme »)
+   et le met à jour en direct. Les pages qui utilisent les variables ci-dessus suivent toutes seules.
+   --------------------------------------------------------------------------------------------- */
+html[data-theme="squid"] {
+  --bg: #061012;
+  --bg-2: #08161a;
+  --surface: #0d1d21;
+  --surface-2: #12262b;
+  --surface-3: #183137;
+  --line: #1b3338;
+  --line-2: #26454c;
+  --text: #edf9f5;
+  --text-2: #b8d0ca;
+  --muted: #7c9893;
+  --fire-1: #ff2f7d;
+  --fire-2: #ff4f93;
+  --fire-3: #2fd8a6;
+  --fire-4: #8ff0d2;
+  --ember: #ff2f7d;
+  --fire-grad: linear-gradient(90deg, #ff2f7d 0%, #ff5c9d 50%, #ff8cbc 100%);
+  --fire-grad-v: linear-gradient(180deg, #ff9cc6 0%, #ff4f93 45%, #e0115f 100%);
+  --glow: 0 0 0 1px rgba(255, 47, 125, .35), 0 8px 40px -8px rgba(255, 40, 120, .55);
+  --acc-rgb: 255, 47, 125;
+  --glow-rgb: 255, 40, 120;
+  --on-fire: #24000f;
+  --scroll-thumb: #1d3439;
+}
+html[data-theme="lfi"] {
+  --bg: #110607;
+  --bg-2: #16080a;
+  --surface: #1d0b0e;
+  --surface-2: #271014;
+  --surface-3: #33161b;
+  --line: #3a1a1f;
+  --line-2: #4e242b;
+  --text: #fcf0e2;
+  --text-2: #e4cfbf;
+  --muted: #a98a82;
+  --fire-1: #c8102e;
+  --fire-2: #ff2a3d;
+  --fire-3: #ffd2a1;
+  --fire-4: #ffe8cc;
+  --ember: #ff3b3b;
+  --fire-grad: linear-gradient(90deg, #d6102c 0%, #ff2a3d 50%, #ff5a4c 100%);
+  --fire-grad-v: linear-gradient(180deg, #ff7a66 0%, #ff2a3d 45%, #a60c22 100%);
+  --glow: 0 0 0 1px rgba(255, 42, 61, .35), 0 8px 40px -8px rgba(255, 30, 50, .55);
+  --acc-rgb: 255, 42, 61;
+  --glow-rgb: 255, 30, 50;
+  --on-fire: #1c0003;
+  --scroll-thumb: #3d1a20;
+}
+/* Squid : ○ △ □ discrets en fond, derrière le contenu */
+html[data-theme="squid"]::before {
+  content: ''; position: fixed; z-index: -1; top: 18px; right: 22px; width: 330px; height: 104px; pointer-events: none; opacity: .09;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 330 104'%3E%3Cg fill='none' stroke-width='4'%3E%3Ccircle cx='52' cy='52' r='42' stroke='%23ff2f7d'/%3E%3Cpath d='M165 10 214 94H116Z' stroke='%2312b98a' stroke-linejoin='round'/%3E%3Crect x='236' y='10' width='84' height='84' rx='3' stroke='%23ff2f7d'/%3E%3C/g%3E%3C/svg%3E") no-repeat center / contain;
+}
+/* Changement de thème en douceur (classe posée ~0,7 s par fx.js) */
+html.fs-theme-anim *, html.fs-theme-anim *::before, html.fs-theme-anim *::after {
+  transition: background-color .5s ease, color .5s ease, border-color .5s ease, box-shadow .5s ease, fill .5s ease, stroke .5s ease !important;
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }

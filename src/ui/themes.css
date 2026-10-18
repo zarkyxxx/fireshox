@@ -1,0 +1,142 @@
+/* Fire Shox — thèmes du navigateur : fire (défaut), squid, lfi.
+   tabs-plus.js pose <html data-theme="…"> au démarrage et quand le réglage « settings.theme » change.
+   1) chaque thème redéfinit les variables de ui.css ;
+   2) les règles plus bas remplacent les couleurs écrites en dur dans ui.css par ces variables
+      (avec le thème « fire », le rendu reste identique à l'original). */
+
+/* ================================================================ Squid Shox : rose / vert sarcelle */
+:root[data-theme="squid"] {
+  --strip: #061114;
+  --bar: #0a181c;
+  --bar-2: #0e1d21;
+  --tab: #0b191c;
+  --tab-hover: #10242a;
+  --tab-active: #142c32;
+  --line: #1a3238;
+  --line-2: #25454c;
+  --text: #e9f8f3;
+  --text-2: #b1cbc5;
+  --muted: #789893;
+  --fire-1: #ff2f7d;
+  --fire-2: #ff4f93;
+  --fire-3: #2fd8a6;
+  --fire-grad: linear-gradient(90deg, #ff2f7d, #ff5c9d 55%, #ff8cbc);
+  --brand-grad: linear-gradient(90deg, #ff2f7d, #ff6fa9 46%, #2fd8a6);
+  --menu: #0c1b1f;
+  --acc-rgb: 255, 47, 125;
+  --glow-rgb: 255, 40, 120;
+  --on-acc: #24000f;
+  --hover: #12282d;
+  --press: #183238;
+  --field: #040c0e;
+  --edge: #10252a;
+  --raise: #142b30;
+  --raise-2: #1b363c;
+  --chip: #12262b;
+  --pop: #071316;
+  --views: #061012;
+  --status: #0b1a1d;
+  --placeholder: #5d7d78;
+  --knob: #8fb0aa;
+  --avatar-bg: radial-gradient(circle, #3b0a22, #061114 70%);
+  --flames: linear-gradient(90deg, #ff2f7d, #12b98a, #ff5c9d, #5fe0c0, #ff2f7d);
+}
+
+/* ================================================================ LFI Shox : rouge / bordeaux / crème */
+:root[data-theme="lfi"] {
+  --strip: #120608;
+  --bar: #1a090c;
+  --bar-2: #210c10;
+  --tab: #1a090c;
+  --tab-hover: #261015;
+  --tab-active: #2e131a;
+  --line: #3b1a21;
+  --line-2: #50252d;
+  --text: #fcefe0;
+  --text-2: #e2cbbb;
+  --muted: #a8867e;
+  --fire-1: #c8102e;
+  --fire-2: #ff2a3d;
+  --fire-3: #ffd2a1;
+  --fire-grad: linear-gradient(90deg, #d6102c, #ff2a3d 55%, #ff5a4c);
+  --brand-grad: linear-gradient(90deg, #ff2a3d, #ff5546 42%, #ffe2c2);
+  --menu: #1f0b0f;
+  --acc-rgb: 255, 42, 61;
+  --glow-rgb: 255, 30, 50;
+  --on-acc: #1c0003;
+  --hover: #2b1217;
+  --press: #34171d;
+  --field: #0c0405;
+  --edge: #2a0f14;
+  --raise: #2f141a;
+  --raise-2: #3b1a21;
+  --chip: #2b1318;
+  --pop: #150709;
+  --views: #120708;
+  --status: #1e0a0e;
+  --placeholder: #8a6a64;
+  --knob: #c4a597;
+  --avatar-bg: radial-gradient(circle, #4a0812, #120608 70%);
+  --flames: linear-gradient(90deg, #c8102e, #ff2a3d, #ffe2c2, #ff2a3d, #c8102e);
+}
+
+/* ================================================================ changement de thème en douceur */
+html.theme-anim *, html.theme-anim *::before, html.theme-anim *::after {
+  transition: background-color .5s ease, color .5s ease, border-color .5s ease, box-shadow .5s ease, fill .5s ease, stroke .5s ease !important;
+}
+
+/* ================================================================ couleurs en dur de ui.css → variables */
+html[data-theme] .brand img { filter: drop-shadow(0 0 6px rgba(var(--glow-rgb), .55)); }
+html[data-theme] .brand-name { background: var(--brand-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+html[data-theme] #toolbar { border-top-color: var(--edge); border-bottom-color: var(--edge); }
+html[data-theme] #bookmarks { border-bottom-color: var(--edge); }
+html[data-theme] .tb:hover:not(:disabled), html[data-theme] .bm:hover, html[data-theme] .vb-eye:hover { background: var(--hover); }
+html[data-theme] .tb:active:not(:disabled) { background: var(--press); }
+html[data-theme] #omnibox, html[data-theme] .dialog input, html[data-theme] .vb-user, html[data-theme] .vb-pw { background: var(--field); }
+html[data-theme] #omnibox.focus { border-color: rgba(var(--acc-rgb), .8); box-shadow: 0 0 0 3px rgba(var(--glow-rgb), .16); }
+html[data-theme] .guard:hover, html[data-theme] .app:hover, html[data-theme] .link-btn:hover { background: rgba(var(--acc-rgb), .1); }
+html[data-theme] #address::placeholder { color: var(--placeholder); }
+html[data-theme] #address::selection { background: rgba(var(--acc-rgb), .45); }
+html[data-theme] .omni-icon:hover { background: var(--edge); }
+html[data-theme] .omni-chip { background: var(--chip); }
+html[data-theme] .turbo-btn { background: rgba(var(--glow-rgb), .1); box-shadow: inset 0 0 0 1px rgba(var(--acc-rgb), .55); }
+html[data-theme] .turbo-btn:hover { background: rgba(var(--glow-rgb), .2); }
+html[data-theme] .turbo-btn.on { color: var(--on-acc); background: var(--fire-grad); box-shadow: 0 0 16px rgba(var(--glow-rgb), .75), inset 0 1px 0 rgba(255, 255, 255, .4); animation-name: turbo-pulse-theme; }
+@keyframes turbo-pulse-theme { 50% { box-shadow: 0 0 26px rgba(var(--acc-rgb), 1), inset 0 1px 0 rgba(255, 255, 255, .4); } }
+html[data-theme] body.turbo #turbo-flames { background-image: var(--flames); box-shadow: 0 0 12px rgba(var(--glow-rgb), .9); }
+html[data-theme] .avatar img { background: var(--avatar-bg); box-shadow: 0 0 0 2px rgba(var(--acc-rgb), .55); }
+html[data-theme] .avatar:hover img { box-shadow: 0 0 0 2px var(--fire-2), 0 0 16px rgba(var(--glow-rgb), .7); }
+html[data-theme] .update-pill, html[data-theme] .btn-fire, html[data-theme] .dialog .row button.primary,
+html[data-theme] .vb-btn.primary, html[data-theme] .vb-badge { color: var(--on-acc); }
+html[data-theme] #suggest { background: var(--pop); border-color: rgba(var(--acc-rgb), .8); border-top-color: var(--line); }
+html[data-theme] .sg.sel { background: rgba(var(--acc-rgb), .12); }
+html[data-theme] #progress i { box-shadow: 0 0 10px rgba(var(--glow-rgb), .9); }
+html[data-theme] #views, html[data-theme] #views webview, html[data-theme] .crashed { background: var(--views); }
+html[data-theme] #status { background: var(--status); }
+html[data-theme] .mi:hover:not(:disabled), html[data-theme] .mi.hl { background: rgba(var(--acc-rgb), .14); }
+html[data-theme] .mi .check { background: var(--raise-2); }
+html[data-theme] .mi .check.on { background: var(--fire-2); }
+html[data-theme] .mi .check::after { background: var(--knob); }
+html[data-theme] .mi .check.on::after { background: #fff; }
+html[data-theme] .mhead img { background: var(--avatar-bg); box-shadow: 0 0 0 2px rgba(var(--acc-rgb), .6), 0 0 18px rgba(var(--glow-rgb), .5); }
+html[data-theme] .mzoom button, html[data-theme] .dl .dl-ic, html[data-theme] .dialog .row button:not(.primary), html[data-theme] .vb-btn:not(.primary):not(.ghost) { background: var(--raise); }
+html[data-theme] .mzoom button:hover, html[data-theme] .vb-btn:not(.primary):not(.ghost):hover { background: var(--raise-2); }
+html[data-theme] .app i { background: color-mix(in srgb, var(--c) 18%, var(--menu)); }
+html[data-theme] .dl .bar { background: var(--line); }
+html[data-theme] .toast { background: var(--edge); }
+html[data-theme] .key-btn { color: var(--fire-2); }
+html[data-theme] .key-btn.pending { color: var(--fire-3); background: rgba(var(--acc-rgb), .12); }
+html[data-theme] #vault-bubble { border-color: rgba(var(--acc-rgb), .55); box-shadow: 0 22px 60px rgba(0, 0, 0, .65), 0 0 44px -14px rgba(var(--glow-rgb), .6); }
+html[data-theme] .vb-arrow { border-left-color: rgba(var(--acc-rgb), .55); border-top-color: rgba(var(--acc-rgb), .55); }
+html[data-theme] .vb-badge { box-shadow: 0 0 18px rgba(var(--glow-rgb), .55), inset 0 1px 0 rgba(255, 255, 255, .4); }
+html[data-theme] .vb-user:focus { box-shadow: 0 0 0 3px rgba(var(--glow-rgb), .14); }
+html[data-theme] .vb-btn.primary { box-shadow: 0 4px 16px -4px rgba(var(--glow-rgb), .7), inset 0 1px 0 rgba(255, 255, 255, .35); }
+html[data-theme] .vk-fill { background: rgba(var(--acc-rgb), .14); box-shadow: inset 0 0 0 1px rgba(var(--acc-rgb), .4); }
+html[data-theme] .vk-fill:hover { background: rgba(var(--acc-rgb), .24); }
+
+/* ================================================================ Squid : ○△□ discrets sous le nom */
+:root[data-theme="squid"] .brand-name { position: relative; }
+:root[data-theme="squid"] .brand-name::after {
+  content: ''; position: absolute; left: 1px; bottom: -9px; width: 36px; height: 8px; opacity: .85; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 8'%3E%3Cg fill='none' stroke-width='1.3'%3E%3Ccircle cx='4' cy='4' r='3' stroke='%23ff2f7d'/%3E%3Cpath d='M18 1.1 21.3 6.9H14.7Z' stroke='%2312b98a' stroke-linejoin='round'/%3E%3Crect x='28.6' y='1.1' width='5.8' height='5.8' stroke='%23ff2f7d'/%3E%3C/g%3E%3C/svg%3E") no-repeat center / contain;
+}

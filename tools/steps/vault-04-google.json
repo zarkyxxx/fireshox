@@ -1,0 +1,17 @@
+[
+  { "open": "fireshox://passwords/", "size": [1280, 800] },
+  { "wait": 1200 },
+  { "log": "--- 2 FAUX comptes (example.invalid) rangés en local pour accounts.google.com : rien n'est tapé ni envoyé à Google" },
+  { "js": "(async () => { const a = await shoxvault.add({ url: 'https://accounts.google.com', username: 'faux.compte.shox@example.invalid', password: 'pas-un-vrai-mdp-1' }); const b = await shoxvault.add({ url: 'https://accounts.google.com', username: 'deuxieme.faux@example.invalid', password: 'pas-un-vrai-mdp-2' }); return JSON.stringify([a.ok, b.ok]); })()" },
+  { "ui": "FS.open('https://accounts.google.com/ServiceLogin?hl=fr'); 1" },
+  { "wait": 6500 },
+  { "js": "JSON.stringify({ host: location.host, path: location.pathname, pastille: !!document.querySelector('fireshox-vault'), champ: !!document.getElementById('identifierId'), autocomplete: (document.getElementById('identifierId') || {}).autocomplete, valeurVide: ((document.getElementById('identifierId') || {}).value || '') === '' })" },
+  { "ui": "JSON.stringify(FS.vault())" },
+  { "shot": ".cache/shots/vault/17-google-pastille.png" },
+  { "clickAt": "(() => { const r = document.getElementById('identifierId').getBoundingClientRect(); return [r.left + 60, r.top + r.height / 2]; })()" },
+  { "wait": 600 },
+  { "shot": ".cache/shots/vault/18-google-liste.png" },
+  { "js": "JSON.stringify({ valeurToujoursVide: document.getElementById('identifierId').value === '' })" },
+  { "key": "Escape" },
+  { "quit": true }
+]

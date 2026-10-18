@@ -118,7 +118,7 @@ body.turbo .cta { color: #ffd04a; text-shadow: 0 0 12px rgba(255, 140, 0, .8); }
 @keyframes ticker { to { transform: translateX(-100%); } }
 #ticker:hover .tk-run { animation-play-state: paused; }
 
-#corner { position: fixed; right: 16px; bottom: 46px; z-index: 3; display: flex; gap: 8px; }
+#corner { position: fixed; right: 16px; top: 14px; z-index: 3; display: flex; gap: 8px; }
 .corner-btn { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px 0 11px; border: 0; border-radius: 999px; background: rgba(28, 26, 34, .9); box-shadow: inset 0 0 0 1px #3a3644; color: var(--text-2); font-weight: 600; font-size: 12.5px; backdrop-filter: blur(6px); }
 .corner-btn:hover { color: var(--text); background: rgba(40, 36, 48, .95); }
 .corner-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }

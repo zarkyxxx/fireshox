@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ShoxNotes</title>
+<link rel="icon" href="/assets/logo-32.png">
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="notes.css">
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="side" aria-label="Liste des notes">
+    <header class="side-head">
+      <div class="brand"><img src="/assets/logo-64.png" alt="Le Y"><span><b>ShoxNotes</b><small id="count">0 note</small></span></div>
+      <button class="new-btn" id="new" type="button" title="Nouvelle note (Ctrl+N)" aria-label="Nouvelle note">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Nouvelle</span>
+      </button>
+    </header>
+    <label class="search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Rechercher dans les notes" autocomplete="off" spellcheck="false">
+      <button type="button" class="clear" id="q-clear" aria-label="Effacer la recherche" hidden><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </label>
+    <div class="filters" id="filters" role="tablist" aria-label="Filtrer par étiquette"></div>
+    <div class="list" id="list"></div>
+  </aside>
+
+  <section class="editor" id="editor" aria-label="Note">
+    <div class="ed-bar">
+      <button class="back" id="back" type="button" aria-label="Retour à la liste"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg><span>Notes</span></button>
+      <div class="ed-tools">
+        <button class="tool" id="t-check" type="button" title="Case à cocher (- [ ])" aria-label="Case à cocher"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="m8 12.5 2.7 2.7L16.5 9"/></svg></button>
+        <button class="tool" id="t-bold" type="button" title="Gras (Ctrl+B)" aria-label="Gras"><svg viewBox="0 0 24 24"><path d="M7 4.5h6a3.75 3.75 0 0 1 0 7.5H7zM7 12h7a3.75 3.75 0 0 1 0 7.5H7z"/></svg></button>
+        <span class="sep"></span>
+        <button class="tool" id="t-pin" type="button" title="Épingler" aria-label="Épingler"><svg viewBox="0 0 24 24"><path d="M12 17v5M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg></button>
+        <div class="pal-wrap">
+          <button class="tool" id="t-color" type="button" title="Étiquette de couleur" aria-label="Étiquette de couleur" aria-haspopup="menu"><i class="dot" id="t-color-dot"></i></button>
+          <div class="palette" id="palette" role="menu" hidden></div>
+        </div>
+        <button class="tool danger" id="t-del" type="button" title="Supprimer la note" aria-label="Supprimer la note"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4.5h6V7"/></svg></button>
+      </div>
+    </div>
+    <div class="ed-scroll" id="ed-scroll">
+      <div class="ed-inner">
+        <div class="ed-meta" id="meta"></div>
+        <input class="ed-title" id="title" placeholder="Titre" maxlength="140" spellcheck="true" autocomplete="off">
+        <div class="ed-body">
+          <textarea id="ta" spellcheck="true" placeholder="Écris ta note…&#10;- [ ] une case à cocher&#10;**du gras**, et les liens deviennent cliquables"></textarea>
+          <div class="view" id="view" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+    <div class="ed-empty" id="ed-empty">
+      <img src="/assets/logo-256.png" alt="">
+      <b>Aucune note ouverte</b>
+      <span>Choisis une note à gauche ou crée-en une nouvelle.</span>
+      <button class="fs-btn fire" id="new2" type="button">+ Nouvelle note</button>
+    </div>
+  </section>
+</div>
+<div class="undo" id="undo" role="status" hidden><span id="undo-txt">Note supprimée</span><button type="button" id="undo-btn">Annuler</button></div>
+
+<script src="/shared/fx.js"></script>
+<script src="notes.js"></script>
+</body>
+</html>

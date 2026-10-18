@@ -6,8 +6,10 @@
 <link rel="icon" href="/assets/logo-32.png">
 <link rel="stylesheet" href="/shared/base.css">
 <link rel="stylesheet" href="home.css">
+<link rel="stylesheet" href="perso.css">
 </head>
 <body>
+<div id="bg" aria-hidden="true"><div class="bg-img" id="bg-img"></div><div class="bg-dim"></div></div>
 <canvas id="embers"></canvas>
 <div class="glow"></div>
 
@@ -32,16 +34,19 @@
   </form>
 
   <section id="folders" aria-label="Dossiers Fire Shox"></section>
+  <section id="shortcuts" aria-label="Raccourcis"></section>
   <section id="favs" hidden></section>
 </main>
 
 <div id="ticker"><div class="tk-label">SHOX INFO</div><div class="tk-track"><div class="tk-run" id="tk-run"></div></div></div>
 
 <div id="corner">
+  <button id="perso-btn" class="corner-btn" type="button" title="Personnaliser le fond de l'accueil" aria-haspopup="dialog"><svg viewBox="0 0 24 24"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>Personnaliser</button>
   <button id="toggle-img" class="corner-btn" title="Masquer / afficher l'image Fire Shox"></button>
 </div>
 
 <script src="/shared/fx.js"></script>
 <script src="home.js"></script>
+<script src="perso.js"></script>
 </body>
 </html>

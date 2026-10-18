@@ -1,0 +1,12 @@
+[
+  { "open": "fireshox://home/", "size": [1280, 800] },
+  { "wait": 1200 },
+  { "ui": "FS.open('fireshox://wiki/'); 1" },
+  { "newWindow": { "url": "fireshox://shoxbench/" } },
+  { "wait": 1500 },
+  { "ui": "JSON.stringify(shell.get('sessions').map((s) => s.tabs.map((t) => t.title)))" },
+  { "closeWindow": true },
+  { "wait": 1000 },
+  { "ui": "JSON.stringify({ sessions: shell.get('sessions').map((s) => s.tabs.map((t) => t.title)), session: shell.get('session').tabs.map((t) => t.title) })" },
+  { "quit": true }
+]

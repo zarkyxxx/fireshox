@@ -1,0 +1,134 @@
+[
+ {
+  "open": "fireshox://home/",
+  "size": [
+   1280,
+   800
+  ]
+ },
+ {
+  "wait": 1200
+ },
+ {
+  "ui": "FS.open(\"data:text/html,<title>Alpha</title><h1>Alpha</h1>\"); FS.open(\"data:text/html,<title>Bravo</title><h1>Bravo</h1>\"); FS.open(\"data:text/html,<title>Charlie</title><h1>Charlie</h1>\"); FS.open(\"data:text/html,<title>Delta</title><h1>Delta</h1>\"); FS.open(\"data:text/html,<title>Echo</title><h1>Echo</h1>\"); 1"
+ },
+ {
+  "wait": 1200
+ },
+ {
+  "ui": "FSTabs.group([1, 2, 3], \"Trio\", \"vert\"); 1"
+ },
+ {
+  "wait": 500
+ },
+ {
+  "ui": "JSON.stringify(FSTabs.state().tabs.map((t) => t.title + (t.group ? \" [\" + FSTabs.state().groups.find((g) => g.id === t.group).name + \"]\" : \"\")))"
+ },
+ {
+  "shot": ".cache/shots/tabs/15-dnd-avant.png"
+ },
+ {
+  "log": "--- Delta glissé entre Alpha et Bravo (doit entrer dans Trio)"
+ },
+ {
+  "drag": [
+   [
+    0,
+    0
+   ]
+  ],
+  "dragFrom": "FSTabs.rect(FSTabs.state().tabs.findIndex((t) => t.title === \"Delta\"))",
+  "dragTo": "(() => { const a = FSTabs.rect(FSTabs.state().tabs.findIndex((t) => t.title === \"Alpha\")), b = FSTabs.rect(FSTabs.state().tabs.findIndex((t) => t.title === \"Bravo\")); return [(a[0] + b[0]) / 2 + 4, a[1]]; })()"
+ },
+ {
+  "wait": 500
+ },
+ {
+  "ui": "JSON.stringify(FSTabs.state().tabs.map((t) => t.title + (t.group ? \" [\" + FSTabs.state().groups.find((g) => g.id === t.group).name + \"]\" : \"\")))"
+ },
+ {
+  "log": "--- Charlie glissé tout à droite après Echo (doit sortir de Trio)"
+ },
+ {
+  "drag": [
+   [
+    0,
+    0
+   ]
+  ],
+  "dragFrom": "FSTabs.rect(FSTabs.state().tabs.findIndex((t) => t.title === \"Charlie\"))",
+  "dragTo": "(() => { const e = FSTabs.rect(FSTabs.state().tabs.findIndex((t) => t.title === \"Echo\")); return [e[0] + 60, e[1]]; })()"
+ },
+ {
+  "wait": 500
+ },
+ {
+  "ui": "JSON.stringify(FSTabs.state().tabs.map((t) => t.title + (t.group ? \" [\" + FSTabs.state().groups.find((g) => g.id === t.group).name + \"]\" : \"\")))"
+ },
+ {
+  "log": "--- Alpha glissé avant la pastille (doit sortir de Trio)"
+ },
+ {
+  "drag": [
+   [
+    0,
+    0
+   ]
+  ],
+  "dragFrom": "FSTabs.rect(FSTabs.state().tabs.findIndex((t) => t.title === \"Alpha\"))",
+  "dragTo": "(() => { const h = FSTabs.rect(FSTabs.state().tabs.findIndex((t) => t.title === \"Accueil Fire Shox\")); return [h[0] + 20, h[1]]; })()"
+ },
+ {
+  "wait": 500
+ },
+ {
+  "ui": "JSON.stringify(FSTabs.state().tabs.map((t) => t.title + (t.group ? \" [\" + FSTabs.state().groups.find((g) => g.id === t.group).name + \"]\" : \"\")))"
+ },
+ {
+  "shot": ".cache/shots/tabs/16-dnd-apres.png"
+ },
+ {
+  "log": "--- Ctrl+W sur un onglet épinglé"
+ },
+ {
+  "ui": "FSTabs.pin(FSTabs.state().tabs.findIndex((t) => t.title === \"Echo\")); FSTabs.activate(0); JSON.stringify(FSTabs.state().tabs.map((t) => t.title + (t.pinned ? \" 📌\" : \"\") + (t.active ? \" *\" : \"\")))"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "key": "W",
+  "modifiers": [
+   "control"
+  ],
+  "target": "ui"
+ },
+ {
+  "wait": 500
+ },
+ {
+  "ui": "JSON.stringify(FSTabs.state().tabs.map((t) => t.title + (t.pinned ? \" 📌\" : \"\")))"
+ },
+ {
+  "log": "--- Menu : Déplacer vers une nouvelle fenêtre"
+ },
+ {
+  "ui": "FSTabs.tabMenu(FSTabs.state().tabs.findIndex((t) => t.title === \"Bravo\")); 1"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "clickAt": "(() => { const b = [...document.querySelectorAll(\"#layer .mi\")].find((x) => /nouvelle fenêtre/.test(x.textContent)); const r = b.getBoundingClientRect(); return [r.left + 30, r.top + r.height / 2]; })()",
+  "target": "ui"
+ },
+ {
+  "wait": 2500
+ },
+ {
+  "winInfo": true
+ },
+ {
+  "quit": true
+ }
+]

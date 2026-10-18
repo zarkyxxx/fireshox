@@ -1,0 +1,15 @@
+[
+  { "open": "https://en.wikipedia.org/wiki/Nike_Shox", "size": [1400, 860] },
+  { "wait": 2000 },
+  { "ui": "ShoxPanel.close(); 1" },
+  { "wait": 5000 },
+  { "ui": "JSON.stringify(ShoxExtras.state().translate)" },
+  { "shot": ".cache/shots/core/21-traduction-barre.png" },
+  { "ui": "document.querySelector('#translate-bar [data-a=go]').click(); 1" },
+  { "wait": 9000 },
+  { "ui": "JSON.stringify({ url: FS.tabs().find(t => t.active).url, tr: ShoxExtras.state().translate, original: ShoxExtras.originalOf(FS.tabs().find(t => t.active).url) })" },
+  { "js": "JSON.stringify({ title: document.title, h1: (document.querySelector('h1') || {}).innerText })" },
+  { "shot": ".cache/shots/core/22-traduction-faite.png" },
+  { "ui": "JSON.stringify({ a: ShoxExtras.originalOf('https://my--site-com.translate.goog/a/b?x=1&_x_tr_sl=auto&_x_tr_tl=fr&_x_tr_hl=fr#h'), b: ShoxExtras.originalOf('https://en-wikipedia-org.translate.goog/wiki/Nike_Shox?_x_tr_sl=auto&_x_tr_tl=fr'), c: ShoxExtras.isTranslated('https://fr.wikipedia.org/') })" },
+  { "quit": true }
+]

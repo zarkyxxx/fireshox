@@ -1,0 +1,18 @@
+[
+  { "open": "fireshox://notes/", "size": [360, 700] },
+  { "wait": 1000 },
+  { "shot": ".cache/shots/extra/final-notes-360-liste.png" },
+  { "js": "ShoxNotes.open('a1'); 1" },
+  { "wait": 400 },
+  { "shot": ".cache/shots/extra/final-notes-360-note.png" },
+  { "js": "document.querySelector('.view .ln:last-child').click(); 1" },
+  { "wait": 200 },
+  { "type": " Ne pas oublier les **Shox**." },
+  { "wait": 300 },
+  { "shot": ".cache/shots/extra/final-notes-360-edition.png" },
+  { "js": "document.activeElement.blur(); document.querySelector('#t-del').click(); 1" },
+  { "wait": 500 },
+  { "shot": ".cache/shots/extra/final-notes-360-supprimee.png" },
+  { "js": "document.querySelector('#undo-btn').click(); JSON.stringify({n: ShoxNotes.notes.length, text: ShoxNotes.notes.find(n => n.id === 'a1').text.slice(-40)})" },
+  { "quit": true }
+]

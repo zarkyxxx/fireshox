@@ -1,0 +1,8 @@
+[
+  { "open": "fireshox://runner/", "size": [1280, 800] },
+  { "wait": 1000 },
+  { "js": "window.__errs = []; addEventListener('error', e => __errs.push(String(e.message))); var g = RunnerPage.game, d = g.debug; g.start(); d.autopilot(true); var log = []; var seen = {}; var nights = 0, lastN = 0; for (var i = 0; i < 1500 && g.state === 'run'; i++) { d.step(0.1); d.world.obs.forEach(o => seen[o.type] = (seen[o.type] || 0) + 1); if (d.world.night > 0.5 && lastN <= 0.5) nights++; lastN = d.world.night; } JSON.stringify({state: g.state, t: Math.round(d.world.t), score: Math.round(d.world.score), speed: Math.round(d.world.speed), shox: d.world.shox, nights: nights, types: Object.keys(seen), errs: __errs})" },
+  { "shot": ".cache/shots/extra/runner-06-simu.png" },
+  { "js": "var g = RunnerPage.game, d = g.debug; var res = []; for (var k = 0; k < 6; k++) { g.start(); d.autopilot(true); for (var i = 0; i < 2000 && g.state === 'run'; i++) d.step(0.1); res.push(Math.round(d.world.score)); } JSON.stringify({scores: res, best: g.best})" },
+  { "quit": true }
+]

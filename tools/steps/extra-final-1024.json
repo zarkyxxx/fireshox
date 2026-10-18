@@ -1,0 +1,15 @@
+[
+  { "open": "fireshox://error/?code=-106&url=https%3A%2F%2Fwww.youtube.com%2F&desc=ERR_INTERNET_DISCONNECTED", "size": [1024, 640] },
+  { "wait": 1200 },
+  { "js": "JSON.stringify({sh: document.documentElement.scrollHeight})" },
+  { "shot": ".cache/shots/extra/final-1024-erreur.png" },
+  { "open": "fireshox://jeux/?game=runner" },
+  { "wait": 1400 },
+  { "shot": ".cache/shots/extra/final-1024-jeux.png" },
+  { "open": "fireshox://home/" },
+  { "wait": 1600 },
+  { "js": "HomePerso.setBg({type: 'meme', id: 'le-y-lancer-456', embers: true, dim: 0.6}); window.scrollTo(0, 400); 1" },
+  { "wait": 1600 },
+  { "shot": ".cache/shots/extra/final-1024-accueil-meme.png" },
+  { "quit": true }
+]

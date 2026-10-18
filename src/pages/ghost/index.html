@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Accueil Fantôme</title>
+<link rel="icon" href="/assets/logo-32.png">
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="ghost.css">
+</head>
+<body>
+<div id="mist" aria-hidden="true"></div>
+<div id="shoes" aria-hidden="true"></div>
+
+<main class="wrap">
+  <header class="hero">
+    <div class="logo-wrap">
+      <img class="logo" src="/assets/logo-256.png" alt="Le Y, version fantôme">
+      <span class="sheet" aria-hidden="true"></span>
+    </div>
+    <div class="titles">
+      <p class="kicker">👻 Fenêtre Fantôme</p>
+      <h1>Mode Fantôme</h1>
+      <p class="lead">Tu traverses le Web comme un esprit en Shox : dès que cette fenêtre se ferme, Fire Shox oublie tout.</p>
+    </div>
+  </header>
+
+  <form class="search" id="search" autocomplete="off">
+    <svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="q" spellcheck="false" placeholder="Rechercher sans laisser de traces…" aria-label="Recherche">
+    <button class="go" type="submit" title="Rechercher">
+      <svg class="ic" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </button>
+  </form>
+
+  <section class="cards">
+    <article class="card gone">
+      <h2><span class="badge">✕</span>Fire Shox ne garde pas</h2>
+      <ul>
+        <li><b>L'historique</b><span>les pages visitées ici n'apparaissent nulle part</span></li>
+        <li><b>Les cookies et données des sites</b><span>tu es déconnecté de tout à la fermeture</span></li>
+        <li><b>Le cache</b><span>images et fichiers effacés avec la fenêtre</span></li>
+        <li><b>Les onglets</b><span>rien n'est rouvert au prochain lancement</span></li>
+        <li><b>Les mots de passe</b><span>ShoxVault peut remplir, mais n'enregistre rien</span></li>
+        <li><b>Les autorisations</b><span>caméra, micro, position… oubliées aussi</span></li>
+      </ul>
+    </article>
+    <article class="card kept">
+      <h2><span class="badge">!</span>Ce qui reste visible</h2>
+      <ul>
+        <li><b>Les fichiers téléchargés</b><span>ils restent dans ton dossier Téléchargements</span></li>
+        <li><b>Les favoris ajoutés</b><span>et les réglages de Fire Shox</span></li>
+        <li><b>Les sites que tu visites</b><span>ils te voient toujours passer (adresse IP, compte connecté)</span></li>
+        <li><b>Ton école, ton employeur, ton FAI</b><span>le Fantôme n'est pas une cape d'invisibilité</span></li>
+      </ul>
+      <p class="block">🛡️ ShoxBlock écrase aussi les pubs et les traqueurs ici.</p>
+    </article>
+  </section>
+
+  <footer class="foot">
+    <button class="fs-btn ghost-btn" id="another">
+      <svg class="ic" viewBox="0 0 24 24"><path d="M9 10h.01"/><path d="M15 10h.01"/><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/></svg>
+      Nouvelle fenêtre Fantôme
+    </button>
+    <span class="hint">Ctrl+Maj+N · ferme la fenêtre pour tout effacer</span>
+  </footer>
+</main>
+
+<script src="/shared/fx.js"></script>
+<script src="ghost.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+[
+  { "open": "fireshox://settings/#apparence", "size": [1024, 640] },
+  { "wait": 1500 },
+  { "ui": "FSTabs.theme('squid'); FS.open('fireshox://wiki/'); FSTabs.group([1], 'Wiki'); FSTabs.activate(0); 1" },
+  { "wait": 1200 },
+  { "shot": ".cache/shots/tabs/1024-20-squid-parametres.png" },
+  { "js": "document.querySelector('#performances').scrollIntoView(); 1" },
+  { "wait": 500 },
+  { "shot": ".cache/shots/tabs/1024-21-squid-performances.png" },
+  { "ui": "FSTabs.theme('lfi'); FSTabs.activate(1); 1" },
+  { "wait": 1500 },
+  { "shot": ".cache/shots/tabs/1024-22-lfi-wiki.png" },
+  { "ui": "FS.menu(); JSON.stringify((() => { const m = document.querySelector('#layer .menu').getBoundingClientRect(); return { top: m.top, bottom: m.bottom, h: innerHeight }; })())" },
+  { "wait": 300 },
+  { "shot": ".cache/shots/tabs/1024-23-lfi-menu.png" },
+  { "ui": "document.querySelector('#layer').innerHTML = ''; FSTabs.theme('fire'); 1" },
+  { "wait": 800 },
+  { "quit": true }
+]

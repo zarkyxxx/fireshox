@@ -1,0 +1,11 @@
+[
+  { "open": "fireshox://ghost/", "ghost": true, "size": [1280, 800] },
+  { "wait": 1500 },
+  { "ui": "FS.open('fireshox://wiki/'); 1" },
+  { "wait": 1200 },
+  { "ui": "FSTabs.detach(1, 900, 500, 300).then((r) => JSON.stringify(r))" },
+  { "wait": 2500 },
+  { "winInfo": true },
+  { "shotAll": ".cache/shots/tabs/34-fantome" },
+  { "quit": true }
+]

@@ -10,6 +10,9 @@
 //   FX.burst(x, y, { count, colors, spread, gravity, size }) → gerbe d'étincelles (écran)
 //   FX.toast(texte)
 //   FX.rand(a, b), FX.pick(liste), FX.sleep(ms), FX.fmt(nombre, décimales)
+//   FX.theme.get() → 'fire' | 'squid' | 'lfi' ; FX.theme.set(nom) ; FX.theme.colors() → couleurs d'étincelles
+//       Le thème du navigateur est posé sur <html data-theme="…"> (base.css redéfinit les variables) et
+//       suivi en direct ; l'évènement « fs-theme » (document) prévient les pages qui dessinent elles-mêmes.
 (function () {
   'use strict';
   const api = window.fireshox;
@@ -30,6 +33,43 @@
     if (api) api.open(url, opts || {});
     else window.open(url, '_blank');
   }
+
+  // ---------------------------------------------------------------- thèmes (fire, squid, lfi)
+  const THEMES = ['fire', 'squid', 'lfi'];
+  const SPARKS = {
+    fire: ['#ffd84a', '#ffb000', '#ff7a00', '#ff3d00', '#fff2c0'],
+    squid: ['#ff2f7d', '#ff8cbc', '#12b98a', '#5fe0c0', '#ffe3ef'],
+    lfi: ['#ff2a3d', '#ff6b57', '#ffe2c2', '#c8102e', '#fff4e8'],
+  };
+  let themeTimer = 0;
+  function currentTheme() {
+    const s = store.get('settings', {}) || {};
+    return THEMES.includes(s.theme) ? s.theme : 'fire';
+  }
+  function applyTheme(t, animate) {
+    const root = document.documentElement;
+    t = THEMES.includes(t) ? t : 'fire';
+    if (root.dataset.theme === t) return;
+    if (animate && root.dataset.theme) {
+      root.classList.add('fs-theme-anim');
+      clearTimeout(themeTimer);
+      themeTimer = setTimeout(() => root.classList.remove('fs-theme-anim'), 700);
+    }
+    root.dataset.theme = t;
+    try { document.dispatchEvent(new CustomEvent('fs-theme', { detail: t })); } catch {}
+  }
+  applyTheme(currentTheme(), false);
+  store.onChange((key, value) => { if (key === 'settings') applyTheme((value || {}).theme, true); });
+  const theme = {
+    list: THEMES.slice(),
+    get: () => document.documentElement.dataset.theme || currentTheme(),
+    set(t) {
+      if (!THEMES.includes(t)) return;
+      store.set('settings', { ...(store.get('settings', {}) || {}), theme: t });
+      applyTheme(t, true);
+    },
+    colors: () => SPARKS[theme.get()] || SPARKS.fire,
+  };
 
   // ---------------------------------------------------------------- sons
   let ctx = null;
@@ -138,7 +178,7 @@
   }
   function burst(x, y, o = {}) {
     ensureCanvas();
-    const colors = o.colors || ['#ffd84a', '#ffb000', '#ff7a00', '#ff3d00', '#fff2c0'];
+    const colors = o.colors || theme.colors();
     const n = o.count || 60, spread = o.spread || 9, g = o.gravity ?? 0.18, size = o.size || 3.2;
     for (let i = 0; i < n; i++) {
       const ang = Math.random() * Math.PI * 2, sp = Math.random() * spread;
@@ -164,5 +204,5 @@
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const fmt = (n, d = 0) => Number(n).toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
 
-  window.FX = { store, open, sound, burst, toast, rand, pick, sleep, fmt, inBrowser: !!api };
+  window.FX = { store, open, sound, burst, toast, rand, pick, sleep, fmt, theme, inBrowser: !!api };
 })();

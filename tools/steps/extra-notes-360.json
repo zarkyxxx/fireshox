@@ -1,0 +1,22 @@
+[
+  { "open": "fireshox://notes/", "size": [360, 700] },
+  { "wait": 1000 },
+  { "js": "JSON.stringify({w: innerWidth, h: innerHeight, n: ShoxNotes.notes.length, cur: ShoxNotes.current, scrollW: document.documentElement.scrollWidth})" },
+  { "shot": ".cache/shots/extra/notes-06-360-liste.png" },
+  { "js": "ShoxNotes.open('a2'); 1" },
+  { "wait": 400 },
+  { "js": "JSON.stringify({scrollW: document.documentElement.scrollWidth, links: [...document.querySelectorAll('.view a.lk')].map(a => a.dataset.href)})" },
+  { "shot": ".cache/shots/extra/notes-07-360-note.png" },
+  { "js": "ShoxNotes.open('a1'); document.querySelector('#t-color').click(); 1" },
+  { "wait": 300 },
+  { "shot": ".cache/shots/extra/notes-08-360-palette.png" },
+  { "js": "document.body.click(); document.querySelector('#back').click(); 1" },
+  { "wait": 300 },
+  { "shot": ".cache/shots/extra/notes-09-360-retour.png" },
+  { "open": "fireshox://notes/", "size": [1280, 800] },
+  { "wait": 900 },
+  { "js": "ShoxNotes.open('a2'); 1" },
+  { "wait": 300 },
+  { "shot": ".cache/shots/extra/notes-10-1280-lecture.png" },
+  { "quit": true }
+]

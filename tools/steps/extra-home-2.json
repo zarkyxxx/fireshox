@@ -1,0 +1,20 @@
+[
+  { "open": "fireshox://home/", "size": [1280, 800] },
+  { "wait": 800 },
+  { "js": "HomePerso.setBg({type: 'embers'}); var add = ['twitter.com', 'instagram.com', 'reddit.com', 'github.com', 'netflix.com', 'spotify.com', 'fireshox://runner/', 'fireshox://notes/']; var f; (async () => { for (const u of add) { HomePerso.openDialog(null); await FX.sleep(60); f = document.querySelector('.hp-dialog'); f.name.value = ''; f.url.value = u; f.url.dispatchEvent(new Event('input')); f.requestSubmit(); await FX.sleep(60); } })(); 1" },
+  { "wait": 2500 },
+  { "js": "JSON.stringify({n: HomePerso.shortcuts.length, names: HomePerso.shortcuts.map(s => s.name), add: !!document.querySelector('#sc-add')})" },
+  { "js": "window.scrollTo(0, document.documentElement.scrollHeight); 1" },
+  { "wait": 1500 },
+  { "shot": ".cache/shots/extra/home-11-douze.png" },
+  { "js": "var sc = HomePerso.shortcuts[0]; HomePerso.openDialog(sc); var f = document.querySelector('.hp-dialog'); f.name.value = 'Discord des potes'; f.requestSubmit(); var el = document.querySelectorAll('#shortcuts .sc[data-id]')[2]; el.querySelector('.sc-more').click(); 1" },
+  { "wait": 300 },
+  { "shot": ".cache/shots/extra/home-12-menu-plus.png" },
+  { "js": "document.querySelector('.hp-menu [data-m=del]').click(); JSON.stringify({n: HomePerso.shortcuts.length, add: !!document.querySelector('#sc-add')})" },
+  { "wait": 500 },
+  { "shot": ".cache/shots/extra/home-13-supprime.png" },
+  { "js": "document.querySelector('.hp-undo button').click(); JSON.stringify({n: HomePerso.shortcuts.length, first: HomePerso.shortcuts[0].name})" },
+  { "js": "var f = document.querySelector('.hp-dialog'); HomePerso.openDialog(null); f.url.value = 'pas une adresse'; f.url.dispatchEvent(new Event('input')); 1" },
+  { "wait": 200 },
+  { "quit": true }
+]

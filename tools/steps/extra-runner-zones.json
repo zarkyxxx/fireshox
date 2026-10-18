@@ -1,0 +1,15 @@
+[
+  { "open": "fireshox://runner/", "size": [1600, 900] },
+  { "wait": 1000 },
+  { "js": "var st = document.getElementById('stage'); st.style.cssText = 'width:600px;height:200px;margin:0 auto'; 1" },
+  { "wait": 300 },
+  { "js": "var g = RunnerPage.game, d = g.debug; g.start(); d.set({score: 520}); d.clear(); var W = d.world.W; d.spawn('dalgona', W*0.45, {cy: d.world.gy - 50, level:'milieu'}); d.spawn('cones', W*0.8); d.set({duck: true}); d.freeze(true); JSON.stringify(d.size)" },
+  { "wait": 300 },
+  { "shot": ".cache/shots/extra/runner-07-petit-600x200.png" },
+  { "js": "var d = RunnerPage.game.debug; d.freeze(false); RunnerPage.game.resume(); var st = document.getElementById('stage'); st.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;border-radius:0;z-index:50'; 1" },
+  { "wait": 300 },
+  { "js": "var g = RunnerPage.game, d = g.debug; d.set({score: 1350, duck: false, night: 0.6}); d.clear(); var W = d.world.W; d.spawn('jack', W*0.7); d.spawn('plot', W*0.38, {n: 2, w: 38}); d.pick(W*0.22, false); d.set({y: 0}); d.freeze(true); JSON.stringify(d.size)" },
+  { "wait": 300 },
+  { "shot": ".cache/shots/extra/runner-08-plein-ecran.png" },
+  { "quit": true }
+]

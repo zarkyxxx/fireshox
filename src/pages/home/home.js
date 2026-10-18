@@ -103,6 +103,12 @@
   }
   let last = 0;
   function tick(t) {
+    // Braises coupées (fond image sans braises, voir perso.js) : on ne dessine plus rien.
+    if (document.body.classList.contains('no-embers')) {
+      if (parts.length) { parts.length = 0; cx.clearRect(0, 0, W, H); }
+      requestAnimationFrame(tick);
+      return;
+    }
     const turbo = document.body.classList.contains('turbo');
     const rate = turbo ? 4 : 1;
     for (let i = 0; i < rate; i++) if (Math.random() < 0.55) spawn();

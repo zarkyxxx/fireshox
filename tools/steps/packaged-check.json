@@ -1,0 +1,23 @@
+[
+  { "open": "fireshox://home/", "size": [1400, 860] },
+  { "wait": 2500 },
+  { "ui": "JSON.stringify({ tabs: FS.tabs().length, fsx: typeof FSX, tabsPlus: typeof FSTabs })" },
+  { "ui": "FS.open('https://www.marmiton.org/'); 1" },
+  { "wait": 9000 },
+  { "ui": "(document.querySelector('#b-shoxblock, [data-shoxblock], .shoxblock-btn') || {}).textContent || 'pas de bouton trouvé'" },
+  { "shot": ".cache/shots/final/01-marmiton.png" },
+  { "ui": "FS.open('fireshox://passwords/'); 1" },
+  { "wait": 1500 },
+  { "js": "document.title + ' | ' + document.body.innerText.slice(0, 60)" },
+  { "ui": "FS.open('fireshox://runner/'); 1" },
+  { "wait": 1500 },
+  { "js": "document.title" },
+  { "ui": "FS.open('fireshox://notes/'); 1" },
+  { "wait": 1500 },
+  { "js": "document.title" },
+  { "key": "K", "target": "ui", "modifiers": ["control", "shift"] },
+  { "wait": 2500 },
+  { "shot": ".cache/shots/final/02-panneau.png" },
+  { "ui": "JSON.stringify(FS.tabs().map(t => t.title))" },
+  { "quit": true }
+]

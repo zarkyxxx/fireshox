@@ -1,0 +1,70 @@
+/* Fire Shox — Paramètres : cartes des thèmes et onglets qui dorment */
+
+.th-intro { margin: 0 0 12px; color: var(--muted); font-size: 13.5px; }
+.th-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
+.th-card {
+  position: relative; display: block; aspect-ratio: 4 / 5; min-height: 230px; padding: 0; border: 0; border-radius: 20px; overflow: hidden;
+  text-align: left; color: #fff; background: #000; isolation: isolate;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .08), 0 14px 34px -14px rgba(0, 0, 0, .8);
+  transition: transform .25s cubic-bezier(.2, 1.3, .4, 1), box-shadow .3s ease;
+}
+.th-card:hover { transform: translateY(-4px); box-shadow: 0 0 0 1px color-mix(in srgb, var(--c1) 60%, transparent), 0 18px 44px -14px var(--c1); }
+.th-card:active { transform: translateY(-1px) scale(.985); }
+.th-card:focus-visible { outline: 2px solid var(--c1); outline-offset: 3px; }
+.th-card.on { box-shadow: 0 0 0 2px var(--c1), 0 0 0 5px color-mix(in srgb, var(--c1) 25%, transparent), 0 18px 50px -12px var(--c1); }
+
+.th-img { position: absolute; inset: 0; z-index: -2; background-size: cover, cover; background-repeat: no-repeat; transition: transform .6s cubic-bezier(.2, .8, .3, 1), filter .3s; filter: saturate(.92) brightness(.9); }
+.th-card:hover .th-img, .th-card.on .th-img { transform: scale(1.05); filter: saturate(1.08) brightness(1); }
+.th-shade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, .55) 58%, rgba(0, 0, 0, .92) 100%); }
+/* Bords crantés du paquet (comme un booster) */
+.th-card::before, .th-card::after {
+  content: ''; position: absolute; left: 0; right: 0; height: 7px; z-index: 1; pointer-events: none; opacity: .55;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .45) 0 4px, transparent 4px 8px);
+}
+.th-card::before { top: 0; } .th-card::after { bottom: 0; opacity: .25; }
+
+.th-badge {
+  position: absolute; top: 14px; right: 12px; display: flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px 0 7px; border-radius: 13px;
+  font-size: 12px; font-weight: 800; letter-spacing: .02em; color: #120808; background: var(--c1);
+  box-shadow: 0 0 18px -2px var(--c1), inset 0 1px 0 rgba(255, 255, 255, .4);
+  opacity: 0; transform: translateY(-6px) scale(.9); transition: opacity .25s, transform .3s cubic-bezier(.2, 1.4, .4, 1);
+}
+.th-badge svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.th-card.on .th-badge { opacity: 1; transform: none; }
+
+.th-body { position: absolute; left: 0; right: 0; bottom: 0; display: grid; gap: 4px; padding: 0 14px 15px; }
+.th-name { font-family: var(--font-display); font-weight: 400; font-size: 17px; letter-spacing: .01em; line-height: 1.1; text-shadow: 0 0 18px var(--c1), 0 2px 6px rgba(0, 0, 0, .8); }
+.th-desc { color: rgba(255, 255, 255, .78); font-size: 12px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Mini navigateur aux couleurs du thème */
+.th-mock { display: grid; margin-bottom: 8px; border-radius: 9px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255, 255, 255, .14), 0 8px 20px -6px rgba(0, 0, 0, .8); }
+.th-mock i { display: block; font-style: normal; flex: none; }
+.th-mock .mk-strip { display: flex; align-items: flex-end; gap: 4px; height: 20px; padding: 0 7px; background: var(--ms); }
+.th-mock .mk-logo { width: 10px; height: 10px; margin: 0 3px 5px 0; border-radius: 50%; background: var(--mg); box-shadow: 0 0 6px var(--ma); }
+.th-mock .mk-tab { position: relative; width: 34%; height: 13px; margin-bottom: 2px; border-radius: 4px; background: rgba(255, 255, 255, .05); }
+.th-mock .mk-tab::after { content: ''; position: absolute; left: 6px; top: 5px; width: 55%; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, .28); }
+.th-mock .mk-tab.on { background: color-mix(in srgb, var(--ms) 75%, #fff 9%); box-shadow: inset 0 0 0 1px var(--ma), 0 0 8px -2px var(--ma); }
+.th-mock .mk-tab.on::after { background: rgba(255, 255, 255, .7); }
+.th-mock .mk-bar { display: flex; align-items: center; gap: 6px; height: 20px; padding: 0 7px; background: var(--mb); border-top: 1px solid rgba(255, 255, 255, .05); }
+.th-mock .mk-omni { flex: 1; height: 10px; border-radius: 5px; background: rgba(0, 0, 0, .45); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); }
+.th-mock .mk-turbo { width: 24px; height: 10px; border-radius: 3px; background: var(--mg); box-shadow: 0 0 6px var(--ma); }
+
+/* ---------------------------------------------------------------- onglets qui dorment */
+.opt.wrap { flex-wrap: wrap; }
+.seg { position: relative; display: inline-flex; flex: none; padding: 3px; border-radius: 12px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line-2); }
+.seg button { position: relative; z-index: 1; height: 32px; padding: 0 13px; border: 0; border-radius: 9px; background: transparent; color: var(--text-2); font-weight: 700; font-size: 13px; white-space: nowrap; transition: color .2s; }
+.seg button:hover { color: var(--text); }
+.seg button.on { color: var(--on-fire, #1a0a00); }
+.seg .seg-pill { position: absolute; top: 3px; left: 0; height: 32px; border-radius: 9px; background: var(--fire-grad); box-shadow: 0 4px 16px -4px rgba(var(--glow-rgb, 255, 90, 0), .7), inset 0 1px 0 rgba(255, 255, 255, .35); opacity: 0; transition: transform .3s cubic-bezier(.2, 1.2, .4, 1), width .3s, opacity .2s; }
+.sleep-note { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px 14px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+.sleep-note .zz { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 10px; color: var(--fire-3); background: rgba(var(--acc-rgb, 255, 122, 0), .1); font: 900 13px/1 var(--font); letter-spacing: -.04em; }
+.sleep-note b { color: var(--text-2); font-weight: 600; }
+
+@media (max-width: 1100px) {
+  .th-desc { -webkit-line-clamp: 3; }
+}
+@media (max-width: 860px) {
+  .th-grid { gap: 10px; }
+  .th-name { font-size: 14px; }
+  .th-desc { display: none; }
+}

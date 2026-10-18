@@ -1,0 +1,9 @@
+[
+  { "open": "fireshox://home/", "size": [1280, 800] },
+  { "wait": 2000 },
+  { "ui": "FS.open('fireshox://settings/'); FS.open('fireshox://shoxbench/'); FS.open('fireshox://wiki/'); 1" },
+  { "wait": 1500 },
+  { "ui": "JSON.stringify(FSTabs.state())" },
+  { "shot": ".cache/shots/tabs/01-sanity.png" },
+  { "quit": true }
+]

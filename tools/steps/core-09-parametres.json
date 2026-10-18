@@ -1,0 +1,12 @@
+[
+  { "open": "fireshox://settings/#claude", "size": [1024, 640] },
+  { "wait": 2500 },
+  { "ui": "ShoxPanel.close(); 1" },
+  { "js": "document.querySelector('#claude').scrollIntoView(); JSON.stringify([...document.querySelectorAll('#claude [data-key], #shoxblock [data-key], #traduction [data-key]')].map(e => e.dataset.key + '=' + (e.type === 'checkbox' ? e.checked : e.value)))" },
+  { "wait": 600 },
+  { "shot": ".cache/shots/core/44-parametres-claude.png" },
+  { "js": "document.querySelector('#shoxblock').scrollIntoView(); JSON.stringify({ total: document.querySelector('#sb-total').textContent, upd: document.querySelector('#sb-upd').textContent, allow: document.querySelector('#sb-allow').textContent.trim() })" },
+  { "wait": 500 },
+  { "shot": ".cache/shots/core/45-parametres-shoxblock.png" },
+  { "quit": true }
+]

@@ -1,0 +1,155 @@
+/* Fire Shox — onglets « plus » : épinglés, endormis, groupes, carte de survol, choix du thème (menu). */
+
+/* Animations communes (repli des groupes, épinglage) */
+.tab { transition: background .15s, color .15s, flex-basis .22s ease, min-width .22s ease, padding .22s ease, margin .22s ease, opacity .18s ease; }
+
+/* ---------------------------------------------------------------- beaucoup d'onglets */
+.tab { min-width: 28px; container-type: inline-size; }
+.tab.active { min-width: 52px; }
+.tab.narrow { padding: 0 5px; }
+/* Onglet étroit mais lisible : la croix ne s'affiche que sur l'onglet actif ou survolé */
+@container (max-width: 112px) {
+  .tab:not(.active):not(:hover) > .close { display: none; }
+}
+#tabs.overflow { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; padding-right: 0; margin-right: 40px; }
+#tabs.overflow::-webkit-scrollbar { display: none; }
+#tabs.overflow #newtab { position: sticky; right: 0; z-index: 6; margin-left: 4px; background: var(--strip); box-shadow: -16px 0 14px -6px var(--strip); }
+#tabs.overflow .tgroup:not(.noname) { flex-shrink: 1; min-width: 56px; }
+#tabs.overflow.scrolled { -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 28px); mask-image: linear-gradient(90deg, transparent 0, #000 28px); }
+
+/* ---------------------------------------------------------------- onglets épinglés */
+.tab.pinned { flex: 0 0 40px; min-width: 40px; width: 40px; padding: 0; gap: 0; justify-content: center; }
+.tab.pinned .title, .tab.pinned .close, .tab.pinned .audio { display: none !important; }
+.tab.pinned .fav { width: 18px; height: 18px; }
+.tab.pinned .fav img { width: 18px; height: 18px; }
+.tab.pin-end { margin-right: 9px; }
+.tab.pin-end::after { content: ''; position: absolute; right: -6px; top: 10px; bottom: 10px; width: 1px; background: var(--line-2); border-radius: 1px; }
+.tab.pinned + .tab::before { display: none; }
+.tab.pinned.audible .fav::after { content: ''; position: absolute; right: -3px; bottom: -2px; width: 7px; height: 7px; border-radius: 50%; background: var(--fire-3); box-shadow: 0 0 0 2px var(--strip), 0 0 8px var(--fire-3); animation: tp-pulse 1.2s ease-in-out infinite; }
+@keyframes tp-pulse { 50% { transform: scale(.7); opacity: .6; } }
+.tab .fav { position: relative; }
+
+/* ---------------------------------------------------------------- onglets endormis */
+.tab.sleeping { color: var(--muted); }
+.tab.sleeping .title { opacity: .62; font-style: italic; }
+.tab.sleeping .fav > img, .tab.sleeping .fav > svg, .tab.sleeping .fav > span { filter: grayscale(1) brightness(.8); opacity: .55; }
+.tab.sleeping.active .title { opacity: 1; font-style: normal; }
+/* Badge « z » posé sur le coin du favicon, et un petit « z » qui s'envole (l'onglet ronfle) */
+.tab .zz {
+  position: absolute; right: -6px; bottom: -5px; width: 13px; height: 13px; border-radius: 50%;
+  display: grid; place-items: center; pointer-events: none; font-style: normal;
+  background: var(--strip); box-shadow: 0 0 0 1.5px rgba(var(--acc-rgb), .75), 0 0 8px rgba(var(--glow-rgb), .45);
+}
+.tab .zz b { font: 900 8.5px/1 var(--font); color: var(--fire-3); transform: translateY(-.5px); }
+.tab .zz b + b {
+  position: absolute; left: 9px; top: -9px; font-size: 7.5px; opacity: 0;
+  text-shadow: 0 0 2px var(--strip), 0 0 6px rgba(var(--acc-rgb), .7);
+  animation: tp-snore 2.8s ease-in-out infinite;
+}
+.tab.active .zz { display: none; }
+@keyframes tp-snore {
+  0% { opacity: 0; transform: translate(-3px, 5px) scale(.6); }
+  30% { opacity: 1; }
+  75% { opacity: .85; }
+  100% { opacity: 0; transform: translate(3px, -5px) scale(1.15); }
+}
+
+/* ---------------------------------------------------------------- groupes */
+.tgroup {
+  -webkit-app-region: no-drag; flex: none; position: relative; display: flex; align-items: center; gap: 6px;
+  height: 24px; max-width: 160px; margin: 0 4px 7px 6px; padding: 0 10px; border-radius: 8px;
+  background: var(--g); color: #120808; font-weight: 800; font-size: 11.5px; letter-spacing: .02em; white-space: nowrap;
+  box-shadow: 0 0 16px -5px var(--g), inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -1px 0 rgba(0, 0, 0, .2);
+  transition: background .2s, color .2s, box-shadow .2s, transform .12s, padding .2s;
+}
+.tgroup:hover { filter: brightness(1.1) saturate(1.05); }
+.tgroup:active { transform: scale(.96); }
+.tgroup .tg-name { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.tgroup .tg-count { display: none; min-width: 18px; height: 16px; padding: 0 5px; border-radius: 5px; place-items: center; background: var(--g); color: #120808; font: 800 10.5px/16px var(--mono); text-align: center; }
+.tgroup.noname { padding: 0; width: 16px; height: 16px; margin-bottom: 11px; border-radius: 50%; }
+.tgroup.noname .tg-name { display: none; }
+/* Repliée : pastille en contour + nombre d'onglets */
+.tgroup.collapsed { background: rgba(0, 0, 0, .2); color: var(--g); box-shadow: inset 0 0 0 1.5px var(--g), 0 0 14px -6px var(--g); padding: 0 4px 0 10px; }
+.tgroup.collapsed .tg-count { display: grid; }
+.tgroup.collapsed.noname { width: auto; height: 24px; margin-bottom: 7px; padding: 0 4px; border-radius: 8px; }
+/* Trait de couleur sous la pastille et sous les onglets du groupe */
+.tgroup:not(.collapsed)::after { content: ''; position: absolute; left: 50%; right: -6px; bottom: -7px; height: 2px; background: var(--g); border-radius: 2px 0 0 2px; }
+.tgroup.noname:not(.collapsed)::after { bottom: -11px; right: -10px; }
+.tab.grouped::after { content: ''; position: absolute; left: -2px; right: 0; bottom: -2px; height: 2px; background: var(--g); box-shadow: 0 0 8px -1px var(--g); }
+.tab.grouped.g-end::after { right: 6px; border-radius: 0 2px 2px 0; }
+.tab.grouped.active { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--g) 70%, transparent), 0 0 18px -6px var(--g); }
+.tgroup + .tab::before { display: none; }
+/* Onglets d'un groupe replié : ils glissent sous la pastille */
+.tab.gcol { flex: 0 0 0px; min-width: 0; padding: 0; margin-left: -2px; opacity: 0; overflow: hidden; pointer-events: none; gap: 0; }
+.tab.gcol::before, .tab.gcol::after { display: none; }
+.tab.dragging::after { display: none; }
+
+/* ---------------------------------------------------------------- onglet détaché (vers une nouvelle fenêtre) */
+.tab.tearing { flex: 0 0 0px; min-width: 0; padding: 0; margin-left: -2px; opacity: 0; overflow: hidden; pointer-events: none; gap: 0; }
+.tab.tearing::before, .tab.tearing::after { display: none; }
+#tab-tear {
+  position: fixed; z-index: 97; width: 230px; pointer-events: none; overflow: hidden;
+  border-radius: 12px; background: var(--bar);
+  box-shadow: 0 0 0 1px rgba(var(--acc-rgb), .65), 0 18px 44px rgba(0, 0, 0, .6), 0 0 30px -8px rgba(var(--glow-rgb), .85);
+  transform: rotate(-2deg); transform-origin: 24px 0; animation: tear-in .18s cubic-bezier(.2, 1.3, .4, 1);
+  transition: opacity .15s;
+}
+#tab-tear.out { opacity: .55; }
+@keyframes tear-in { from { opacity: 0; transform: rotate(0) scale(.9); } }
+#tab-tear .tt-tab { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px; background: var(--tab-active); box-shadow: inset 0 -1px 0 var(--line); }
+#tab-tear .tt-fav { width: 16px; height: 16px; display: grid; place-items: center; flex: none; }
+#tab-tear .tt-fav img, #tab-tear .tt-fav .ic { width: 15px; height: 15px; }
+#tab-tear .tt-fav .ic { color: var(--muted); }
+#tab-tear b { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 12.5px; font-weight: 700; color: var(--text); }
+#tab-tear .tt-page { display: grid; gap: 6px; padding: 12px 12px 10px; background: var(--views); }
+#tab-tear .tt-page i { display: block; height: 7px; border-radius: 4px; background: var(--line); }
+#tab-tear .tt-page i:first-child { width: 62%; height: 10px; background: rgba(var(--acc-rgb), .35); }
+#tab-tear .tt-page i:last-child { width: 80%; }
+#tab-tear .tt-hint { display: flex; align-items: center; gap: 7px; padding: 7px 12px 8px; font-size: 11.5px; font-weight: 700; color: var(--fire-3); background: var(--bar); }
+#tab-tear .tt-hint .ic { width: 14px; height: 14px; }
+
+/* ---------------------------------------------------------------- carte au survol d'un onglet */
+#tab-card {
+  position: fixed; z-index: 95; width: max-content; min-width: 200px; max-width: 320px; padding: 10px 12px 11px;
+  display: grid; gap: 3px; pointer-events: none;
+  background: var(--menu); border: 1px solid var(--line-2); border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .55), 0 0 0 1px rgba(0, 0, 0, .35);
+  animation: tc-in .14s ease-out;
+}
+@keyframes tc-in { from { opacity: 0; transform: translateY(-3px); } }
+#tab-card .tc-t { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+#tab-card .tc-u { font: 11.5px var(--mono); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#tab-card .tc-g, #tab-card .tc-s, #tab-card .tc-p { display: flex; align-items: center; gap: 7px; margin-top: 5px; font-size: 12px; font-weight: 600; color: var(--text-2); }
+#tab-card .tc-g i { width: 9px; height: 9px; border-radius: 50%; background: var(--g); box-shadow: 0 0 8px var(--g); flex: none; }
+#tab-card .tc-s { padding: 6px 9px 6px 8px; border-radius: 8px; color: var(--fire-3); background: rgba(var(--acc-rgb), .1); box-shadow: inset 0 0 0 1px rgba(var(--acc-rgb), .28); }
+#tab-card .tc-s .ic, #tab-card .tc-p .ic { width: 15px; height: 15px; }
+#tab-card.asleep { border-color: rgba(var(--acc-rgb), .45); }
+
+/* ---------------------------------------------------------------- menus : groupes et thème */
+.gdot { width: 16px; height: 16px; display: grid; place-items: center; flex: none; }
+.gdot::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--g); box-shadow: 0 0 8px -1px var(--g); }
+
+.gmenu { width: 290px; }
+.gedit { padding: 6px 4px 4px; }
+.gname-wrap { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border-radius: 10px; background: var(--field); border: 1px solid var(--line-2); transition: border-color .15s, box-shadow .15s; }
+.gname-wrap:focus-within { border-color: var(--g); box-shadow: 0 0 0 3px color-mix(in srgb, var(--g) 22%, transparent); }
+.gname-wrap .ic { width: 16px; height: 16px; color: var(--g); }
+.gname { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent; font-weight: 700; user-select: text; }
+.gname::placeholder { color: var(--muted); font-weight: 500; }
+.gcolors { display: flex; justify-content: space-between; gap: 6px; padding: 10px 4px 4px; }
+.gsw { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; transition: transform .12s; }
+.gsw::before { content: ''; width: 20px; height: 20px; border-radius: 50%; background: var(--c); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35); transition: transform .15s; }
+.gsw:hover::before { transform: scale(1.12); }
+.gsw.on { box-shadow: inset 0 0 0 2px var(--c), 0 0 12px -2px var(--c); }
+.gsw.on::before { transform: scale(.8); }
+
+.mtheme { display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 6px 0 10px; }
+.mtheme > .ic { width: 16px; height: 16px; color: var(--text-2); margin-right: 6px; }
+.mtheme .mi-l { flex: 1; }
+.mth { display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 9px 0 5px; border-radius: 15px; font-weight: 700; font-size: 12px; color: var(--text-2); background: var(--raise); box-shadow: inset 0 0 0 1px var(--line-2); transition: background .15s, color .15s, box-shadow .15s; }
+.mth:hover { color: var(--text); background: var(--raise-2); }
+.mth.on { color: var(--text); box-shadow: inset 0 0 0 1.5px var(--fire-2), 0 0 14px -4px rgba(var(--glow-rgb), .8); }
+.mth-sw { width: 20px; height: 20px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18); }
+.mth-fire { background: conic-gradient(from 200deg, #ff3d00, #ff8a00, #ffc21a, #ff3d00); }
+.mth-squid { background: conic-gradient(from 200deg, #ff2f7d 0 50%, #12b98a 50% 100%); }
+.mth-lfi { background: conic-gradient(from 200deg, #ff2a3d 0 60%, #7a0d1c 60% 80%, #fbe7cf 80% 100%); }

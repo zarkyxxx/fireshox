@@ -16,8 +16,11 @@
   const GAMES = (window.JEUX || []).filter((g) => g && g.id).map((g) => ({
     id: cleanId(g.id),
     titre: String(g.titre || g.id),
-    image: g.image || `/assets/jeux/${cleanId(g.id)}/cover.jpg`,
+    image: g.image || (typeof g.dessin === 'function' ? '' : `/assets/jeux/${cleanId(g.id)}/cover.jpg`),
     banniere: g.banniere || '',
+    dessin: typeof g.dessin === 'function' ? g.dessin : null,
+    source: g.source || '',
+    infos: typeof g.infos === 'function' ? g.infos : null,
     lancement: g.lancement || `fireshox://jeux/${cleanId(g.id)}/`,
     description: g.description || '',
     genre: g.genre || '',
@@ -182,12 +185,31 @@
     document.title = 'Jeux vidéo';
   }
 
+  function infosHtml(g) {
+    if (!g.infos) return '';
+    try { return (g.infos() || []).map(([k, v]) => `<div class="d-stat">${esc(k)}<b>${esc(v)}</b></div>`).join(''); } catch { return ''; }
+  }
+
+  // Jaquettes dessinées en direct (canvas) pour les jeux qui n'ont pas encore d'image (ex. Shox Runner).
+  function drawArt() {
+    const one = (g, w, h, kind) => {
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      return Promise.resolve(g.dessin(cv, kind)).then(() => cv.toDataURL('image/jpeg', 0.9));
+    };
+    return Promise.all(GAMES.filter((g) => g.dessin).map(async (g) => {
+      try {
+        if (!g.image) g.image = await one(g, 600, 900, 'cover');
+        if (!g.banniere) g.banniere = await one(g, 1920, 620, 'banner');
+      } catch {}
+    }));
+  }
+
   function renderGame(g, fromQR) {
     const n = (FX.store.get('jeux.lances', {}) || {})[g.id] || 0;
     main.innerHTML = '<div class="view">' +
       `<section class="detail-hero">${g.banniere ? `<div class="bg" style="background-image:url('${esc(g.banniere)}')"></div>` : `<div class="bg blur" style="background-image:url('${esc(g.image)}')"></div>`}<div class="d-cover">${cover(g)}</div><h1>${esc(g.titre)}</h1></section>` +
       `<div class="detail-bar"><button type="button" class="fs-btn fire play-btn" id="play"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>Jouer</button>` +
-      `<div class="d-stat">Parties lancées<b>${FX.fmt(n)}</b></div>${g.genre ? `<div class="d-stat">Genre<b>${esc(g.genre)}</b></div>` : ''}<div class="d-stat">Source<b>Carte QR Shox Opening</b></div></div>` +
+      `${g.infos ? infosHtml(g) : `<div class="d-stat">Parties lancées<b>${FX.fmt(n)}</b></div>`}${g.genre ? `<div class="d-stat">Genre<b>${esc(g.genre)}</b></div>` : ''}<div class="d-stat">Source<b>${esc(g.source || 'Carte QR Shox Opening')}</b></div></div>` +
       (fromQR ? '<div class="qr-ok">✅ <span>Carte QR reconnue : <b>' + esc(g.titre) + '</b> est dans ta bibliothèque.</span></div>' : '') +
       `<div class="detail-body">${g.description ? esc(g.description) : 'Aucune description pour l\'instant.'}</div>` +
       '</div>';
@@ -288,13 +310,19 @@
     main.scrollTop = 0;
     $('#launch').hidden = true;
     if (raw !== null && id) {
-      if (BY.has(id)) { const first = !getScans()[id]; if (scanned) recordScan(id); renderGame(BY.get(id), scanned && first); }
+      if (BY.has(id)) {
+        // Jeu préinstallé (champ « source ») : ce n'est pas une lecture de carte QR.
+        const g = BY.get(id), qr = scanned && !g.source, first = !getScans()[id];
+        if (qr) recordScan(id);
+        renderGame(g, qr && first);
+      }
       else renderPromo(PLANNED[id] ? id : '', id, scanned);
     } else renderHome();
     renderSide();
   }
 
-  route(true);
+  // Les jaquettes dessinées sont prêtes en quelques millisecondes ; on ne les attend jamais plus d'une seconde.
+  Promise.race([drawArt(), FX.sleep(1000)]).then(() => route(true));
   // Retour sur la page via le bouton « précédent » après un lancement : cacher l'écran de lancement.
   addEventListener('pageshow', () => { $('#launch').hidden = true; });
 

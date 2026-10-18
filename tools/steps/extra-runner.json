@@ -1,0 +1,22 @@
+[
+  { "open": "fireshox://runner/", "size": [1280, 800] },
+  { "wait": 1200 },
+  { "js": "JSON.stringify({ok: !!window.ShoxRunner, size: RunnerPage.game.debug.size, state: RunnerPage.game.state})" },
+  { "shot": ".cache/shots/extra/runner-01-accueil.png" },
+  { "key": "Space" },
+  { "js": "RunnerPage.game.debug.autopilot(true); RunnerPage.game.state" },
+  { "wait": 6000 },
+  { "js": "JSON.stringify({state: RunnerPage.game.state, score: Math.round(RunnerPage.game.debug.world.score), obs: RunnerPage.game.debug.world.obs.length})" },
+  { "shot": ".cache/shots/extra/runner-02-course.png" },
+  { "js": "var d = RunnerPage.game.debug; RunnerPage.game.resume(); d.set({score: 1260}); d.clear(); var W = d.world.W; d.spawn('cones', W*0.42); d.spawn('dalgona', W*0.62, {cy: d.world.gy - 50, level:'milieu'}); d.spawn('jack', W*0.86); d.pick(W*0.27, true); d.set({y: 40, vy: 300, shox: 3}); d.freeze(true); 1" },
+  { "wait": 400 },
+  { "shot": ".cache/shots/extra/runner-03-scene.png" },
+  { "js": "var d = RunnerPage.game.debug; RunnerPage.game.resume(); d.freeze(false); d.set({night: 1, score: 760}); d.clear(); var W = d.world.W; d.spawn('pile', W*0.5); d.spawn('plot', W*0.75, {n:3, w:58}); d.set({y:0}); d.freeze(true); 1" },
+  { "wait": 300 },
+  { "shot": ".cache/shots/extra/runner-04-nuit.png" },
+  { "js": "var d = RunnerPage.game.debug; d.freeze(false); d.autopilot(false); d.set({night: 0.0}); d.crash('jack'); 1" },
+  { "wait": 1500 },
+  { "js": "JSON.stringify({state: RunnerPage.game.state, best: FX.store.get('jeux.runner.best'), parties: FX.store.get('jeux.runner.parties'), coins: FX.store.get('opening.coins')})" },
+  { "shot": ".cache/shots/extra/runner-05-fin.png" },
+  { "quit": true }
+]

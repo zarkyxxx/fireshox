@@ -1,0 +1,82 @@
+[
+ {
+  "open": "fireshox://home/",
+  "size": [
+   1280,
+   800
+  ]
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "ui": "FS.open(\"fireshox://opening/\"); FS.open(\"fireshox://shoxbench/\"); FS.open(\"fireshox://wiki/\"); FS.open(\"fireshox://images/\"); FS.open(\"fireshox://jeux/\"); FS.open(\"fireshox://history/\"); FS.open(\"fireshox://downloads/\"); FS.open(\"fireshox://settings/\"); FS.open(\"fireshox://passwords/\"); FS.open(\"data:text/html;charset=utf-8,%3Ctitle%3ERecette%20des%20cr%C3%AApes%3C%2Ftitle%3E%3Cbody%20style%3D%22background%3A%23111%3Bcolor%3A%23eee%3Bfont%3A20px%20sans-serif%22%3E%3Ch1%3ERecette%20des%20cr%C3%AApes%3C%2Fh1%3E\"); FS.open(\"data:text/html;charset=utf-8,%3Ctitle%3EM%C3%A9t%C3%A9o%20de%20Shox-City%3C%2Ftitle%3E%3Cbody%20style%3D%22background%3A%23111%3Bcolor%3A%23eee%3Bfont%3A20px%20sans-serif%22%3E%3Ch1%3EM%C3%A9t%C3%A9o%20de%20Shox-City%3C%2Fh1%3E\"); FS.open(\"data:text/html;charset=utf-8,%3Ctitle%3ETuto%20ressorts%3C%2Ftitle%3E%3Cbody%20style%3D%22background%3A%23111%3Bcolor%3A%23eee%3Bfont%3A20px%20sans-serif%22%3E%3Ch1%3ETuto%20ressorts%3C%2Fh1%3E\"); FS.open(\"data:text/html;charset=utf-8,%3Ctitle%3EForum%20des%20Shox%3C%2Ftitle%3E%3Cbody%20style%3D%22background%3A%23111%3Bcolor%3A%23eee%3Bfont%3A20px%20sans-serif%22%3E%3Ch1%3EForum%20des%20Shox%3C%2Fh1%3E\"); FS.open(\"data:text/html;charset=utf-8,%3Ctitle%3EBoutique%20de%20lacets%3C%2Ftitle%3E%3Cbody%20style%3D%22background%3A%23111%3Bcolor%3A%23eee%3Bfont%3A20px%20sans-serif%22%3E%3Ch1%3EBoutique%20de%20lacets%3C%2Fh1%3E\"); FS.open(\"data:text/html;charset=utf-8,%3Ctitle%3EDoc%20Electron%3C%2Ftitle%3E%3Cbody%20style%3D%22background%3A%23111%3Bcolor%3A%23eee%3Bfont%3A20px%20sans-serif%22%3E%3Ch1%3EDoc%20Electron%3C%2Fh1%3E\"); 1"
+ },
+ {
+  "wait": 2500
+ },
+ {
+  "ui": "FSTabs.pin(1); FSTabs.pin(2); 1"
+ },
+ {
+  "ui": "window.__g1 = FSTabs.group([4,5,6], \"Shox Squad\", \"squid\"); window.__g2 = FSTabs.group([8,9], \"Révisions\", \"bleu\"); window.__g3 = FSTabs.group([11,12,13], \"LFI\", \"lfi\"); FSTabs.activate(5); 1"
+ },
+ {
+  "wait": 600
+ },
+ {
+  "ui": "JSON.stringify({ n: FSTabs.state().tabs.length, overflow: FSTabs.overflow() })"
+ },
+ {
+  "shot": ".cache/shots/tabs/1280-10-groupes-deplies.png"
+ },
+ {
+  "ui": "FSTabs.collapse(window.__g1, true); FSTabs.collapse(window.__g3, true); 1"
+ },
+ {
+  "wait": 600
+ },
+ {
+  "ui": "JSON.stringify({ active: FSTabs.state().tabs.find((t) => t.active).title, overflow: FSTabs.overflow(), hidden: FSTabs.state().tabs.filter((t) => t.hidden).length })"
+ },
+ {
+  "shot": ".cache/shots/tabs/1280-11-groupes-replies.png"
+ },
+ {
+  "ui": "FSTabs.groupMenu(window.__g2, false)"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": ".cache/shots/tabs/1280-12-menu-groupe.png"
+ },
+ {
+  "key": "Escape",
+  "target": "ui"
+ },
+ {
+  "ui": "document.querySelector(\"#layer\").innerHTML = \"\"; FSTabs.card(FSTabs.state().tabs.findIndex((t) => t.group === window.__g2)); 1"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": ".cache/shots/tabs/1280-13-carte-groupe.png"
+ },
+ {
+  "ui": "FSTabs.collapse(window.__g1, false); FSTabs.collapse(window.__g3, false); FS.open(\"https://example.com/\"); FS.open(\"data:text/html,<title>Encore</title>\"); FS.open(\"data:text/html,<title>Toujours plus</title>\"); FS.open(\"data:text/html,<title>Shox 20</title>\"); FS.open(\"data:text/html,<title>Shox 21</title>\"); 1"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "ui": "JSON.stringify({ n: FSTabs.state().tabs.length, overflow: FSTabs.overflow() })"
+ },
+ {
+  "shot": ".cache/shots/tabs/1280-14-beaucoup.png"
+ },
+ {
+  "quit": true
+ }
+]

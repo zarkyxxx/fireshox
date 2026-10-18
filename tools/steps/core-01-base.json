@@ -1,0 +1,11 @@
+[
+  { "open": "fireshox://home/", "size": [1400, 860] },
+  { "wait": 2500 },
+  { "ui": "JSON.stringify({ fsx: typeof FSX, panel: typeof ShoxPanel, extras: typeof ShoxExtras, ghost: window.FS_GHOST, st: ShoxExtras && ShoxExtras.state() })" },
+  { "shot": ".cache/shots/core/01-base.png" },
+  { "ui": "ShoxPanel.open('claude'); 1" },
+  { "wait": 7000 },
+  { "ui": "JSON.stringify({ open: ShoxPanel.isOpen(), url: ShoxPanel.view().getURL(), w: getComputedStyle(document.body).getPropertyValue('--cp-w') })" },
+  { "shot": ".cache/shots/core/02-panel-claude.png" },
+  { "quit": true }
+]

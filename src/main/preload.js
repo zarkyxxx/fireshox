@@ -33,4 +33,37 @@ contextBridge.exposeInMainWorld('shell', {
   installUpdate: () => ipcRenderer.send('update:install'),
   checkUpdate: () => ipcRenderer.invoke('update:check'),
   clearData: (what) => ipcRenderer.invoke('data:clear', what),
+  // Onglet détaché : { url, title, pinned, state, last, screenX, screenY, grabX } → { action, bounds }
+  detachTab: (info) => ipcRenderer.invoke('tab:detach', info),
+  // ShoxVault : l'interface ne reçoit jamais de mot de passe enregistré, seulement les identifiants
+  // du site affiché (et le mot de passe qu'on propose d'enregistrer, si on clique sur l'œil).
+  vault: {
+    site: (contentsId) => ipcRenderer.invoke('vault:ui-site', contentsId),
+    revealOffer: (offerId) => ipcRenderer.invoke('vault:ui-reveal', String(offerId)),
+    decide: (offerId, action, username) => ipcRenderer.invoke('vault:ui-decide', String(offerId), String(action), typeof username === 'string' ? username : undefined),
+    fill: (contentsId, id) => ipcRenderer.send('vault:ui-fill', contentsId, String(id)),
+    copyUsername: (id) => ipcRenderer.send('vault:ui-copy-user', String(id)),
+    tabClosed: (contentsId) => ipcRenderer.send('vault:ui-tab-closed', contentsId),
+    onOffer: on('vault:offer'),
+    onChanged: on('vault:changed'),
+  },
+});
+
+// Panneau Claude, ShoxBlock, ShoxShot, mode Fantôme (src/ui/panel.js et src/ui/extras.js).
+contextBridge.exposeInMainWorld('fsx', {
+  newGhostWindow: () => ipcRenderer.send('app:new-ghost-window'),
+  onClaudeAsk: on('claude:ask'),
+  block: {
+    state: (contentsId) => ipcRenderer.invoke('shoxblock:state', contentsId),
+    setSite: (contentsId, enabled) => ipcRenderer.invoke('shoxblock:set-site', contentsId, !!enabled),
+    onCount: on('shoxblock:count'),
+  },
+  shot: {
+    capture: (contentsId, mode, rect) => ipcRenderer.invoke('shot:capture', contentsId, String(mode), rect || null),
+    copy: (id) => ipcRenderer.invoke('shot:copy', String(id)),
+    save: (id) => ipcRenderer.invoke('shot:save', String(id)),
+    openFolder: (id) => ipcRenderer.send('shot:open-folder', String(id || '')),
+    discard: (id) => ipcRenderer.send('shot:discard', String(id)),
+    folder: () => ipcRenderer.invoke('shot:folder'),
+  },
 });

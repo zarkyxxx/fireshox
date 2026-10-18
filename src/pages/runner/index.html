@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shox Runner</title>
+<link rel="icon" href="/assets/logo-32.png">
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="runner.css">
+</head>
+<body>
+<header class="rn-top">
+  <a class="brand" href="fireshox://jeux/?game=runner" title="Voir Shox Runner dans la bibliothèque Jeux vidéo">
+    <img src="/assets/logo-64.png" alt="Le Y">
+    <span class="brand-txt"><b>SHOX RUNNER</b><small>Le jeu hors ligne de Fire Shox</small></span>
+  </a>
+  <div class="chips">
+    <div class="chip" title="Ton meilleur score"><span>Record</span><b id="best">00000</b></div>
+    <div class="chip" title="Parties jouées"><span>Parties</span><b id="games">0</b></div>
+    <div class="chip coins" title="Tes ShoxCoins (1 de plus tous les 100 points)"><i class="coin"></i><b id="coins">1 000</b><span>ShoxCoins</span></div>
+  </div>
+  <button class="fs-btn rn-full" id="full" type="button" title="Jouer en plein écran">
+    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    Plein écran
+  </button>
+</header>
+
+<main class="rn-main">
+  <div class="stage" id="stage"></div>
+
+  <div class="keys">
+    <span><kbd>Espace</kbd><kbd>↑</kbd><kbd>clic</kbd> sauter <em>maintenir = saut plus haut</em></span>
+    <span><kbd>↓</kbd> s'accroupir <em>en l'air : plonger</em></span>
+    <span class="k-coin"><i class="coin"></i> 1 ShoxCoin tous les 100 points</span>
+  </div>
+
+  <section class="bestiaire" aria-label="Obstacles et bonus">
+    <div class="b-head"><h2>Sur la route de Le Y</h2><span>La vitesse augmente, la nuit tombe à 700 points… et Jack Shi arrive en fin de partie.</span></div>
+    <div class="cards" id="cards"></div>
+  </section>
+</main>
+
+<script src="/shared/fx.js"></script>
+<script src="game.js"></script>
+<script src="page.js"></script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+[
+ {
+  "open": "fireshox://settings/#apparence",
+  "size": [
+   1280,
+   800
+  ]
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "ui": "FS.open('fireshox://shoxbench/'); FS.open('fireshox://opening/'); FS.open('fireshox://wiki/'); FS.open('fireshox://home/'); 1"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "ui": "FSTabs.pin(4); FSTabs.group([3, 4], 'Shox Squad'); FSTabs.sleep(3); FSTabs.activate(2); 1"
+ },
+ {
+  "wait": 900
+ },
+ {
+  "shot": ".cache/shots/tabs/20-fire-shoxbench.png"
+ },
+ {
+  "ui": "FSTabs.activate(1); 1"
+ },
+ {
+  "wait": 900
+ },
+ {
+  "shot": ".cache/shots/tabs/21-fire-parametres.png"
+ },
+ {
+  "ui": "FSTabs.theme('squid'); 1"
+ },
+ {
+  "wait": 1200
+ },
+ {
+  "shot": ".cache/shots/tabs/22-squid-parametres.png"
+ },
+ {
+  "ui": "FSTabs.activate(2); 1"
+ },
+ {
+  "wait": 900
+ },
+ {
+  "shot": ".cache/shots/tabs/23-squid-shoxbench.png"
+ },
+ {
+  "ui": "FS.menu(); 1"
+ },
+ {
+  "wait": 400
+ },
+ {
+  "shot": ".cache/shots/tabs/24-squid-menu.png"
+ },
+ {
+  "ui": "document.querySelector('.mth[data-th=\"lfi\"]').click(); 1"
+ },
+ {
+  "wait": 1200
+ },
+ {
+  "shot": ".cache/shots/tabs/25-lfi-menu.png"
+ },
+ {
+  "key": "Escape",
+  "target": "ui"
+ },
+ {
+  "ui": "document.querySelector('#layer').innerHTML = ''; FSTabs.activate(3); 1"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "shot": ".cache/shots/tabs/26-lfi-opening.png"
+ },
+ {
+  "ui": "FSTabs.activate(1); 1"
+ },
+ {
+  "wait": 900
+ },
+ {
+  "shot": ".cache/shots/tabs/27-lfi-parametres.png"
+ },
+ {
+  "js": "document.querySelector('#performances').scrollIntoView(); 1"
+ },
+ {
+  "wait": 500
+ },
+ {
+  "shot": ".cache/shots/tabs/28-lfi-performances.png"
+ },
+ {
+  "js": "scrollTo(0, 0); document.querySelector('.th-card[data-theme-id=\"fire\"]').click(); 1"
+ },
+ {
+  "wait": 1200
+ },
+ {
+  "ui": "JSON.stringify({ theme: FSTabs.state().theme, html: document.documentElement.dataset.theme })"
+ },
+ {
+  "js": "JSON.stringify({ theme: document.documentElement.dataset.theme, cards: [...document.querySelectorAll('.th-card.on')].map((c) => c.dataset.themeId) })"
+ },
+ {
+  "shot": ".cache/shots/tabs/29-fire-retour.png"
+ },
+ {
+  "quit": true
+ }
+]

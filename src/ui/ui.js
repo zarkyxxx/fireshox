@@ -19,7 +19,11 @@
   const TOOLS = [
     { id: 'history', url: 'fireshox://history/', title: 'Historique', icon: 'history', color: '#c9a0ff' },
     { id: 'downloads', url: 'fireshox://downloads/', title: 'Téléchargements', icon: 'download', color: '#7fd1ff' },
+    { id: 'passwords', url: 'fireshox://passwords/', title: 'Mots de passe', icon: 'key', color: '#ffb000', kw: 'shoxvault mdp password mots de passe identifiants', noApps: true },
+    { id: 'notes', url: 'fireshox://notes/', title: 'ShoxNotes', icon: 'notebook', color: '#ffb000', kw: 'notes bloc-notes carnet memo' },
+    { id: 'runner', url: 'fireshox://runner/', title: 'Shox Runner', icon: 'gamepad', color: '#ff7a00', kw: 'jeu hors ligne dino course runner' },
     { id: 'settings', url: 'fireshox://settings/', title: 'Paramètres', icon: 'settings', color: '#ffcf70' },
+    { id: 'ghost', url: 'fireshox://ghost/', title: 'Accueil Fantôme', icon: 'ghost', color: '#a99bff', kw: 'fantome navigation privee incognito', noApps: true },
   ];
   const ENGINES = {
     google: { name: 'Google', url: 'https://www.google.com/search?q=%s' },
@@ -37,7 +41,7 @@
   const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
 
   // ------------------------------------------------------------------ réglages
-  const DEFAULTS = { engine: 'google', startup: 'restore', bookmarksBar: true, sound: true, turbo: false, hideHero: false, hideLogo: false };
+  const DEFAULTS = { engine: 'google', startup: 'restore', bookmarksBar: true, sound: true, turbo: false, hideHero: false, hideLogo: false, pwSave: true, pwAutofill: true };
   let settings = { ...DEFAULTS, ...(S.get('settings', {}) || {}) };
   function saveSettings(patch) {
     settings = { ...settings, ...patch };
@@ -72,6 +76,13 @@
   const views = $('#views');
   const tabsEl = $('#tabs');
   const address = $('#address');
+  // Points d'accroche remplis par tabs-plus.js (onglets qui dorment, épinglés, groupes, thèmes).
+  const TX = {};
+  function tx(name, ...a) {
+    const f = TX[name];
+    if (!f) return undefined;
+    try { return f(...a); } catch (err) { console.error('[tabs-plus]', name, err); return undefined; }
+  }
 
   function titleFor(url) {
     const p = internalFor(url);
@@ -79,13 +90,15 @@
     try { return new URL(url).host || url; } catch { return url || 'Nouvel onglet'; }
   }
 
-  function makeTab({ url = HOME, title, background = false, index, lazy = false } = {}) {
+  function makeTab(opts = {}) {
+    const { url = HOME, title, background = false, index, lazy = false } = opts;
     const tab = {
       id: ++seq, url, title: title || titleFor(url), favicon: null, loading: false, wv: null, contentsId: null,
       ready: false, audible: false, muted: false, failedUrl: null, crashed: false,
     };
     tab.el = buildTabEl(tab);
     if (index === undefined || index > tabs.length) tabs.push(tab); else tabs.splice(index, 0, tab);
+    tx('created', tab, opts);
     renderTabOrder();
     renderTab(tab);
     if (!lazy) ensureWebview(tab);
@@ -132,15 +145,19 @@
     el.classList.toggle('audible', tab.audible && !tab.muted);
     el.classList.toggle('muted', tab.muted);
     el.querySelector('.audio').innerHTML = icon(tab.muted ? 'mute' : 'volume');
+    tx('render', tab);
   }
 
   function renderTabOrder() {
+    tx('beforeOrder');
     const plus = $('#newtab');
     for (const t of tabs) tabsEl.insertBefore(t.el, plus);
+    tx('afterOrder');
   }
 
   function markNarrow() {
-    for (const t of tabs) if (!t.el.classList.contains('opening')) t.el.classList.toggle('narrow', t.el.offsetWidth < 84);
+    for (const t of tabs) if (!t.el.classList.contains('opening')) t.el.classList.toggle('narrow', t.el.offsetWidth < 62);
+    tx('narrowed');
   }
   new ResizeObserver(markNarrow).observe(tabsEl);
 
@@ -151,6 +168,7 @@
     wv.setAttribute('src', tab.url);
     tab.wv = wv;
     wireWebview(tab, wv);
+    tx('webview', tab, wv);
     views.appendChild(wv);
     if (tab === active) wv.classList.add('active');
     return wv;
@@ -163,7 +181,7 @@
       try { tab.contentsId = wv.getWebContentsId(); } catch {}
       if (tab.muted) wv.setAudioMuted(true);
       updateNav(tab);
-      if (tab === active) updateZoomBadge();
+      if (tab === active) { updateZoomBadge(); updateKey(); }
     });
     wv.addEventListener('did-start-loading', () => {
       tab.loading = true; tab.crashed = false; renderTab(tab);
@@ -212,7 +230,7 @@
     hideCrash(tab);
     updateNav(tab);
     renderTab(tab);
-    if (tab === active) { syncAddress(); updateStar(); updateGuard(); updateZoomBadge(); }
+    if (tab === active) { syncAddress(); updateStar(); updateGuard(); updateZoomBadge(); updateKey(); }
     if (full) addHistory(url, tab.title);
     saveSession();
   }
@@ -223,6 +241,7 @@
 
   function activate(tab) {
     if (!tab) return;
+    tx('activate', tab, active);
     const changed = active !== tab;
     active = tab;
     ensureWebview(tab);
@@ -233,7 +252,7 @@
     }
     document.title = `${tab.title} — Fire Shox`;
     syncAddress(true);
-    updateStar(); updateGuard(); updateNav(tab); updateZoomBadge(); updateReload();
+    updateStar(); updateGuard(); updateNav(tab); updateZoomBadge(); updateReload(); updateKey();
     if (tab.loading) progressStart(); else progressHide();
     showStatus('');
     if (changed) { closeFind(); saveSession(); }
@@ -244,21 +263,24 @@
   function closeTab(tab) {
     const i = tabs.indexOf(tab);
     if (i < 0) return;
-    closed.push({ url: shownUrl(tab), title: tab.title, index: i });
+    closed.push({ url: shownUrl(tab), title: tab.title, index: i, pinned: !!tab.pinned, group: tab.group || null });
     if (closed.length > 25) closed.shift();
     tabs.splice(i, 1);
+    if (tab.contentsId) S.vault.tabClosed(tab.contentsId);
+    tab.vaultOffer = null;
     tab.el.remove();
     if (tab.wv) tab.wv.remove();
     if (tab.crashEl) tab.crashEl.remove();
+    tx('closed', tab);
     if (!tabs.length) { saveSessionNow(); window.close(); return; }
-    if (active === tab) { active = null; activate(tabs[Math.min(i, tabs.length - 1)]); }
+    if (active === tab) { active = null; activate(tx('nextAfterClose', i) || tabs[Math.min(i, tabs.length - 1)]); }
     saveSession();
     requestAnimationFrame(markNarrow);
   }
 
   function reopenTab() {
     const c = closed.pop();
-    if (c) makeTab({ url: c.url, title: c.title, index: c.index });
+    if (c) makeTab({ url: c.url, title: c.title, index: c.index, pinned: c.pinned, group: c.group || null });
   }
 
   function toggleMute(tab) {
@@ -289,6 +311,7 @@
 
   // Glisser-déposer pour réordonner les onglets
   function startTabDrag(e, tab) {
+    if (TX.drag) { tx('drag', e, tab); return; }
     if (e.button !== 0) return;
     activate(tab);
     const startX = e.clientX;
@@ -444,6 +467,8 @@
     }
     if (e.key === 'Enter') {
       e.preventDefault();
+      const picked = suggestions.length && !suggestEl.hidden ? suggestions[sel] : null;
+      if (picked && picked.run && !e.ctrlKey && !e.altKey) { editing = false; hideSuggest(); address.blur(); picked.run(); return; }
       let url;
       if (e.ctrlKey && !/[\s./]/.test(address.value.trim())) url = `https://www.${address.value.trim()}.com`;
       else url = (suggestions.length && !suggestEl.hidden ? suggestions[sel].url : null) || resolveInput(address.value);
@@ -466,12 +491,16 @@
     if (isSearch) suggestions.push({ icon: 'search', title: t, sub: `Rechercher sur ${engine().name}`, url: target });
     else if (inner && /^fireshox:/.test(target)) suggestions.push({ icon: inner.icon, color: inner.color, title: inner.title, sub: target.replace(/\/$/, ''), url: target });
     else suggestions.push({ icon: 'globe', title: t, sub: 'Aller à l\'adresse', url: target });
+    // Panneau Claude (panel.js) : toujours en 2e position quand on tape un texte.
+    if (window.ShoxPanel && settings.claudeSuggest !== false && !/^[a-z][\w+.-]*:\/\//i.test(t)) {
+      suggestions.push({ icon: 'sparkle', color: '#ffb46a', title: `Demander à Claude : ${t}`, sub: 'claude.ai', url: ShoxPanel.askUrl(t), run: () => ShoxPanel.ask(t) });
+    }
     if (!isSearch && !/^[a-z-]+:/i.test(t)) suggestions.push({ icon: 'search', title: t, sub: `Rechercher sur ${engine().name}`, url: searchUrl(t) });
     const low = t.toLowerCase();
     const seen = new Set(suggestions.map((s) => s.url));
     const add = (s) => { if (!seen.has(s.url) && suggestions.length < 8) { seen.add(s.url); suggestions.push(s); } };
     for (const p of [...INTERNAL, ...TOOLS]) {
-      if (p.title.toLowerCase().includes(low) || p.id.includes(low) || p.url.includes(low)) add({ icon: p.icon, color: p.color, title: p.title, sub: p.url.replace(/\/$/, ''), url: p.url });
+      if (p.title.toLowerCase().includes(low) || p.id.includes(low) || p.url.includes(low) || (p.kw || '').includes(low)) add({ icon: p.icon, color: p.color, title: p.title, sub: p.url.replace(/\/$/, ''), url: p.url });
     }
     for (const b of bookmarks) {
       if ((b.title || '').toLowerCase().includes(low) || b.url.toLowerCase().includes(low)) add({ icon: 'star', title: b.title, sub: displayUrl(b.url), url: b.url });
@@ -503,6 +532,7 @@
     e.preventDefault();
     const s = suggestions[+row.dataset.i];
     editing = false; hideSuggest(); address.blur();
+    if (s.run && e.button === 0 && !e.ctrlKey) { s.run(); return; }
     if (e.button === 1 || e.ctrlKey) makeTab({ url: s.url, background: true }); else navigate(s.url);
   });
 
@@ -701,6 +731,7 @@
   // Menu contextuel des onglets
   function tabMenu(tab) {
     const i = tabs.indexOf(tab);
+    if (TX.tabMenu) { const m = tx('tabMenu', tab); if (m) return m; }
     return [
       { label: 'Nouvel onglet à droite', icon: 'plus', action: () => makeTab({ url: HOME, index: i + 1 }) },
       { sep: true },
@@ -755,6 +786,7 @@
     } else if (sel) {
       items.push({ label: 'Copier', icon: 'copy', kbd: 'Ctrl+C', action: () => wv.copy() });
       items.push({ label: `Rechercher « ${sel.length > 26 ? sel.slice(0, 26) + '…' : sel} » sur ${engine().name}`, icon: 'search', action: () => makeTab({ url: searchUrl(sel), index: tabs.indexOf(tab) + 1 }) });
+      if (window.ShoxPanel) items.push({ label: `Demander à Claude « ${sel.length > 24 ? sel.slice(0, 24) + '…' : sel} »`, icon: 'sparkle', action: () => ShoxPanel.ask(sel) });
       items.push({ sep: true });
     }
     if (!p.linkURL && !p.isEditable && !sel && p.mediaType !== 'image') {
@@ -764,6 +796,9 @@
       items.push({ sep: true });
       items.push({ label: 'Imprimer…', icon: 'printer', kbd: 'Ctrl+P', action: () => wv.print() });
       if (/^https?:/.test(tab.url)) items.push({ label: 'Afficher le code source', icon: 'code', kbd: 'Ctrl+U', action: () => makeTab({ url: 'view-source:' + tab.url, index: tabs.indexOf(tab) + 1 }) });
+      // Traduction et ShoxShot (extras.js)
+      if (window.ShoxExtras && ShoxExtras.canTranslate(tab)) items.push({ label: ShoxExtras.translateLabel(tab), icon: 'languages', action: () => ShoxExtras.translate(tab) });
+      if (window.ShoxExtras) items.push({ label: "Capture d'écran (ShoxShot)", icon: 'camera', kbd: 'Ctrl+Maj+S', action: () => ShoxExtras.shotMenu() });
       items.push({ sep: true });
     }
     items.push({ label: 'Inspecter', icon: 'code', action: () => wv.inspectElement(p.x, p.y) });
@@ -778,9 +813,11 @@
       { html: `<div class="mhead"><img src="../../assets/logo-64.png" alt=""><div><b>Fire Shox</b><small>100 % incandescent · amorti gravitationnel</small></div></div>` },
       { label: 'Nouvel onglet', icon: 'plus', kbd: 'Ctrl+T', action: () => newTab() },
       { label: 'Nouvelle fenêtre', icon: 'window', kbd: 'Ctrl+N', action: () => S.newWindow([]) },
+      { label: 'Nouvelle fenêtre Fantôme', icon: 'ghost', kbd: 'Ctrl+Maj+N', action: () => window.fsx && fsx.newGhostWindow() },
       { sep: true },
       { label: 'Historique', icon: 'history', kbd: 'Ctrl+H', action: () => openTool('history') },
       { label: 'Téléchargements', icon: 'download', kbd: 'Ctrl+J', action: () => openTool('downloads') },
+      { label: 'Mots de passe', icon: 'key', action: () => openTool('passwords') },
       { label: 'Ajouter cette page aux favoris', icon: 'star', kbd: 'Ctrl+D', action: toggleBookmark },
       { sep: true },
       { html: `<div class="mzoom"><span class="mi-l">Zoom</span><button data-z="-1">−</button><output>${z} %</output><button data-z="1">+</button><button data-z="f" title="Plein écran (F11)">⛶</button></div>`,
@@ -792,8 +829,15 @@
       { sep: true },
       { label: 'Rechercher dans la page', icon: 'search', kbd: 'Ctrl+F', action: openFind },
       { label: 'Imprimer…', icon: 'printer', kbd: 'Ctrl+P', action: () => active?.wv?.print() },
+      ...(window.ShoxExtras ? [
+        { label: ShoxExtras.translateLabel(active), icon: 'languages', disabled: !ShoxExtras.canTranslate(active), action: () => ShoxExtras.translate(active) },
+        { label: "Capture d'écran (ShoxShot)", icon: 'camera', kbd: 'Ctrl+Maj+S', action: () => ShoxExtras.shotMenu() },
+      ] : []),
       { label: 'Outils de développement', icon: 'code', kbd: 'F12', action: toggleDevtools },
       { sep: true },
+      ...(tx('mainMenu') || []),
+      ...(window.ShoxPanel ? [{ label: 'Panneau Claude', icon: 'sparkle', kbd: 'Ctrl+Maj+K', check: ShoxPanel.isOpen(), action: () => ShoxPanel.toggle() }] : []),
+      { label: 'ShoxBlock (bloqueur de pubs)', icon: 'shield', check: settings.shoxblock !== false, action: () => { saveSettings({ shoxblock: settings.shoxblock === false }); window.ShoxExtras && ShoxExtras.blockChanged(); } },
       { label: 'Mode Turbo Shox', icon: 'zap', check: !!settings.turbo, action: toggleTurbo },
       { label: "Masquer l'image Fire Shox (accueil)", icon: 'eyeoff', check: !!settings.hideHero, action: () => saveSettings({ hideHero: !settings.hideHero }) },
       { label: 'Masquer le logo de la barre', icon: 'eyeoff', check: !!settings.hideLogo, action: () => saveSettings({ hideLogo: !settings.hideLogo }) },
@@ -805,7 +849,7 @@
   }
 
   function appsPop() {
-    const all = [...INTERNAL, ...TOOLS];
+    const all = [...INTERNAL, ...TOOLS].filter((p) => !p.noApps); // grille 3 × 3
     const pop = openPop(`<h3>${icon('flame')} Sites Fire Shox</h3><div class="apps">${all.map((p) =>
       `<button class="app" data-url="${p.url}" style="--c:${p.color}"><i>${icon(p.icon)}</i>${esc(p.short || p.title)}</button>`).join('')}</div>`, $('#b-apps'));
     pop.querySelectorAll('.app').forEach((a) => a.addEventListener('click', (e) => { closeLayer(); if (e.ctrlKey) makeTab({ url: a.dataset.url, background: true }); else openUrlInTab(a.dataset.url); }));
@@ -941,6 +985,171 @@
     pop.querySelector('[data-all]').addEventListener('click', () => { closeLayer(); openTool('downloads'); });
   }
 
+  // ------------------------------------------------------------------ ShoxVault (mots de passe)
+  // L'interface ne voit jamais un mot de passe enregistré : seulement les identifiants du site affiché.
+  // Le remplissage est demandé au processus principal, qui vérifie l'origine de la page.
+  const keyBtn = $('#b-key');
+  const bubble = $('#vault-bubble');
+  const OFFER_MAX_AGE = 14 * 60 * 1000;
+  let siteInfo = null;
+  let keySeq = 0;
+  let bubbleOffer = null;
+  let maskTimer = null;
+  const hueOf = (s) => { let x = 0; for (const c of String(s)) x = (x * 31 + c.charCodeAt(0)) >>> 0; return 14 + (x % 34); };
+  const initial = (s) => (String(s || '').trim().charAt(0) || '?').toUpperCase();
+
+  async function updateKey() {
+    const t = active;
+    const seq = ++keySeq;
+    if (t && t.vaultOffer && Date.now() - t.vaultOffer.at > OFFER_MAX_AGE) t.vaultOffer = null;
+    let info = null;
+    if (t && t.contentsId && /^https?:/i.test(t.url)) { try { info = await S.vault.site(t.contentsId); } catch {} }
+    if (seq !== keySeq || t !== active) return;
+    siteInfo = info;
+    const offer = t ? t.vaultOffer : null;
+    const n = info && info.accounts ? info.accounts.length : 0;
+    keyBtn.hidden = !n && !offer;
+    keyBtn.classList.toggle('pending', !!offer);
+    keyBtn.title = offer ? 'ShoxVault : enregistrer ce mot de passe ?'
+      : `ShoxVault : ${n} mot${n > 1 ? 's' : ''} de passe enregistré${n > 1 ? 's' : ''} pour ce site`;
+    if (offer && !offer.closed) showBubble(offer); else hideBubble();
+  }
+
+  S.vault.onOffer((o) => {
+    // Onglet de la page ; une fenêtre popup de connexion se rattache à l'onglet actif.
+    const tab = tabs.find((x) => x.contentsId === o.contentsId) || active;
+    if (!tab) return;
+    tab.vaultOffer = { ...o, at: Date.now(), closed: false };
+    if (tab === active) updateKey();
+  });
+  S.vault.onChanged(() => updateKey());
+
+  function hideBubble() {
+    bubble.hidden = true;
+    bubble.textContent = '';
+    bubbleOffer = null;
+    clearTimeout(maskTimer);
+  }
+  function closeBubble() {
+    if (bubbleOffer) bubbleOffer.closed = true; // l'icône clé reste allumée pour y revenir
+    hideBubble();
+  }
+
+  function showBubble(o) {
+    if (bubbleOffer === o && !bubble.hidden) { placeBubble(); return; }
+    hideBubble();
+    bubbleOffer = o;
+    const dots = '•'.repeat(Math.max(8, Math.min(18, o.len || 10)));
+    bubble.innerHTML = `<div class="vb-arrow"></div>
+      <div class="vb-head">
+        <span class="vb-badge">${icon('key')}</span>
+        <div class="vb-titles"><b class="vb-title"></b><small></small></div>
+        <button class="tb sm vb-x" title="Fermer (Échap)">${icon('x')}</button>
+      </div>
+      ${o.unavailable ? `<p class="vb-warn">Le chiffrement de Windows n'est pas disponible sur ce PC : ShoxVault refuse de garder un mot de passe en clair. Rien n'a été enregistré.</p>
+      <div class="vb-actions"><span class="grow"></span><button class="vb-btn primary" data-a="dismiss">Compris</button></div>` : `
+      <div class="vb-fields">
+        <label for="vb-user">Identifiant</label>
+        <input id="vb-user" class="vb-user" spellcheck="false" autocomplete="off" placeholder="(sans identifiant)">
+        <label>Mot de passe</label>
+        <div class="vb-pw"><span class="vb-pass">${dots}</span><button class="vb-eye" title="Afficher le mot de passe">${icon('eye')}</button></div>
+      </div>
+      <div class="vb-actions">
+        <button class="vb-btn ghost" data-a="never">Jamais pour ce site</button><span class="grow"></span>
+        <button class="vb-btn" data-a="dismiss">Pas maintenant</button>
+        <button class="vb-btn primary" data-a="save">${o.update ? 'Mettre à jour' : 'Enregistrer'}</button>
+      </div>`}`;
+    // Textes venant du site (domaine, identifiant) : toujours en textContent.
+    const title = bubble.querySelector('.vb-title');
+    if (o.unavailable) title.textContent = "Impossible d'enregistrer ce mot de passe";
+    else {
+      title.append(o.update ? 'Mettre à jour le mot de passe pour ' : 'Enregistrer le mot de passe pour ');
+      title.append(Object.assign(document.createElement('span'), { className: 'vb-host', textContent: o.host }));
+      title.append(' ?');
+      bubble.querySelector('small').textContent = o.update
+        ? 'Ce compte est déjà dans ShoxVault avec un autre mot de passe.'
+        : 'Gardé au chaud par ShoxVault : chiffré par Windows, jamais envoyé sur internet.';
+      bubble.querySelector('.vb-user').value = o.username || '';
+    }
+    bubble.querySelector('.vb-x').addEventListener('click', closeBubble);
+    const pass = bubble.querySelector('.vb-pass');
+    const eye = bubble.querySelector('.vb-eye');
+    if (eye) {
+      eye.addEventListener('click', async () => {
+        clearTimeout(maskTimer);
+        if (pass.classList.contains('shown')) { pass.textContent = dots; pass.classList.remove('shown'); eye.innerHTML = icon('eye'); eye.title = 'Afficher le mot de passe'; return; }
+        const p = await S.vault.revealOffer(o.id);
+        if (p == null || bubbleOffer !== o) { if (p == null) toast('Cette proposition a expiré'); return; }
+        pass.textContent = p;
+        pass.classList.add('shown');
+        eye.innerHTML = icon('eyeoff');
+        eye.title = 'Masquer le mot de passe';
+        maskTimer = setTimeout(() => { if (pass.isConnected) { pass.textContent = dots; pass.classList.remove('shown'); eye.innerHTML = icon('eye'); } }, 20000);
+      });
+    }
+    bubble.querySelectorAll('[data-a]').forEach((b) => b.addEventListener('click', () => decideOffer(o, b.dataset.a)));
+    bubble.querySelector('.vb-user')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') decideOffer(o, 'save'); });
+    bubble.hidden = false;
+    placeBubble();
+  }
+
+  async function decideOffer(o, action) {
+    const user = bubble.querySelector('.vb-user')?.value;
+    for (const t of tabs) if (t.vaultOffer === o) t.vaultOffer = null;
+    hideBubble();
+    let r = null;
+    try { r = await S.vault.decide(o.id, action, user); } catch {}
+    if (action === 'save') {
+      if (r && r.ok) toast(r.result === 'updated' ? `🔥 Mot de passe mis à jour pour ${o.host}` : `🔥 Mot de passe enregistré pour ${o.host}`);
+      else toast(r && r.error === 'unavailable' ? 'Chiffrement Windows indisponible : rien enregistré' : 'Proposition expirée : reconnecte-toi pour réessayer');
+    } else if (action === 'never' && r && r.ok) toast(`ShoxVault ne proposera plus rien pour ${o.host}`);
+    updateKey();
+  }
+
+  function placeBubble() {
+    if (bubble.hidden) return;
+    const anchor = keyBtn.hidden ? $('#b-star') : keyBtn;
+    const r = anchor.getBoundingClientRect();
+    const w = bubble.offsetWidth;
+    const cx = r.left + r.width / 2;
+    const left = Math.round(Math.max(8, Math.min(cx + 46 - w, innerWidth - w - 8)));
+    bubble.style.left = left + 'px';
+    bubble.style.top = Math.round(r.bottom + 12) + 'px';
+    const arrow = bubble.querySelector('.vb-arrow');
+    if (arrow) arrow.style.left = Math.round(Math.max(14, Math.min(w - 28, cx - left - 7))) + 'px';
+  }
+
+  keyBtn.addEventListener('click', () => {
+    const t = active;
+    if (!t) return;
+    if (t.vaultOffer) { t.vaultOffer.closed = false; showBubble(t.vaultOffer); return; }
+    keyPop();
+  });
+
+  function keyPop() {
+    const info = siteInfo;
+    if (!info || !info.accounts || !info.accounts.length) return;
+    const t = active;
+    const pop = openPop(`<div class="vk"><h3>${icon('key')} ShoxVault <span class="vk-host">${esc(info.host)}</span></h3>
+      <div class="vk-list">${info.accounts.map((a, i) => `<div class="vk-row" data-i="${i}">
+        <span class="vk-av" style="--h:${hueOf(a.username)}">${esc(initial(a.username))}</span>
+        <div class="vk-u"><b>${esc(a.username || '(sans identifiant)')}</b><small>••••••••••</small></div>
+        <button class="vk-fill" data-fill title="Remplir l'identifiant et le mot de passe dans la page">Remplir</button>
+        <button class="tb sm" data-copy title="Copier l'identifiant">${icon('copy')}</button></div>`).join('')}</div>
+      <div class="pop-foot"><button class="link-btn" data-manage>${icon('settings')}Gérer les mots de passe</button></div></div>`, keyBtn);
+    pop.classList.add('vk-pop');
+    pop.querySelectorAll('.vk-row').forEach((row) => {
+      const a = info.accounts[+row.dataset.i];
+      row.querySelector('[data-fill]').addEventListener('click', () => {
+        closeLayer();
+        if (t && t.contentsId) S.vault.fill(t.contentsId, a.id);
+        t?.wv?.focus();
+      });
+      row.querySelector('[data-copy]').addEventListener('click', () => { S.vault.copyUsername(a.id); closeLayer(); toast('Identifiant copié'); });
+    });
+    pop.querySelector('[data-manage]').addEventListener('click', () => { closeLayer(); openTool('passwords'); });
+  }
+
   // ------------------------------------------------------------------ turbo, devtools, plein écran
   function toggleTurbo() {
     saveSettings({ turbo: !settings.turbo });
@@ -1001,6 +1210,7 @@
     'clear-data': () => openUrlInTab('fireshox://settings/#donnees'),
     escape: () => {
       if (layer.childElementCount) { closeLayer(); return; }
+      if (!bubble.hidden) { closeBubble(); return; }
       if (!findbar.hidden) { closeFind(); return; }
       if (active?.loading && document.activeElement !== address) active.wv.stop();
     },
@@ -1017,14 +1227,17 @@
   });
 
   // Une page ou le processus principal demande un nouvel onglet
-  S.onNewTab(({ url, background, sameTab, from }) => {
+  S.onNewTab(({ url, background, sameTab, from, title, pinned, state, at }) => {
     if (sameTab) {
       const t = tabs.find((x) => x.contentsId === from);
       if (t) { navigate(url, t); return; }
     }
     const opener = tabs.find((x) => x.contentsId === from);
-    const index = opener ? tabs.indexOf(opener) + 1 : undefined;
-    makeTab({ url, background: !!background, index });
+    let index = opener ? tabs.indexOf(opener) + 1 : undefined;
+    let group;
+    // Onglet lâché depuis une autre fenêtre : à l'endroit du lâcher, avec l'état de sa page.
+    if (typeof at === 'number') { const d = tx('dropAt', at); if (d) { index = d.index; group = d.group; } }
+    makeTab({ url, background: !!background, index, group, title, pinned: !!pinned, state });
   });
 
   // ------------------------------------------------------------------ boutons
@@ -1066,7 +1279,7 @@
     }
     if (!e.target.closest('.tab, #bookmarks, #b-back, #b-forward')) e.preventDefault();
   });
-  window.addEventListener('resize', () => { if (layer.childElementCount) closeLayer(); });
+  window.addEventListener('resize', () => { if (layer.childElementCount) closeLayer(); placeBubble(); });
   // Certaines pages demandent un « scrollIntoView » qui remonte jusqu'à l'interface : on la remet en place.
   const unscroll = (el) => el.addEventListener('scroll', () => { if (el.scrollTop || el.scrollLeft) { el.scrollTop = 0; el.scrollLeft = 0; } }, true);
   [$('#app'), views].forEach(unscroll);
@@ -1074,11 +1287,26 @@
 
   // ------------------------------------------------------------------ session
   function sessionData() {
-    return { tabs: tabs.map((t) => ({ url: shownUrl(t), title: t.title })), active: Math.max(0, tabs.indexOf(active)) };
+    const data = { tabs: tabs.map((t) => ({ url: shownUrl(t), title: t.title })), active: Math.max(0, tabs.indexOf(active)) };
+    return tx('session', data) || data; // + épinglés, groupes, favicons (tabs-plus.js)
   }
   const saveSession = debounce(() => S.set('session', sessionData()), 400);
   function saveSessionNow() { S.set('session', sessionData()); }
   window.addEventListener('beforeunload', () => { if (tabs.length) saveSessionNow(); });
+
+  // ------------------------------------------------------------------ extensions des onglets
+  // src/ui/tabs-plus.js (chargé avant ce fichier) : onglets qui dorment, épinglés, groupes, thèmes.
+  if (typeof window.FireShoxTabsPlus === 'function') {
+    try {
+      window.FireShoxTabsPlus({
+        S, TX, tabs, closed, HOME, views, tabsEl, layer, icon, esc, internalFor, shownUrl, titleFor,
+        get active() { return active; },
+        get settings() { return settings; },
+        saveSettings, makeTab, activate, closeTab, reopenTab, toggleMute, renderTab, renderTabOrder, ensureWebview,
+        markNarrow, saveSession, saveSessionNow, openMenu, openPop, closeLayer, toast, navigate, reload,
+      });
+    } catch (err) { console.error('[tabs-plus]', err); }
+  }
 
   // ------------------------------------------------------------------ démarrage
   applySettings();
@@ -1087,12 +1315,29 @@
   const startUrls = JSON.parse(params.get('urls') || '[]');
   const session = S.get('session');
   const restore = params.get('restore') !== '0';
-  if (startUrls.length) startUrls.forEach((u, i) => makeTab({ url: u, background: i > 0 }));
-  else if (restore && settings.startup === 'restore' && session && session.tabs && session.tabs.length) {
-    const act = Math.min(session.active || 0, session.tabs.length - 1);
-    session.tabs.forEach((t, i) => makeTab({ url: t.url, title: t.title, lazy: i !== act, background: true }));
+  const savedTabs = restore && session && Array.isArray(session.tabs) ? session.tabs : [];
+  if (savedTabs.length) tx('restore', session);
+  // Comme Chrome : les onglets épinglés reviennent à chaque démarrage, même ouvert avec un lien.
+  const restorePinned = () => savedTabs.filter((t) => t && t.pinned)
+    .forEach((t) => makeTab({ url: t.url, title: t.title, lazy: true, background: true, pinned: true, fav: t.fav }));
+  // Fenêtre ouverte par un onglet détaché : son titre, son épingle et l'état de sa page.
+  let startTab = null;
+  try { startTab = JSON.parse(params.get('tab') || 'null'); } catch {}
+  if (startUrls.length) {
+    restorePinned();
+    startUrls.forEach((u, i) => makeTab({ url: u, background: i > 0, ...(i === 0 && startTab ? { title: startTab.title || undefined, pinned: !!startTab.pinned, state: startTab.state } : {}) }));
+  }
+  else if (restore && settings.startup === 'restore' && savedTabs.length) {
+    const act = Math.min(session.active || 0, savedTabs.length - 1);
+    savedTabs.forEach((t, i) => makeTab({ url: t.url, title: t.title, lazy: i !== act, background: true, pinned: !!t.pinned, group: t.group || null, fav: t.fav }));
     activate(tabs[act]);
-  } else makeTab({ url: HOME });
+  } else { restorePinned(); makeTab({ url: HOME }); }
+
+  // Pour panel.js et extras.js (panneau Claude, ShoxBlock, ShoxShot, traduction, Fantôme).
+  window.FSX = {
+    active: () => active, tabs: () => tabs, makeTab, navigate, openMenu, openPop, closeLayer, toast, icon, esc,
+    settings: () => settings, saveSettings, commands: COMMANDS, openUrlInTab, shownUrl, displayUrl, HOME,
+  };
 
   // Pour les tests automatisés (--run)
   window.FS = {
@@ -1101,5 +1346,6 @@
     open: (url) => makeTab({ url }),
     menu: mainMenu,
     apps: appsPop,
+    vault: () => ({ key: !keyBtn.hidden, pending: keyBtn.classList.contains('pending'), bubble: !bubble.hidden, title: bubble.querySelector('.vb-title')?.textContent || '', user: bubble.querySelector('.vb-user')?.value ?? null, accounts: siteInfo && siteInfo.accounts ? siteInfo.accounts.map((x) => x.username) : [] }),
   };
 })();

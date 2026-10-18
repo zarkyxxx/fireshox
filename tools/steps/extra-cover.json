@@ -1,0 +1,8 @@
+[
+  { "open": "fireshox://runner/", "size": [1280, 800] },
+  { "wait": 1000 },
+  { "js": "var cv = document.createElement('canvas'); cv.width = 600; cv.height = 900; cv.style.cssText = 'position:fixed;left:20px;top:20px;width:400px;height:600px;z-index:99;border-radius:12px'; document.body.appendChild(cv); var b = document.createElement('canvas'); b.width = 1920; b.height = 620; b.style.cssText = 'position:fixed;left:440px;top:20px;width:820px;height:265px;z-index:99;border-radius:12px'; document.body.appendChild(b); Promise.all([ShoxRunner.drawCover(cv, 'cover'), ShoxRunner.drawCover(b, 'banner')]).then(() => 1)" },
+  { "wait": 600 },
+  { "shot": ".cache/shots/extra/runner-09-jaquettes.png" },
+  { "quit": true }
+]
