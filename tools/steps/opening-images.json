@@ -1,0 +1,12 @@
+[
+  { "open": "fireshox://opening/?coins=5000", "size": [1280, 800] },
+  { "wait": 3000 },
+  { "shot": ".cache/shots/opening/140-boutique-images.png" },
+  { "js": "location.href = 'fireshox://opening/?open=fire&force=legend&coins=5000'; 1" },
+  { "wait": 4500 },
+  { "shot": ".cache/shots/opening/141-paquet-fire.png" },
+  { "js": "location.href = 'fireshox://opening/?detail=fire/le-y'; 1" },
+  { "wait": 3000 },
+  { "shot": ".cache/shots/opening/142-carte-le-y.png" },
+  { "quit": true }
+]
