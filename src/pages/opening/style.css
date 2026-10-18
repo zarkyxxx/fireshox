@@ -545,6 +545,14 @@ button.earn-item:hover { border-color: rgba(255, 140, 0, .45); background: var(-
 .st-hint .k { margin-left: 8px; display: inline-grid; place-items: center; min-width: 26px; height: 22px; padding: 0 6px; border-radius: 6px; font-size: 11px; font-family: var(--font-mono); background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .18); }
 .st-hint .pulse { width: 9px; height: 9px; border-radius: 50%; background: var(--a); box-shadow: 0 0 0 0 var(--a); animation: ping 1.5s ease-out infinite; }
 .stage.hide-tray .st-hint { bottom: 34px; }
+.st-hint .st-play {
+  pointer-events: auto; cursor: pointer; margin-left: 12px; height: 32px; padding: 0 14px; border: 0; border-radius: 10px;
+  font: inherit; font-weight: 800; font-size: 13px; color: #1a0a00; text-shadow: none;
+  background: linear-gradient(90deg, #ff5a00, #ff9a00 60%, #ffc21a); box-shadow: 0 6px 20px -6px rgba(255, 110, 0, .9);
+  transition: transform .12s, filter .2s;
+}
+.st-hint .st-play:hover { filter: brightness(1.1); }
+.st-hint .st-play:active { transform: scale(.96); }
 
 .st-tray { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 7; display: flex; gap: 8px; padding: 8px 10px; border-radius: 16px; background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .08); transition: transform .5s var(--ease-out), opacity .5s; }
 .stage.hide-tray .st-tray { transform: translate(-50%, 150%); opacity: 0; }

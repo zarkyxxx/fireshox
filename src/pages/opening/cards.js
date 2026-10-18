@@ -19,7 +19,7 @@
   }
   function state(url) { const v = known.get(url); return v instanceof Promise ? undefined : v; }
   function probeAll() {
-    const list = [D.back];
+    const list = [];
     for (const b of D.boosters) { list.push(b.pack); for (const c of b.cards) list.push(c.img); }
     return Promise.race([Promise.all(list.map(probe)), new Promise((r) => setTimeout(r, 1500))]);
   }
@@ -132,7 +132,7 @@
         <span class="qc-sub">${esc(b.qr.sub)}</span>
       </div>
       <div class="qc-qr">${qr}<div class="qc-logo"><img src="/assets/logo-128.png" alt="" draggable="false"></div><div class="qc-scan"></div></div>
-      <div class="qc-cta"><svg><use href="#i-play"/></svg>Clique pour jouer</div>
+      <div class="qc-cta" data-play role="button" title="Lancer le jeu bonus"><svg><use href="#i-play"/></svg>Jouer</div>
       <div class="qc-foot"><span>${esc(b.short)}</span><span>Jeu bientôt dispo</span></div>
       <div class="tc-frame"></div>
       <div class="tc-foil"></div>
@@ -142,15 +142,18 @@
   }
 
   // ------------------------------------------------------------ dos de carte
+  // Le dos reprend l'illustration du paquet ouvert (opts.booster = 'squid' | 'fire' | 'lfi') ;
+  // sans paquet ou sans image de paquet : le dos dessiné (anneau de feu et logo).
   function back(opts = {}) {
     const el = document.createElement('div');
     el.className = 'cback' + (opts.cls ? ' ' + opts.cls : '');
+    const b = opts.booster && D.boosters.find((x) => x.id === opts.booster);
     el.innerHTML = `
       <div class="cb-pattern"></div>
       <div class="cb-ring"><div class="cb-spin"></div><div class="cb-disc"><img src="/assets/logo-256.png" alt="" draggable="false"></div></div>
       <div class="cb-top">Fire Shox</div>
       <div class="cb-bot">Opening</div>
-      ${imgTag(D.back, 'cb-img')}
+      ${b ? imgTag(b.pack, 'cb-img') : ''}
       <div class="cb-frame"></div>`;
     return wireImgs(el);
   }

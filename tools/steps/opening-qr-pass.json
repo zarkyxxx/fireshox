@@ -1,0 +1,16 @@
+[
+  { "open": "fireshox://opening/?open=squid&coins=5000", "size": [1280, 800] },
+  { "wait": 3500 },
+  { "click": [640, 400] },
+  { "wait": 3500 },
+  { "click": [640, 400] },
+  { "wait": 2500 },
+  { "js": "JSON.stringify(SO_OPEN._state())" },
+  { "js": "JSON.stringify(document.querySelector('[data-play]') && document.querySelector('[data-play]').getBoundingClientRect())" },
+  { "shot": ".cache/shots/opening/150-qr-bouton.png" },
+  { "click": [640, 400] },
+  { "wait": 1500 },
+  { "js": "JSON.stringify({ state: SO_OPEN._state(), href: location.href })" },
+  { "shot": ".cache/shots/opening/151-apres-qr.png" },
+  { "quit": true }
+]

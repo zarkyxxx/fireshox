@@ -273,7 +273,7 @@
     const oc = document.createElement('div');
     oc.className = 'oc g-' + (c.qr ? 'qr' : c.rarity);
     oc.innerHTML = '<div class="oc-shk"><div class="oc-lift"><div class="oc-aura"></div><div class="oc-beam"></div><div class="oc-rot"><div class="oc-face back"></div><div class="oc-face front"></div></div></div></div>';
-    oc.querySelector('.oc-face.back').append(C.back());
+    oc.querySelector('.oc-face.back').append(C.back({ booster: sess.b.id }));
     oc.querySelector('.oc-face.front').append(c.qr ? C.qrCard(sess.b) : C.face(c));
     return oc;
   }
@@ -435,7 +435,7 @@
     sess.revealed = true;
     sess.busy = false;
     const last = sess.idx === sess.cards.length - 1;
-    if (g === 'qr') hint('Clique sur la carte pour <b>jouer</b> · à côté pour continuer');
+    if (g === 'qr') hint('Bouton <b>▶ Jouer</b> pour le jeu bonus · clique ailleurs sur la carte pour continuer');
     else hint(last ? 'Clique pour voir le récapitulatif' : 'Clique pour la carte suivante');
   }
 
@@ -730,10 +730,15 @@
     if (sess.phase !== 'cards' || sess.busy) return;
     const c = sess.cards[sess.idx];
     if (!sess.revealed) { reveal(sess); return; }
-    if (c.qr && e && e.target && e.target.closest && e.target.closest('.oc.cur')) { openGame(sess); return; }
     next(sess);
   }
   stage.addEventListener('click', (e) => {
+    // Le jeu bonus ne se lance que par son bouton : un clic sur la carte QR la passe, comme les autres.
+    if (e.target.closest('[data-play]')) {
+      e.stopPropagation();
+      if (S && !S.dead) openGame(S);
+      return;
+    }
     if (e.target.closest('.st-top, .st-recap')) return;
     act(e);
   });
