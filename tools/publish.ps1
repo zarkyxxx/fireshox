@@ -28,7 +28,10 @@ $b64 = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("x-access-token
 $auth = "http.https://github.com/.extraheader=AUTHORIZATION: basic $b64"
 $remote = "https://github.com/$Repo.git"
 
-function Git { & git -c core.autocrlf=false -c $auth @args; if ($LASTEXITCODE -ne 0) { throw "git $args a échoué" } }
+# Pas de fenêtre de connexion : le jeton de gh suffit (sinon le script attend en silence).
+$env:GIT_TERMINAL_PROMPT = "0"
+$env:GCM_INTERACTIVE = "never"
+function Git { & git -c core.autocrlf=false -c credential.helper= -c $auth @args; if ($LASTEXITCODE -ne 0) { throw "git $args a échoué" } }
 
 if (-not $SiteOnly) {
   if (-not $SkipBuild) {
