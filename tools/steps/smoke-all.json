@@ -1,0 +1,20 @@
+[
+  { "open": "fireshox://home/", "size": [1400, 860] },
+  { "wait": 2000 },
+  { "ui": "FS.open('fireshox://opening/'); 1" },
+  { "wait": 2000 },
+  { "js": "JSON.stringify({ title: document.title, err: document.querySelectorAll('.error, .fs-error').length })" },
+  { "ui": "FS.open('fireshox://shoxbench/'); 1" },
+  { "wait": 1800 },
+  { "js": "document.title" },
+  { "ui": "FS.open('fireshox://wiki/#le-y'); 1" },
+  { "wait": 1800 },
+  { "js": "document.title" },
+  { "ui": "FS.open('fireshox://images/'); 1" },
+  { "wait": 1200 },
+  { "ui": "FS.open('fireshox://jeux/'); 1" },
+  { "wait": 1200 },
+  { "ui": "JSON.stringify(FS.tabs().map(t => t.title))" },
+  { "shot": ".cache/shots/ui/40-smoke-all.png" },
+  { "quit": true }
+]

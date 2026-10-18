@@ -13,7 +13,7 @@
   { "js": "window.scrollTo(0, 0); document.querySelector('[data-tab=shoxometre]').click(); 1" },
   { "wait": 900 },
   { "shot": ".cache/shots/shoxbench/27-1024-shoxometre.png" },
-  { "js": "SB.runPolitics(); 1" },
+  { "js": "SB.quiz.fill(); SB.runPolitics(); 1" },
   { "wait": 3200 },
   { "shot": ".cache/shots/shoxbench/28-1024-shoxometre-analyse.png" },
   { "wait": 6500 },

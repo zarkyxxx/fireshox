@@ -60,6 +60,7 @@
     const a = c.art || {};
     if (a.logo) return `<div class="ph-logo"><div class="ph-logo-glow"></div><img src="/assets/logo-512.png" alt="" draggable="false"></div>`;
     if (a.mask) return maskSvg(a.mask);
+    if (a.shoe) return `<svg class="ph-shoe" viewBox="0 0 64 40" style="color:${a.shoe}"><use href="#i-shox"/></svg>`;
     if (a.banner) {
       const words = a.banner.split(' ');
       const half = Math.ceil(words.length / 2);
@@ -71,7 +72,7 @@
   function placeholder(b, c) {
     const a = c.art || {};
     const mark = a.mark || '';
-    const markCls = mark.length > 6 ? 'ph-mark long' : 'ph-mark';
+    const markCls = mark.length > 6 ? 'ph-mark long' : mark.length > 3 ? 'ph-mark mid' : 'ph-mark';
     return `<div class="ph ph-${b.id}">
       <div class="ph-bg"></div>
       <div class="${markCls}">${esc(mark)}</div>
@@ -90,11 +91,14 @@
     const b = D.booster(c.booster);
     const R = D.rarities[c.rarity];
     const el = document.createElement('div');
-    el.className = `tcard r-${c.rarity} b-${b.id}${opts.cls ? ' ' + opts.cls : ''}`;
-    el.style.cssText = vars(b);
+    el.className = `tcard r-${c.rarity} b-${b.id} lay-${c.frame} fit-${c.fit}${c.photo ? ' photo' : ''}${opts.cls ? ' ' + opts.cls : ''}`;
+    el.style.cssText = vars(b) + `;--focus:${c.focus};--zoom:${c.zoom || 1}`;
     el.dataset.key = c.key;
+    // image entière (fit contain) : posée sur un fond flou d'elle-même
+    const img = imgTag(c.img, 'tc-img');
+    const blur = c.fit === 'contain' && img ? imgTag(c.img, 'tc-blur') : '';
     el.innerHTML = `
-      <div class="tc-art">${placeholder(b, c)}${imgTag(c.img, 'tc-img')}</div>
+      <div class="tc-art">${placeholder(b, c)}${blur}${img}</div>
       <div class="tc-shade"></div>
       <div class="tc-head"><span class="tc-name">${esc(c.name)}</span></div>
       <div class="tc-body">
@@ -165,7 +169,8 @@
     el.className = `mcard r-${c.rarity} b-${b.id}`;
     el.style.cssText = vars(b);
     const a = c.art || {};
-    const inner = a.logo ? `<img class="mc-logo" src="/assets/logo-128.png" alt="">` : a.mask ? maskSvg(a.mask) : a.banner ? '<span class="mc-emoji">🏳️</span>' : `<span class="mc-emoji">${a.emoji || '👟'}</span>`;
+    const inner = a.logo ? `<img class="mc-logo" src="/assets/logo-128.png" alt="">` : a.mask ? maskSvg(a.mask) : a.shoe ? `<svg class="ph-shoe" viewBox="0 0 64 40" style="color:${a.shoe}"><use href="#i-shox"/></svg>` : a.banner ? '<span class="mc-emoji">🏳️</span>' : `<span class="mc-emoji">${a.emoji || '👟'}</span>`;
+    el.style.setProperty('--focus', c.focus);
     el.innerHTML = `<div class="ph ph-${b.id}"><div class="ph-bg"></div></div><div class="mc-art">${inner}</div>${imgTag(c.img, 'mc-img')}<div class="mc-frame"></div>`;
     return wireImgs(el);
   }

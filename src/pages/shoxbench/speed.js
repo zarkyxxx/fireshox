@@ -232,7 +232,7 @@
     g.lineTo(cx + nx * r1 - px * w0, cy + ny * r1 - py * w0);
     g.closePath(); g.fill(); g.restore();
 
-    // moyeu : le Mec aux Shox
+    // moyeu : Le Y
     const hr = Math.max(14, R * 0.11);
     g.save();
     g.beginPath(); g.arc(cx, cy, hr + 3, 0, Math.PI * 2); g.fillStyle = '#0d0a0e'; g.fill();

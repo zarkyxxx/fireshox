@@ -60,6 +60,38 @@ if (process.platform === 'win32') app.setAppUserModelId('com.fireshox.browser');
   app.userAgentFallback = `Mozilla/5.0 (${os}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${major}.0.0.0 Safari/537.36`;
 }
 
+// Connexion Google : Google refuse les navigateurs basés sur Electron (« ce navigateur n'est peut-être
+// pas sécurisé »). Sur ses pages de connexion uniquement, Fire Shox se présente comme Firefox,
+// comme le font d'autres navigateurs Chromium (en-tête, navigator.userAgent, et indices client retirés).
+const FIREFOX_UA = (() => {
+  const os = process.platform === 'win32' ? 'Windows NT 10.0; Win64; x64'
+    : process.platform === 'darwin' ? 'Macintosh; Intel Mac OS X 10.15' : 'X11; Linux x86_64';
+  return `Mozilla/5.0 (${os}; rv:150.0) Gecko/20100101 Firefox/150.0`;
+})();
+const GOOGLE_LOGIN = /^https:\/\/(accounts\.google\.[a-z.]+|accounts\.youtube\.com)(\/|$)/i;
+const isGoogleLogin = (url) => GOOGLE_LOGIN.test(url || '');
+
+function setupGoogleLogin(ses) {
+  ses.webRequest.onBeforeSendHeaders({ urls: ['https://accounts.google.com/*', 'https://accounts.youtube.com/*'] }, (details, cb) => {
+    const h = details.requestHeaders;
+    h['User-Agent'] = FIREFOX_UA;
+    for (const k of Object.keys(h)) if (/^sec-ch-ua/i.test(k)) delete h[k];
+    cb({ requestHeaders: h });
+  });
+}
+
+function watchGoogleLogin(wc) {
+  let spoofed = false;
+  wc.on('did-start-navigation', (e) => {
+    if (!e.isMainFrame || e.isSameDocument) return;
+    const google = isGoogleLogin(e.url);
+    if (google !== spoofed) {
+      spoofed = google;
+      wc.setUserAgent(google ? FIREFOX_UA : app.userAgentFallback);
+    }
+  });
+}
+
 protocol.registerSchemesAsPrivileged([{
   scheme: 'fireshox',
   privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true, codeCache: true },
@@ -280,6 +312,7 @@ function handleShortcutInput(win, e, input) {
 const SAFE_SCHEMES = /^(https?|fireshox|file|about|data|blob|view-source|chrome-extension|devtools):/i;
 
 app.on('web-contents-created', (_e, contents) => {
+  watchGoogleLogin(contents);
   if (contents.getType() === 'window') {
     contents.on('will-attach-webview', (_ev, webPreferences, params) => {
       webPreferences.preload = WEBVIEW_PRELOAD;
@@ -304,7 +337,7 @@ app.on('web-contents-created', (_e, contents) => {
         action: 'allow',
         overrideBrowserWindowOptions: {
           width: 520, height: 680, autoHideMenuBar: true, icon: ICON, backgroundColor: '#ffffff',
-          webPreferences: { contextIsolation: true, sandbox: true, nodeIntegration: false },
+          webPreferences: { preload: WEBVIEW_PRELOAD, contextIsolation: true, sandbox: true, nodeIntegration: false },
         },
       };
     }
@@ -662,6 +695,7 @@ app.whenReady().then(() => {
   registerInternalProtocol(ses);
   setupDownloads(ses);
   setupPermissions(ses);
+  setupGoogleLogin(ses);
   try { ses.setSpellCheckerLanguages(['fr', 'en-US']); } catch {}
   ses.on('session-created', () => {});
   app.on('session-created', (s) => { try { registerInternalProtocol(s); setupDownloads(s); setupPermissions(s); } catch {} });

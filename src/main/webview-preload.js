@@ -3,6 +3,20 @@
 'use strict';
 const { contextBridge, ipcRenderer } = require('electron');
 
+// Pages de connexion Google : on y ressemble à Firefox jusqu'au bout (voir main.js, FIREFOX_UA).
+if (/^accounts\.(google\.[a-z.]+|youtube\.com)$/i.test(location.hostname)) {
+  try {
+    contextBridge.executeInMainWorld({
+      func: () => {
+        const N = Navigator.prototype;
+        try { delete N.userAgentData; } catch {}
+        try { Object.defineProperty(N, 'vendor', { get: () => '', configurable: true }); } catch {}
+        try { Object.defineProperty(N, 'productSub', { get: () => '20100101', configurable: true }); } catch {}
+      },
+    });
+  } catch {}
+}
+
 if (location.protocol === 'fireshox:') {
   const listeners = new Set();
   ipcRenderer.on('store:changed', (_e, key, value) => {

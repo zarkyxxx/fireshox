@@ -14,7 +14,7 @@
   { "js": "JSON.stringify({ err: window.__sbErrors, last: Object.assign({}, SB.speedHist().slice(-1)[0], { sp: 0 }) })" },
   { "js": "document.querySelector('[data-tab=shoxometre]').click(); 1" },
   { "wait": 800 },
-  { "js": "SB.runPolitics(); 1" },
+  { "js": "SB.quiz.fill(); SB.runPolitics(); 1" },
   { "wait": 2600 },
   { "shot": ".cache/shots/shoxbench/15-shoxometre-analyse.png" },
   { "wait": 2600 },

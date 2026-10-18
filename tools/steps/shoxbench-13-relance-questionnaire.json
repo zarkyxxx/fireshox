@@ -1,0 +1,9 @@
+[
+  {"open":"fireshox://shoxbench/#shoxometre","size":[1280,800]},
+  {"wait":1500},
+  {"shot":".cache/shots/shoxbench/78-relance-shoxometre.png"},
+  {"js":"window.scrollTo(0, 660); 1"},
+  {"wait":600},
+  {"shot":".cache/shots/shoxbench/79-relance-shoxometre-historique.png"},
+  {"quit":true}
+]

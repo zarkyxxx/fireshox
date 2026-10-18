@@ -1,0 +1,57 @@
+[
+ {
+  "open": "fireshox://opening/?reset=1&fill=25&view=catalogue",
+  "size": [
+   1600,
+   900
+  ]
+ },
+ {
+  "wait": 2200
+ },
+ {
+  "shot": ".cache/shots/opening/120-catalogue-1600.png"
+ },
+ {
+  "js": "scrollTo(0, 560); 'scroll'"
+ },
+ {
+  "wait": 1400
+ },
+ {
+  "shot": ".cache/shots/opening/121-catalogue-1600-cartes.png"
+ },
+ {
+  "js": "document.querySelector('#cat-chips-b [data-f=fire]').click(); document.querySelector('#cat-chips-r [data-f=epic]').click(); scrollTo(0, 300); 'filtre'"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "shot": ".cache/shots/opening/122-catalogue-filtre-fire-epique.png"
+ },
+ {
+  "js": "document.querySelector('#cat-grid .cslot').click(); 'detail'"
+ },
+ {
+  "wait": 1700
+ },
+ {
+  "shot": ".cache/shots/opening/123-catalogue-detail.png"
+ },
+ {
+  "js": "Opening.closeDetail(); document.querySelector('#cat-chips-b [data-f=all]').click(); document.querySelector('#cat-chips-r [data-f=all]').click(); Opening.go('collection'); 'col'"
+ },
+ {
+  "wait": 1600
+ },
+ {
+  "shot": ".cache/shots/opening/124-collection-1600.png"
+ },
+ {
+  "js": "JSON.stringify({ errs: window.__errs })"
+ },
+ {
+  "quit": true
+ }
+]

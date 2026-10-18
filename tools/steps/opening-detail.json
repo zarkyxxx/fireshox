@@ -1,14 +1,14 @@
 [
   { "open": "fireshox://opening/?reset=1&fill=60&view=collection", "size": [1280, 800] },
   { "wait": 1500 },
-  { "js": "const inv = Opening.state().inv; inv['fire/le-mec'] = inv['fire/le-mec'] || { n: 2, t: Date.now() }; const pick = (r) => Object.keys(inv).find(k => SO_DATA.card(k).rarity === r); window.__e = pick('epic'); window.__l = 'fire/le-mec'; Opening.detail(__e, [__e, __l]); __e + ' / ' + __l" },
+  { "js": "const inv = Opening.state().inv; inv['fire/le-y'] = inv['fire/le-y'] || { n: 2, t: Date.now() }; const pick = (r) => Object.keys(inv).find(k => SO_DATA.card(k).rarity === r); window.__e = pick('epic'); window.__l = 'fire/le-y'; Opening.detail(__e, [__e, __l]); __e + ' / ' + __l" },
   { "wait": 900 },
-  { "js": "const r = document.getElementById('dt-stage').getBoundingClientRect(); document.getElementById('detail').dispatchEvent(new PointerEvent('pointermove', { clientX: r.left + r.width * 0.3, clientY: r.top + r.height * 0.35, bubbles: true })); 'move'" },
+  { "js": "{ const r = document.getElementById('dt-stage').getBoundingClientRect(); document.getElementById('detail').dispatchEvent(new PointerEvent('pointermove', { clientX: r.left + r.width * 0.3, clientY: r.top + r.height * 0.35, bubbles: true })); } 'move'" },
   { "wait": 900 },
   { "shot": ".cache/shots/opening/80-detail-epique.png" },
   { "js": "document.getElementById('dt-next').click(); 'next'" },
   { "wait": 700 },
-  { "js": "const r = document.getElementById('dt-stage').getBoundingClientRect(); document.getElementById('detail').dispatchEvent(new PointerEvent('pointermove', { clientX: r.left + r.width * 0.7, clientY: r.top + r.height * 0.6, bubbles: true })); 'move'" },
+  { "js": "{ const r = document.getElementById('dt-stage').getBoundingClientRect(); document.getElementById('detail').dispatchEvent(new PointerEvent('pointermove', { clientX: r.left + r.width * 0.7, clientY: r.top + r.height * 0.6, bubbles: true })); } 'move'" },
   { "wait": 900 },
   { "shot": ".cache/shots/opening/81-detail-legendaire.png" },
   { "quit": true }

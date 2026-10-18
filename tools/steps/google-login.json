@@ -1,0 +1,10 @@
+[
+  { "open": "https://accounts.google.com/ServiceLogin?hl=fr", "size": [1200, 800] },
+  { "wait": 5000 },
+  { "js": "JSON.stringify({ host: location.host, ua: navigator.userAgent, uad: 'userAgentData' in navigator, vendor: navigator.vendor, productSub: navigator.productSub, title: document.title })" },
+  { "shot": ".cache/shots/ui/30-google-login.png" },
+  { "ui": "FS.open('https://www.google.com/'); 1" },
+  { "wait": 3000 },
+  { "js": "JSON.stringify({ host: location.host, ua: navigator.userAgent, uad: 'userAgentData' in navigator })" },
+  { "quit": true }
+]

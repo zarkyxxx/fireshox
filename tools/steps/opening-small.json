@@ -31,7 +31,7 @@
   { "shot": ".cache/shots/opening/39-petit-collection.png" },
   { "js": "const k = Object.keys(Opening.state().inv).sort((a,b) => ({legend:4,epic:3,rare:2,common:1})[SO_DATA.card(b).rarity] - ({legend:4,epic:3,rare:2,common:1})[SO_DATA.card(a).rarity])[0]; Opening.detail(k, [k]); k" },
   { "wait": 900 },
-  { "js": "const r = document.getElementById('dt-stage').getBoundingClientRect(); document.getElementById('detail').dispatchEvent(new PointerEvent('pointermove', { clientX: r.left + r.width * 0.85, clientY: r.top + r.height * 0.2, bubbles: true })); 'move'" },
+  { "js": "{ const r = document.getElementById('dt-stage').getBoundingClientRect(); document.getElementById('detail').dispatchEvent(new PointerEvent('pointermove', { clientX: r.left + r.width * 0.85, clientY: r.top + r.height * 0.2, bubbles: true })); } 'move'" },
   { "wait": 900 },
   { "shot": ".cache/shots/opening/40-petit-detail.png" },
   { "quit": true }

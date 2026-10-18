@@ -36,9 +36,13 @@
       galerie,
       voirAussi: Array.isArray(e.voirAussi) ? e.voirAussi : [],
       categories: Array.isArray(e.categories) ? e.categories : [],
+      statut: String(e.statut || ''),
+      cadrage: String(e.cadrage || ''),
+      chapeau: String(e.chapeau || ''),
     };
+    o.enrich = !o.ebauche && o.statut === 'enrichissement';
     o.mono = monogram(o.titre);
-    o.cats = [...(o.ebauche ? AUTO_CATS_STUB : []), ...o.categories];
+    o.cats = [...(o.ebauche ? AUTO_CATS_STUB : []), ...o.categories, ...(o.enrich ? ['Article en cours d\'enrichissement'] : [])];
     o.plainTitle = fold(o.titre);
     o.plain = [textOf(o.resume), ...o.sections.map((s) => s.titre + ' ' + textOf(s.html)), ...o.infobox.map((r) => (r[1] ? r[0] + ' ' + textOf(r[1]) : ''))].join(' ').replace(/\s+/g, ' ').trim();
     o.foldPlain = fold(o.plain);
@@ -91,9 +95,12 @@
   }
 
   // ------------------------------------------------------------------ images (avec remplacement)
-  function imgBox(src, { cls = 'ratio-45', mono = '?', label = 'Photo à venir', small = false, contain = false, glow = false } = {}) {
-    const extra = [cls, contain ? 'contain' : '', glow ? 'glow' : ''].filter(Boolean).join(' ');
-    return `<div class="imgbox ${extra}" data-src="${esc(src)}">` +
+  // natural : la case prend le format réel de l'image une fois chargée (portrait ou paysage)
+  // position : point de recadrage (object-position) quand la case garde un format imposé
+  function imgBox(src, { cls = 'ratio-45', mono = '?', label = 'Photo à venir', small = false, contain = false, glow = false, natural = false, position = '', zoom = true, cap = '' } = {}) {
+    const extra = [cls, contain ? 'contain' : '', glow ? 'glow' : '', zoom ? 'zoomable' : ''].filter(Boolean).join(' ');
+    const attrs = (natural ? ' data-fit="natural"' : '') + (position ? ` data-pos="${esc(position)}"` : '') + (cap ? ` data-cap="${esc(cap)}"` : '');
+    return `<div class="imgbox ${extra}" data-src="${esc(src)}"${attrs}>` +
       `<div class="ph${small ? ' small' : ''}"><div class="ph-mono">${esc(mono)}</div><div class="ph-label">${esc(label)}</div>${src ? `<code title="${esc(shownPath(src))}">${esc(shownPath(src)).replace(/\//g, '/<wbr>')}</code>` : ''}</div>` +
       '</div>';
   }
@@ -113,7 +120,19 @@
       const img = new Image();
       img.alt = '';
       img.decoding = 'async';
-      img.onload = () => { box.appendChild(img); requestAnimationFrame(() => box.classList.add('loaded')); };
+      if (box.dataset.pos) img.style.objectPosition = box.dataset.pos;
+      img.onload = () => {
+        const r = img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : 1;
+        box.dataset.ratio = String(r);
+        if (box.dataset.fit === 'natural') {
+          const rr = Math.max(0.56, Math.min(2.2, r));
+          box.style.aspectRatio = String(rr);
+          const fig = box.closest('.g-item');
+          if (fig) fig.style.setProperty('--r', rr.toFixed(3));
+        }
+        box.appendChild(img);
+        requestAnimationFrame(() => box.classList.add('loaded'));
+      };
       img.onerror = () => { i += 1; if (i < tries.length) img.src = tries[i]; };
       img.src = tries[0];
     }
@@ -308,7 +327,7 @@
     const photo = imgPath(e, e.photo);
     const isLogo = /\/assets\/logo/.test(photo);
     const infobox = `<aside class="infobox"><div class="ib-title">${esc(e.titre)}</div>` +
-      (photo ? `<div class="ib-photo">${imgBox(photo, { mono: e.mono, label: 'Photo officielle à venir', contain: isLogo, glow: isLogo })}</div>` : '') +
+      (photo ? `<div class="ib-photo">${imgBox(photo, { mono: e.mono, label: 'Photo officielle à venir', contain: isLogo, glow: isLogo, natural: !e.cadrage, position: e.cadrage, cap: textOf(e.legende) || e.titre })}</div>` : '') +
       `<div class="ib-caption">${e.legende ? wikify(e.legende, ctx) : `<span class="todo">${esc(e.titre)}, portrait officiel (en attente)</span>`}</div>` +
       (hasSub ? '' : '<div class="ib-sub">Informations</div>') + rows + '</aside>';
 
@@ -327,7 +346,7 @@
           ? '<div class="gallery">' + e.galerie.map((g, gi) => {
             const p = imgPath(e, g.src);
             const logo = /\/assets\/logo/.test(p);
-            return `<figure class="g-item">${imgBox(p, { cls: 'ratio-1', mono: e.mono, label: 'Photo à venir', small: true, contain: logo, glow: logo })}<figcaption>${g.cap ? wikify(g.cap, ctx) : '<span class="todo">Légende à venir</span>'}</figcaption></figure>`;
+            return `<figure class="g-item" style="--r:1">${imgBox(p, { cls: 'ratio-1', mono: e.mono, label: 'Photo à venir', small: true, contain: logo, glow: logo, natural: true, cap: textOf(g.cap) || e.titre })}<figcaption>${g.cap ? wikify(g.cap, ctx) : '<span class="todo">Légende à venir</span>'}</figcaption></figure>`;
           }).join('') + '</div>'
           : emptySec();
       } else if (s.special === 'voir') {
@@ -374,7 +393,10 @@
 
     const banner = e.ebauche
       ? `<div class="ambox"><img src="/assets/logo-128.png" alt=""><div><b>Cette page attend ses archives officielles.</b>Les photos, anecdotes et citations de <i>${esc(e.titre)}</i> seront ajoutées par le Grand Archiviste des Shox dès leur réception. En attendant, l'article reste une ébauche.</div><div class="act"><button type="button" data-toast="Merci ! Le Grand Archiviste a bien noté ta motivation incandescente.">Je veux aider</button></div></div>`
-      : '';
+      : e.enrich
+        ? '<div class="ambox mini"><span class="mini-ico">📚</span><span><b>Article en cours d\'enrichissement</b> — d\'autres archives arrivent.</span></div>'
+        : '';
+    const hatnote = e.chapeau ? `<div class="hatnote"><span aria-hidden="true">↳</span> <i>${wikify(e.chapeau, null)}</i></div>` : '';
 
     // vues
     const vues = FX.store.get('wiki.vues', {}) || {};
@@ -383,7 +405,7 @@
 
     return `<article class="view article">${articleHead(e.titre)}` +
       '<div class="tagline">Un article de Wiki Shox, l\'encyclopédie incandescente.</div>' +
-      banner +
+      banner + hatnote +
       `<div class="prose">${infobox}${leadHtml}${toc}${bodyParts.join('')}${notesHtml}</div>` +
       navbox(e.slug) + portals() + catlinks(e.cats) +
       footer(vues[e.slug]) +
@@ -433,13 +455,13 @@
     return '<div class="view home">' +
       '<section class="home-banner"><img class="logo" src="/assets/logo-256.png" alt="">' +
       '<div><h1>Bienvenue sur <em class="fire-text">Wiki Shox</em></h1><p>L\'encyclopédie incandescente que chacun peut lire en rebondissant.</p></div>' +
-      `<div class="home-stats"><span><b>${ENTRIES.length}</b>articles en français</span><span><b>${stubs}</b>ébauches en attente</span><span><b>${ENTRIES.length - stubs}</b>article de qualité (auto-proclamé)</span></div></section>` +
+      `<div class="home-stats"><span><b>${ENTRIES.length}</b>articles en français</span><span><b>${ENTRIES.length - stubs}</b>articles rédigés</span><span><b>${stubs}</b>ébauches en attente</span></div></section>` +
       '<div class="home-grid">' +
-      (feat ? `<section class="box"><div class="box-h"><span class="ico">✨</span>Lumière sur…</div><div class="box-b"><div class="feat">${imgBox(imgPath(feat, feat.photo), { cls: 'ratio-1', mono: feat.mono, contain: /logo/.test(feat.photo), glow: /logo/.test(feat.photo), small: true })}<div><h3><a href="#${encodeURIComponent(feat.slug)}">${esc(feat.titre)}</a></h3><p>${esc(featText)}</p><a class="more-link" href="#${encodeURIComponent(feat.slug)}">Lire l'article →</a></div></div></div></section>` : '') +
+      (feat ? `<section class="box"><div class="box-h"><span class="ico">✨</span>Lumière sur…</div><div class="box-b"><div class="feat">${imgBox(imgPath(feat, feat.photo), { cls: 'ratio-1', mono: feat.mono, contain: /logo/.test(feat.photo), glow: /logo/.test(feat.photo), small: true, zoom: false })}<div><h3><a href="#${encodeURIComponent(feat.slug)}">${esc(feat.titre)}</a></h3><p>${esc(featText)}</p><a class="more-link" href="#${encodeURIComponent(feat.slug)}">Lire l'article →</a></div></div></div></section>` : '') +
       `<section class="box"><div class="box-h"><span class="ico">💡</span>Le saviez-vous ?</div><div class="box-b"><ul class="dyk">${(ACC.saviezVous || []).map((t) => `<li>${wikify(t, ctx)}</li>`).join('')}</ul></div></section>` +
       '</div>' +
       '<section class="box home-all"><div class="box-h"><span class="ico">📚</span>Toutes les entrées</div><div class="box-b"><div class="cards">' +
-      ENTRIES.map((x) => `<a class="card" href="#${encodeURIComponent(x.slug)}">${imgBox(imgPath(x, x.photo), { cls: 'ratio-1', mono: x.mono, label: 'Photo à venir', small: true, contain: /logo/.test(x.photo), glow: /logo/.test(x.photo) })}<span class="ct">${esc(x.titre)}</span><span class="cs${x.ebauche ? '' : ' star'}">${x.ebauche ? 'Ébauche' : '★ Article de qualité'}</span></a>`).join('') +
+      ENTRIES.map((x) => `<a class="card" href="#${encodeURIComponent(x.slug)}">${imgBox(imgPath(x, x.photo), { cls: 'ratio-1', mono: x.mono, label: 'Photo à venir', small: true, contain: /logo/.test(x.photo), glow: /logo/.test(x.photo), position: x.cadrage || '50% 30%', zoom: false })}<span class="ct">${esc(x.titre)}</span><span class="cs${x.ebauche ? '' : x.enrich ? ' new' : ' star'}">${x.ebauche ? 'Ébauche' : x.enrich ? '● Nouvel article' : '★ Article de qualité'}</span></a>`).join('') +
       '</div></div></section>' +
       footer(0) +
       '</div>';
@@ -522,9 +544,110 @@
     main.scrollTop = restoring ? scrolls.get(key) : 0;
   }
 
+  // ------------------------------------------------------------------ visionneuse d'images
+  const viewer = $('#viewer');
+  const vStage = $('#v-stage');
+  const vImg = $('#v-img');
+  let vItems = [], vIdx = 0, vs = 1, vtx = 0, vty = 0, vDrag = null;
+
+  function openViewer(box) {
+    const boxes = $$('.imgbox.zoomable.loaded', page);
+    vItems = boxes.map((b) => ({ src: b.querySelector('img').src, cap: b.dataset.cap || '' }));
+    vIdx = Math.max(0, boxes.indexOf(box));
+    viewer.hidden = false;
+    viewer.classList.remove('closing');
+    $('#v-art').textContent = document.title.replace(/ — Wiki Shox$/, '');
+    showV(0);
+    snd('whoosh');
+  }
+  function closeViewer() {
+    if (viewer.hidden) return;
+    viewer.classList.add('closing');
+    snd('click');
+    setTimeout(() => { viewer.hidden = true; viewer.classList.remove('closing'); }, 200);
+  }
+  function showV(dir) {
+    const it = vItems[vIdx];
+    if (!it) return;
+    vs = 1; vtx = 0; vty = 0;
+    vImg.classList.remove('slide-r', 'slide-l');
+    vImg.src = it.src;
+    void vImg.offsetWidth;
+    if (dir) vImg.classList.add(dir > 0 ? 'slide-r' : 'slide-l');
+    applyV();
+    $('#v-count').textContent = `${vIdx + 1} / ${vItems.length}`;
+    $('#v-title').textContent = it.cap;
+    $('#v-cap').textContent = it.cap;
+    $('#v-prev').hidden = $('#v-next').hidden = vItems.length < 2;
+  }
+  function stepV(d) {
+    if (vItems.length < 2) return;
+    vIdx = (vIdx + d + vItems.length) % vItems.length;
+    snd('flip');
+    showV(d);
+  }
+  function applyV(anim) {
+    vImg.classList.toggle('anim', !!anim);
+    vImg.style.transform = `translate(${vtx}px, ${vty}px) scale(${vs})`;
+    $('#v-zval').textContent = Math.round(vs * 100) + ' %';
+    vStage.classList.toggle('zoomed', vs > 1.001);
+    $('#v-zout').disabled = vs <= 1.001;
+    $('#v-zin').disabled = vs >= 5.99;
+  }
+  function clampV() {
+    const r = vStage.getBoundingClientRect();
+    const mx = Math.max(0, (vImg.offsetWidth * vs - r.width) / 2 + 40);
+    const my = Math.max(0, (vImg.offsetHeight * vs - r.height) / 2 + 40);
+    vtx = Math.max(-mx, Math.min(mx, vtx)); vty = Math.max(-my, Math.min(my, vty));
+    if (vs <= 1.001) { vtx = 0; vty = 0; }
+  }
+  function zoomV(f, cx = 0, cy = 0, anim = false) {
+    const s2 = Math.max(1, Math.min(6, vs * f));
+    if (Math.abs(s2 - vs) < 1e-4) return;
+    const k = s2 / vs;
+    vtx = cx - (cx - vtx) * k; vty = cy - (cy - vty) * k; vs = s2;
+    clampV(); applyV(anim);
+  }
+  const vCenter = (ev) => { const r = vStage.getBoundingClientRect(); return [ev.clientX - (r.left + r.width / 2), ev.clientY - (r.top + r.height / 2)]; };
+  vStage.addEventListener('wheel', (ev) => { ev.preventDefault(); const [cx, cy] = vCenter(ev); zoomV(Math.exp(-ev.deltaY * 0.0018), cx, cy); }, { passive: false });
+  vStage.addEventListener('dblclick', (ev) => {
+    if (ev.target.closest('.v-nav')) return;
+    if (vs > 1.001) { vs = 1; vtx = 0; vty = 0; applyV(true); } else { const [cx, cy] = vCenter(ev); zoomV(2.5, cx, cy, true); }
+    snd('tick');
+  });
+  vStage.addEventListener('pointerdown', (ev) => {
+    if (ev.button !== 0 || vs <= 1.001 || ev.target.closest('.v-nav')) return;
+    vDrag = { x: ev.clientX, y: ev.clientY, tx: vtx, ty: vty };
+    vStage.setPointerCapture(ev.pointerId); vStage.classList.add('dragging');
+  });
+  vStage.addEventListener('pointermove', (ev) => { if (!vDrag) return; vtx = vDrag.tx + ev.clientX - vDrag.x; vty = vDrag.ty + ev.clientY - vDrag.y; clampV(); applyV(); });
+  const endV = () => { vDrag = null; vStage.classList.remove('dragging'); };
+  vStage.addEventListener('pointerup', endV);
+  vStage.addEventListener('pointercancel', endV);
+  vStage.addEventListener('click', (ev) => { if (ev.target === vStage && vs <= 1.001) closeViewer(); });
+  $('#v-prev').addEventListener('click', () => stepV(-1));
+  $('#v-next').addEventListener('click', () => stepV(1));
+  $('#v-close').addEventListener('click', closeViewer);
+  $('#v-zin').addEventListener('click', () => { zoomV(1.5, 0, 0, true); snd('tick'); });
+  $('#v-zout').addEventListener('click', () => { zoomV(1 / 1.5, 0, 0, true); snd('tick'); });
+  $('#v-zval').addEventListener('click', () => { vs = 1; vtx = 0; vty = 0; applyV(true); snd('tick'); });
+  document.addEventListener('keydown', (ev) => {
+    if (viewer.hidden || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+    const k = ev.key;
+    if (k === 'Escape') { ev.preventDefault(); ev.stopImmediatePropagation(); closeViewer(); }
+    else if (k === 'ArrowRight') { ev.preventDefault(); stepV(1); }
+    else if (k === 'ArrowLeft') { ev.preventDefault(); stepV(-1); }
+    else if (k === '+' || k === '=') { ev.preventDefault(); zoomV(1.5, 0, 0, true); }
+    else if (k === '-' || k === '_') { ev.preventDefault(); zoomV(1 / 1.5, 0, 0, true); }
+    else if (k === '0') { ev.preventDefault(); vs = 1; vtx = 0; vty = 0; applyV(true); }
+  }, true);
+  window.addEventListener('hashchange', () => { if (!viewer.hidden) { viewer.hidden = true; } });
+
   // clics dans la page : sommaire, notes, liens rouges, petites blagues
   page.addEventListener('click', (ev) => {
     const t = ev.target;
+    const zb = t.closest('.imgbox.zoomable.loaded');
+    if (zb && !t.closest('a')) { openViewer(zb); return; }
     const goEl = t.closest('[data-go]');
     if (goEl) { scrollToEl(document.getElementById(goEl.dataset.go)); snd('tick'); return; }
     const note = t.closest('[data-note]');

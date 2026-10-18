@@ -31,7 +31,7 @@
   { "shot": ".cache/shots/opening/59-grand-recap.png" },
   { "js": "document.querySelector('.rc-cell.r-legend').click(); 'detail'" },
   { "wait": 800 },
-  { "js": "const r = document.getElementById('dt-stage').getBoundingClientRect(); document.getElementById('detail').dispatchEvent(new PointerEvent('pointermove', { clientX: r.left + r.width * 0.25, clientY: r.top + r.height * 0.3, bubbles: true })); 'move'" },
+  { "js": "{ const r = document.getElementById('dt-stage').getBoundingClientRect(); document.getElementById('detail').dispatchEvent(new PointerEvent('pointermove', { clientX: r.left + r.width * 0.25, clientY: r.top + r.height * 0.3, bubbles: true })); } 'move'" },
   { "wait": 900 },
   { "shot": ".cache/shots/opening/60-grand-detail-mec.png" },
   { "js": "Opening.closeDetail(); document.querySelector('.rc-col').click(); 'col'" },

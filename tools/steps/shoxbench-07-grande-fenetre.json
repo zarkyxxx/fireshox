@@ -18,7 +18,7 @@
   { "shot": ".cache/shots/shoxbench/34-1600-debit-historique.png" },
   { "js": "window.scrollTo(0, 0); document.querySelector('[data-tab=shoxometre]').click(); 1" },
   { "wait": 900 },
-  { "js": "SB.runPolitics(); 1" },
+  { "js": "SB.quiz.fill(); SB.runPolitics(); 1" },
   { "wait": 3800 },
   { "shot": ".cache/shots/shoxbench/35-1600-shoxometre-analyse.png" },
   { "wait": 6000 },

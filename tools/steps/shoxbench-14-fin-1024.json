@@ -1,0 +1,11 @@
+[
+  {"open":"fireshox://shoxbench/#shoxometre","size":[1024,640]},
+  {"wait":1400},
+  {"js":"(async () => { SB.quiz.start(); for (const q of SB.D.questions) { await FX.sleep(320); SB.quiz.answer(q.bonus ? 0 : (q.axis === \"eco\" ? (q.dir < 0 ? 1 : 3) : 2)); } await FX.sleep(600); return JSON.stringify(SB.polCompute(SB.quiz.state.ans)); })()"},
+  {"shot":".cache/shots/shoxbench/80-1024-fin.png"},
+  {"js":"document.getElementById('qzQuit').click(); JSON.stringify({ state: document.getElementById('pol').dataset.state, n: SB.polHist().length })"},
+  {"js":"window.scrollTo(0, 760); 1"},
+  {"wait":600},
+  {"shot":".cache/shots/shoxbench/81-1024-historique.png"},
+  {"quit":true}
+]

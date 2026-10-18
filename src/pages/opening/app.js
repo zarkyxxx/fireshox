@@ -29,15 +29,39 @@
   if (readCoins() === null) FX.store.set(K.coins, D.economy.start);
   if (q.get('coins')) FX.store.set(K.coins, Math.max(0, parseInt(q.get('coins'), 10) || 0));
   let coinVal = readCoins() ?? D.economy.start;
-  let inv = sanitizeInv(FX.store.get(K.inv, {}));
+  // Inventaire : migration des cartes renommées et remboursement des cartes retirées du jeu.
+  const mig = migrateInv(FX.store.get(K.inv, {}));
+  let inv = mig.inv;
+  if (mig.changed) FX.store.set(K.inv, inv);
+  if (mig.refund) { coinVal = (readCoins() ?? coinVal) + mig.refund; FX.store.set(K.coins, coinVal); }
   let stats = Object.assign(defaultStats(), FX.store.get(K.stats, {}) || {});
   stats.byBooster = stats.byBooster || {};
-  let ui = Object.assign({ filter: 'all', missing: false }, FX.store.get(K.ui, {}) || {});
+  let ui = Object.assign({ filter: 'all', missing: false, catB: 'all', catR: 'all' }, FX.store.get(K.ui, {}) || {});
+  if (ui.filter !== 'all' && !D.booster(ui.filter)) ui.filter = 'all';
+  if (ui.catB !== 'all' && !D.booster(ui.catB)) ui.catB = 'all';
 
-  function sanitizeInv(v) {
+  function migrateInv(v) {
     const out = {};
-    if (v && typeof v === 'object') for (const [k, e] of Object.entries(v)) if (D.card(k) && e && e.n > 0) out[k] = { n: Math.floor(e.n), t: e.t || Date.now(), fresh: !!e.fresh };
-    return out;
+    let refund = 0, removed = 0, changed = false;
+    if (v && typeof v === 'object') {
+      for (const [k0, e] of Object.entries(v)) {
+        const n = e && e.n > 0 ? Math.floor(e.n) : 0;
+        if (!n) { changed = true; continue; }
+        const k = D.aliases[k0] || k0;
+        if (k !== k0) changed = true;
+        if (D.card(k)) {
+          const prev = out[k];
+          out[k] = prev ? { n: prev.n + n, t: Math.min(prev.t, e.t || Date.now()), fresh: prev.fresh || !!e.fresh } : { n, t: e.t || Date.now(), fresh: !!e.fresh };
+        } else {
+          // carte retirée du jeu : remboursée à sa valeur de recyclage
+          const r = D.retired[k0] || 'common';
+          refund += n * D.rarities[r].recycle;
+          removed += n;
+          changed = true;
+        }
+      }
+    }
+    return { inv: out, refund, removed, changed };
   }
   function save() { FX.store.set(K.inv, inv); FX.store.set(K.stats, stats); }
   const coins = () => coinVal;
@@ -63,7 +87,8 @@
     return 'common';
   }
   function pickCard(b, rarity) {
-    const list = b.cards.filter((c) => c.rarity === rarity);
+    // rareté vide dans ce booster : on prend la plus proche
+    const list = b.cards.filter((c) => c.rarity === D.tierFor(b, rarity));
     const tot = list.reduce((t, c) => t + (c.w || 1), 0);
     let x = Math.random() * tot;
     for (const c of list) { x -= c.w || 1; if (x < 0) return c; }
@@ -73,7 +98,8 @@
     let out = [];
     for (let i = 0; i < 7; i++) out.push(pickCard(b, rollRarity()));
     if (FORCE === 'legend') out[6] = pickCard(b, 'legend');
-    else if (FORCE === 'mec') out[6] = b.cards.find((c) => c.rarity === 'legend' && c.art && c.art.logo);
+    else if (FORCE === 'mec' || FORCE === 'ley') out[6] = b.cards.find((c) => c.rarity === 'legend' && c.ley) || pickCard(b, 'legend');
+    else if (FORCE && FORCE.startsWith('card:') && D.card(FORCE.slice(5)) && D.card(FORCE.slice(5)).booster === b.id) out[6] = D.card(FORCE.slice(5));
     else if (FORCE === 'epic') out[6] = pickCard(b, 'epic');
     else if (FORCE === 'rare') out[6] = pickCard(b, 'rare');
     else if (FORCE === 'common') out = out.map(() => pickCard(b, 'common'));
@@ -153,7 +179,7 @@
     setTimeout(() => el.remove(), 1300);
   }
   function uniqueCount(bid) { return Object.keys(inv).filter((k) => !bid || k.startsWith(bid + '/')).length; }
-  const TOTAL = D.boosters.reduce((t, b) => t + b.cards.length, 0);
+  const TOTAL = D.total();
   function refreshHeader() {
     $('#tab-count').textContent = `${uniqueCount()}/${TOTAL}`;
     paintDaily();
@@ -219,15 +245,16 @@
   // ------------------------------------------------------------ navigation
   let view = 'boutique';
   function go(v, opts = {}) {
-    if (v !== 'boutique' && v !== 'collection') v = 'boutique';
+    if (!['boutique', 'collection', 'catalogue'].includes(v)) v = 'boutique';
     const prev = view;
     if (prev === 'collection' && v !== 'collection') clearFresh();
     view = v;
     $('#view-boutique').hidden = v !== 'boutique';
     $('#view-collection').hidden = v !== 'collection';
+    $('#view-catalogue').hidden = v !== 'catalogue';
     $$('.tab').forEach((t) => t.classList.toggle('on', t.dataset.view === v));
     moveInk();
-    if (v === 'collection') renderCollection(); else renderShop();
+    if (v === 'collection') renderCollection(); else if (v === 'catalogue') renderCatalogue(); else renderShop();
     if (location.hash !== '#' + v) history.replaceState(null, '', location.pathname + location.search + '#' + v);
     if (!opts.keepScroll) scrollTo(0, 0);
     if (v === 'boutique') startAmbient(); else stopAmbient();
@@ -341,7 +368,7 @@
       card.innerHTML = `<div class="mini-pack"></div>
         <div class="pc-main">
           <div class="pc-top"><b>${esc(b.short)}</b><span><em>${have}</em>/${b.cards.length}</span></div>
-          <div class="pc-segs">${b.cards.map((c) => `<i class="${inv[c.key] ? 'on' : ''}" style="--sc:${D.rarities[c.rarity].color}" title="${inv[c.key] ? esc(c.name) : '???'}"></i>`).join('')}</div>
+          <div class="pc-segs" style="grid-template-columns:repeat(${b.cards.length},1fr)">${sortCards(b.cards.slice()).reverse().map((c) => `<i class="${inv[c.key] ? 'on' : ''}" style="--sc:${D.rarities[c.rarity].color}" title="${inv[c.key] ? esc(c.name) : '???'}"></i>`).join('')}</div>
           <div class="pc-foot"><span>${have === b.cards.length ? 'Collection complète !' : `${stats.byBooster[b.id] || 0} ouvert${(stats.byBooster[b.id] || 0) > 1 ? 's' : ''}`}</span><button class="pc-game"><svg><use href="#i-play"/></svg>Jeu bonus</button></div>
         </div>`;
       card.querySelector('.mini-pack').append(C.pack(b));
@@ -418,6 +445,83 @@
   $('#col-missing').addEventListener('change', (e) => { ui.missing = e.target.checked; FX.store.set(K.ui, ui); FX.sound('click'); renderCollection(); });
   $('#col-recycle').addEventListener('click', () => openRecycle());
 
+  // ------------------------------------------------------------ catalogue (toutes les cartes, révélées)
+  const pct = (x) => (x * 100 >= 10 ? FX.fmt(x * 100, 0) : FX.fmt(x * 100, x * 100 >= 1 ? 1 : 2)) + ' %';
+  let catKeys = [];
+  function renderCatalogue() {
+    const all = D.boosters.flatMap((b) => b.cards);
+    const owned = all.filter((c) => inv[c.key]).length;
+    $('#cat-lead').innerHTML = `Toutes les cartes du jeu, même celles que tu n'as pas encore : <b>${all.length}</b> cartes, tu en possèdes <b>${owned}</b>. Clique sur une carte pour la voir en grand.`;
+
+    // taux par booster (après repli quand une rareté n'a pas de carte)
+    const rates = $('#cat-rates');
+    rates.innerHTML = '';
+    for (const b of D.boosters) {
+      const o = D.odds(b);
+      const pLeg = 1 - Math.pow(1 - o.legend, 7);
+      const card = document.createElement('div');
+      card.className = 'rate-card';
+      vars(card, b);
+      card.innerHTML = `<div class="rt-top"><b>${esc(b.short)}</b><span>${b.cards.length} cartes · ${b.price} <svg><use href="#i-coin"/></svg></span></div>
+        <div class="rt-rows">${['legend', 'epic', 'rare', 'common'].map((r) => {
+          const n = b.cards.filter((c) => c.rarity === r).length;
+          return `<div class="rr r-${r}${n ? '' : ' none'}"><span class="gems">${'<i></i>'.repeat(D.rarities[r].stars)}</span><em>${D.rarities[r].label}</em><b>${n ? pct(o[r]) : '—'}</b><small>${n ? n + ' carte' + (n > 1 ? 's' : '') : 'aucune'}</small></div>`;
+        }).join('')}</div>
+        <div class="rt-note">Au moins une Légendaire par booster : <b>${pct(pLeg)}</b></div>`;
+      rates.append(card);
+    }
+
+    // filtres
+    const cb = $('#cat-chips-b');
+    const optsB = [{ id: 'all', label: 'Tous les boosters' }].concat(D.boosters.map((b) => ({ id: b.id, label: b.short, b })));
+    cb.innerHTML = optsB.map((o) => `<button class="chip${ui.catB === o.id ? ' on' : ''}" data-f="${o.id}" ${o.b ? `style="--a:${o.b.colors.a}"` : ''}>${o.b ? '<i></i>' : ''}${esc(o.label)}</button>`).join('');
+    cb.querySelectorAll('.chip').forEach((ch) => ch.addEventListener('click', () => { FX.sound('click'); ui.catB = ch.dataset.f; FX.store.set(K.ui, ui); renderCatalogue(); }));
+    const cr = $('#cat-chips-r');
+    const optsR = [{ id: 'all', label: 'Toutes raretés' }].concat(D.rarityOrder.map((r) => ({ id: r, label: D.rarities[r].label, r })));
+    cr.innerHTML = optsR.map((o) => `<button class="chip rchip${ui.catR === o.id ? ' on' : ''}${o.r ? ' r-' + o.r : ''}" data-f="${o.id}">${o.r ? `<span class="gems">${'<i></i>'.repeat(D.rarities[o.r].stars)}</span>` : ''}${esc(o.label)}</button>`).join('');
+    cr.querySelectorAll('.chip').forEach((ch) => ch.addEventListener('click', () => { FX.sound('click'); ui.catR = ch.dataset.f; FX.store.set(K.ui, ui); renderCatalogue(); }));
+
+    // grille : un bloc par booster, cartes de la plus rare à la plus commune
+    const grid = $('#cat-grid');
+    grid.innerHTML = '';
+    catKeys = [];
+    let delay = 0;
+    for (const b of D.boosters) {
+      if (ui.catB !== 'all' && ui.catB !== b.id) continue;
+      const list = sortCards(b.cards.filter((c) => ui.catR === 'all' || c.rarity === ui.catR));
+      if (!list.length) continue;
+      const have = b.cards.filter((c) => inv[c.key]).length;
+      const sec = document.createElement('section');
+      sec.className = 'cat-group';
+      vars(sec, b);
+      sec.innerHTML = `<div class="cg-head"><i></i><h3>${esc(b.name)}</h3><em>${have}/${b.cards.length} obtenues</em></div><div class="cgrid"></div>`;
+      const cg = sec.querySelector('.cgrid');
+      for (const c of list) {
+        catKeys.push(c.key);
+        const e = inv[c.key];
+        const slot = document.createElement('button');
+        slot.className = 'cslot r-' + c.rarity + (e ? '' : ' locked');
+        slot.style.setProperty('--d', Math.min(delay++ * 0.025, 0.5) + 's');
+        slot.innerHTML = '<div class="cs-tilt"></div>';
+        const face = C.face(c);
+        face.style.setProperty('--delay', (-rnd(0, 4)).toFixed(2) + 's');
+        slot.querySelector('.cs-tilt').append(face);
+        if (!e) slot.insertAdjacentHTML('beforeend', '<span class="cs-lock">Pas encore obtenue</span>');
+        else if (e.n > 1) slot.insertAdjacentHTML('beforeend', `<span class="cs-count">×${e.n}</span>`);
+        slot.addEventListener('pointermove', (ev) => {
+          const rr = slot.getBoundingClientRect();
+          slot.style.setProperty('--ry', (((ev.clientX - rr.left) / rr.width - 0.5) * 18).toFixed(1) + 'deg');
+          slot.style.setProperty('--rx', ((0.5 - (ev.clientY - rr.top) / rr.height) * 14).toFixed(1) + 'deg');
+        });
+        slot.addEventListener('pointerleave', () => { slot.style.removeProperty('--rx'); slot.style.removeProperty('--ry'); });
+        slot.addEventListener('click', () => openDetail(c.key, catKeys));
+        cg.append(slot);
+      }
+      grid.append(sec);
+    }
+    if (!catKeys.length) grid.innerHTML = '<div class="empty"><h3>Aucune carte</h3><p>Aucune carte de cette rareté dans ce booster pour l\'instant.</p></div>';
+  }
+
   // ------------------------------------------------------------ recyclage
   const modal = $('#modal'), mdBox = $('#md-box');
   function openRecycle() {
@@ -493,15 +597,27 @@
       <div class="di-booster"><i></i>${esc(b.name)} · N° ${String(c.no).padStart(2, '0')}/${b.cards.length}</div>
       <p class="di-text">${esc(c.text)}</p>
       <div class="di-stats">${b.statLabels.map((l, i) => `<div class="di-stat"><span>${esc(l)}</span>${stat(c.stats[i])}</div>`).join('')}</div>
-      <div class="di-own">${e ? `Possédée <b>×${e.n}</b> · depuis le ${date}` : 'Pas encore dans ta collection'}</div>
-      <div class="di-actions">${e && e.n > 1 ? `<button class="fs-btn di-recycle"><svg><use href="#i-recycle"/></svg>Recycler un doublon <b>+${R.recycle}</b></button>` : ''}</div>
+      <div class="di-own">${e ? `Possédée <b>×${e.n}</b> · depuis le ${date}` : '<span class="di-lock">Pas encore obtenue</span>'}</div>
+      <div class="di-odds">Chance par carte tirée : <b>${pct(D.cardOdds(c))}</b> · environ 1 sur ${FX.fmt(Math.round(1 / D.cardOdds(c)))}</div>
+      <div class="di-actions">${c.photo ? '<button class="fs-btn di-full"><svg><use href="#i-eye"/></svg>Voir l’image en entier</button>' : ''}${e && e.n > 1 ? `<button class="fs-btn di-recycle"><svg><use href="#i-recycle"/></svg>Recycler un doublon <b>+${R.recycle}</b></button>` : ''}</div>
       <div class="di-hint"><span class="k">←</span><span class="k">→</span> pour naviguer · <span class="k">Échap</span> pour fermer</div>`;
     dtInfo.style.animation = 'none'; void dtInfo.offsetWidth; dtInfo.style.animation = '';
+    const fb = dtInfo.querySelector('.di-full');
+    if (fb) fb.addEventListener('click', () => showFull(c));
     const rb = dtInfo.querySelector('.di-recycle');
     if (rb) rb.addEventListener('click', () => recycleOne(key, rb));
     $('#dt-prev').disabled = dt.i <= 0;
     $('#dt-next').disabled = dt.i >= dt.list.length - 1;
     if (e && e.fresh) { e.fresh = false; save(); }
+  }
+  function showFull(c) {
+    FX.sound('pop');
+    const el = document.createElement('div');
+    el.className = 'dt-full';
+    el.innerHTML = '<img alt=""><span>Clique ou Échap pour revenir à la carte</span>';
+    el.querySelector('img').src = c.img;
+    el.addEventListener('click', () => el.remove());
+    document.body.append(el);
   }
   function recycleOne(key, btn) {
     const e = inv[key];
@@ -527,6 +643,7 @@
     det.classList.add('leave');
     setTimeout(() => { if (!dt.open) { det.hidden = true; det.classList.remove('leave'); dtTilt.innerHTML = ''; } }, 300);
     if (view === 'collection' && !O.active()) renderCollection();
+    if (view === 'catalogue' && !O.active()) renderCatalogue();
   }
   function dtLoop(now) {
     if (!dt.open) { dt.raf = 0; return; }
@@ -554,6 +671,8 @@
   addEventListener('keydown', (e) => {
     if (!modal.hidden && e.key === 'Escape') { closeModal(); return; }
     if (!dt.open) return;
+    const full = document.querySelector('.dt-full');
+    if (full && e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); full.remove(); return; }
     if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); closeDetail(); }
     else if (e.key === 'ArrowLeft') { e.preventDefault(); navDetail(-1); }
     else if (e.key === 'ArrowRight') { e.preventDefault(); e.stopImmediatePropagation(); navDetail(1); }
@@ -570,7 +689,7 @@
     refreshHeader();
     paintCoins();
     if (O.active()) return;
-    if (view === 'collection') renderCollection(); else renderShop();
+    if (view === 'collection') renderCollection(); else if (view === 'catalogue') renderCatalogue(); else renderShop();
   }
   function afterClose(to) {
     $$('.pack-float').forEach((p) => { p.style.visibility = ''; });
@@ -588,7 +707,7 @@
   window.Opening = {
     buy: (id) => buy(id, $(`.buy-btn[data-b="${id}"]`)), go, state: () => ({ coins: coinVal, inv, stats, ui, daily: FX.store.get(K.daily, null) }),
     fill(n) { for (let i = 0; i < n; i++) { const b = D.boosters[i % 3]; const c = pickCard(b, rollRarity()); const e = inv[c.key]; if (e) e.n++; else inv[c.key] = { n: 1, t: Date.now(), fresh: i % 4 === 0 }; } save(); refresh(); },
-    detail: openDetail, closeDetail, recycle: openRecycle,
+    detail: openDetail, closeDetail, recycle: openRecycle, migration: () => ({ refund: mig.refund, removed: mig.removed }),
   };
 
   // ------------------------------------------------------------ démarrage
@@ -601,7 +720,12 @@
     go(start);
     requestAnimationFrame(moveInk);
     document.fonts && document.fonts.ready.then(moveInk);
-    if (q.get('detail') && inv[q.get('detail')]) openDetail(q.get('detail'), [q.get('detail')]);
+    if (q.get('detail') && D.card(q.get('detail'))) openDetail(q.get('detail'), [q.get('detail')]);
+    if (mig.refund) setTimeout(() => {
+      const n = mig.removed, s = n > 1 ? 's' : '';
+      FX.toast(`Mise à jour des cartes : ${n} carte${s} retirée${s} du jeu, remboursée${s} +${FX.fmt(mig.refund)} ShoxCoins`, 6000);
+      FX.sound('coin');
+    }, 900);
     if (q.get('open')) setTimeout(() => buy(q.get('open'), $(`.buy-btn[data-b="${q.get('open')}"]`)), 400);
   });
 })();
