@@ -681,7 +681,12 @@ ipcMain.handle('update:check', async (e) => {
   if (!updater) return { state: app.isPackaged ? 'error' : 'dev' };
   try { await updater.checkForUpdates(); return { state: 'checking' }; } catch (err) { return { state: 'error', message: String(err?.message || err) }; }
 });
-ipcMain.on('update:install', (e) => { if (trusted(e) && updater) updater.quitAndInstall(false, true); });
+// Installation silencieuse (sans les fenêtres de l'installateur) puis relance automatique, comme Chrome.
+ipcMain.on('update:install', (e) => {
+  if (!trusted(e) || !updater) return;
+  store.flush();
+  updater.quitAndInstall(true, true);
+});
 
 // ---------------------------------------------------------------------------
 // Pilotage de test (--run=étapes.json) : ouvrir, attendre, exécuter du JS, cliquer, capturer.

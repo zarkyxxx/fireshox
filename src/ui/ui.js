@@ -961,9 +961,17 @@
   // ------------------------------------------------------------------ mises à jour
   S.onUpdate((st) => {
     const b = $('#b-update');
-    if (st.state === 'ready') { b.hidden = false; b.title = `Fire Shox ${st.version} est prêt : redémarrer pour l'installer`; }
+    if (st.state === 'ready') {
+      b.hidden = false;
+      b.title = `Fire Shox ${st.version} est prêt : un clic pour redémarrer à jour (tes onglets sont gardés). Sinon, il s'installera tout seul à la fermeture.`;
+      toast(`Mise à jour ${st.version} prête — clique sur « Mettre à jour » ou ferme Fire Shox`);
+    }
   });
-  $('#b-update').addEventListener('click', () => S.installUpdate());
+  $('#b-update').addEventListener('click', () => {
+    saveSessionNow();
+    $('#b-update').querySelector('span').textContent = 'Redémarrage…';
+    S.installUpdate();
+  });
 
   // ------------------------------------------------------------------ raccourcis
   const COMMANDS = {
