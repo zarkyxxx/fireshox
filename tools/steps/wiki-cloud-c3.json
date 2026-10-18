@@ -1,0 +1,10 @@
+[
+  { "open": "fireshox://wiki/#modifier:theo", "size": [1024, 640] },
+  { "wait": 2000 },
+  { "js": "window.__errs = []; addEventListener('error', e => __errs.push(String(e.message))); JSON.stringify({ online: WikiCloud.state.online, draft: !!WikiEditor.test.state().draft, hasText: WikiEditor.test.state().data.resume.includes('panne de réseau') })" },
+  { "shot": ".cache/shots/wiki/cloud-63-brouillon-repris-1024.png" },
+  { "js": "document.getElementById('ed-publish').click(); 1" },
+  { "wait": 2500 },
+  { "js": "JSON.stringify({ hash: location.hash, rev: WikiCloud.page('theo').revision, drafts: Object.keys(FX.store.get('wiki.brouillons', {})), errs: __errs })" },
+  { "quit": true }
+]

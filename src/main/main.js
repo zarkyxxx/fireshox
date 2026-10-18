@@ -12,6 +12,7 @@ const vault = require('./vault');
 const adblock = require('./adblock');
 const shot = require('./shot');
 const claude = require('./claude');
+const wikiCloud = require('./wiki-cloud');
 
 const ROOT = path.join(__dirname, '..', '..');
 const PAGES = path.join(ROOT, 'src', 'pages');
@@ -686,6 +687,8 @@ function setupExtras() {
   adblock.init({ store, uiOf, isUi: isUiSender, trusted, isGoogleLogin });
   shot.init({ isUi: isUiSender, trusted, dir: args['shot-dir'] ? path.resolve(String(args['shot-dir'])) : null });
   claude.init({ uiOf, settings: () => store.get('settings') || {} });
+  // Wiki Shox partagé (textdb + catbox). --wiki-endpoint / --wiki-upload : faux serveur local de test.
+  wikiCloud.init({ endpoint: args['wiki-endpoint'], upload: args['wiki-upload'] });
 }
 function isGhostUiSender(e) {
   const win = BrowserWindow.fromWebContents(e.sender);
@@ -1117,7 +1120,7 @@ const readySessions = new WeakSet();
 function setupSession(ses) {
   if (!ses || readySessions.has(ses)) return;
   readySessions.add(ses);
-  for (const fn of [registerInternalProtocol, setupDownloads, setupPermissions, setupIdentity, adblock.enable]) {
+  for (const fn of [registerInternalProtocol, setupDownloads, setupPermissions, setupIdentity, adblock.enable, wikiCloud.setupSession]) {
     try { fn(ses); } catch (err) { console.error('[session]', fn.name, err && err.message); }
   }
   try { ses.setSpellCheckerLanguages(['fr', 'en-US']); } catch {}

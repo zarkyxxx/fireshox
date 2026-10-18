@@ -1,0 +1,12 @@
+[
+  { "open": "fireshox://wiki/#le-y", "size": [1280, 800] },
+  { "wait": 1500 },
+  { "js": "JSON.stringify({ api: !!window.fireshoxWiki, cloud: WikiCloud.state, entries: WikiShox.entries.length, title: document.title, errs: document.querySelectorAll('.wt-bad').length })" },
+  { "js": "fireshoxWiki.info()" },
+  { "shot": ".cache/shots/wiki/cloud-01-article.png" },
+  { "js": "location.hash = '#modifier:le-y'; 1" },
+  { "wait": 1200 },
+  { "js": "JSON.stringify({ title: document.title, resume: WikiEditor.test.state() && WikiEditor.test.state().data.resume.slice(0, 300), sec: WikiEditor.test.state() && WikiEditor.test.state().data.sections.map(s => s[0]) })" },
+  { "shot": ".cache/shots/wiki/cloud-02-editeur.png" },
+  { "quit": true }
+]

@@ -1,5 +1,10 @@
 // Wiki Shox — données de l'encyclopédie (fireshox://wiki/).
 // =====================================================================
+// WIKI PARTAGÉ : ce fichier est la VERSION D'ORIGINE livrée avec Fire Shox. Dès qu'une page est
+// modifiée en ligne (onglet « Modifier »), la version en ligne la remplace chez tout le monde, et ce
+// fichier ne sert plus pour cette page (sauf « Restaurer la version d'origine » dans l'historique).
+// Les textes en ligne sont du wikitexte sûr (voir wikitext.js), jamais du HTML.
+// =====================================================================
 // Le chef de projet n'a qu'à REMPLIR les textes vides ('') et déposer les images.
 //
 // IMAGES (déposer les fichiers, rien d'autre à faire) :

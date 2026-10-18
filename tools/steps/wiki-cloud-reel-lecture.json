@@ -1,0 +1,9 @@
+[
+  { "open": "fireshox://wiki/#le-y", "size": [1280, 800] },
+  { "wait": 4000 },
+  { "js": "JSON.stringify({ state: WikiCloud.state, pages: Object.keys(WikiCloud.index()).length, info: null })" },
+  { "js": "fireshoxWiki.info()" },
+  { "js": "(async () => JSON.stringify(await fireshoxWiki.history('le-y')))()" },
+  { "shot": ".cache/shots/wiki/cloud-70-vrai-serveur-lecture.png" },
+  { "quit": true }
+]

@@ -1,6 +1,11 @@
 // Wiki Shox — l'encyclopédie incandescente (fireshox://wiki/)
 // Navigation par #slug (bouton « précédent » du navigateur compris), recherche, barre latérale repliable.
-// Stockage : wiki.prefs { sidebar: 'open'|'closed', toc: true|false }, wiki.vues { slug: nombre }.
+// Wiki PARTAGÉ : une page modifiée en ligne (cloud.js) remplace sa version d'origine (data.js).
+//   • version d'origine (data.js) : HTML local de confiance → wikify()
+//   • version en ligne : wikitexte venu de n'importe qui → WikiText (tout est échappé)
+// Routes : #slug, #categorie:Nom, #modifier:slug[:section], #historique:slug, #version:slug:rév,
+//          #diff:slug:rév, #creer[:Titre], #recentes  (les 6 dernières sont dans editor.js)
+// Stockage : wiki.prefs { sidebar, toc }, wiki.vues { slug: nombre } (+ clés de cloud.js)
 (function () {
   'use strict';
 
@@ -11,59 +16,117 @@
   const textOf = (html) => { const t = document.createElement('template'); t.innerHTML = String(html || '').replace(/<\/(p|li|blockquote|tr|h\d|caption)>|<br\s*\/?>/gi, ' $&').replace(/\{\{[^}]*\}\}/g, '').replace(/\[\[([^\]|]+)\|?([^\]]*)\]\]/g, (_m, a, b) => b || a); return t.content.textContent.replace(/\s+/g, ' ').trim(); };
   const snd = (n) => { try { FX.sound(n); } catch {} };
   const toast = (t) => { try { FX.toast(t); } catch {} };
+  const WT = window.WikiText;
+  const Cloud = window.WikiCloud;
 
   // ------------------------------------------------------------------ données
   const CHAMPS = window.WIKI_CHAMPS || ['Nom complet', 'Surnom(s)', 'Première apparition', 'Signe distinctif'];
   const ACC = window.WIKI_ACCUEIL || {};
   const AUTO_CATS_STUB = ['Ébauche Wiki Shox', 'Archives en attente'];
+  const DEFAULT_SECTIONS = [['Biographie', ''], ['Origines', ''], ['Faits marquants', ''], ['Citations célèbres', '']];
+  const DEFAULTS = (window.WIKI_ENTREES || []).filter((e) => e && WT.SLUG_RE.test(String(e.slug || '')));
+  const DEFAULT_BY = new Map(DEFAULTS.map((e) => [e.slug, e]));
+  const POS_RE = /^\d{1,3}% \d{1,3}%$/;
 
-  function normalize(e) {
+  // format : 'html' (data.js, confiance) ou 'wiki' (en ligne) ; cloud : { revision, modified, author } ou null
+  function normalize(e, format = 'html', cloud = null) {
     const slug = String(e.slug || '').trim();
-    const sections = (Array.isArray(e.sections) ? e.sections : [['Biographie', ''], ['Origines', ''], ['Faits marquants', ''], ['Citations célèbres', '']])
-      .map((s) => (Array.isArray(s) ? { titre: s[0], html: s[1] || '', niveau: s[2] === 3 ? 3 : 2 } : { titre: s.titre, html: s.html || '', niveau: s.niveau === 3 ? 3 : 2 }));
+    const wiki = format === 'wiki';
+    const sections = (Array.isArray(e.sections) ? e.sections : DEFAULT_SECTIONS)
+      .map((s) => (Array.isArray(s) ? { titre: String(s[0] || ''), html: String(s[1] || ''), niveau: s[2] === 3 ? 3 : 2 } : { titre: String(s.titre || ''), html: String(s.html || ''), niveau: s.niveau === 3 ? 3 : 2 }));
     const filled = sections.some((s) => s.html.trim()) || String(e.resume || '').trim();
     const galerie = (Array.isArray(e.galerie) ? e.galerie : [['1.jpg', ''], ['2.jpg', ''], ['3.jpg', '']])
-      .map((g) => (Array.isArray(g) ? { src: g[0], cap: g[1] || '' } : typeof g === 'string' ? { src: g, cap: '' } : { src: g.src, cap: g.legende || '' }));
+      .map((g) => (Array.isArray(g) ? { src: String(g[0] || ''), cap: String(g[1] || '') } : typeof g === 'string' ? { src: g, cap: '' } : { src: String(g.src || ''), cap: String(g.legende || '') }))
+      .map((g) => ({ ...g, src: wiki ? WT.safeImage(g.src, slug) : g.src }))
+      .filter((g) => g.src);
+    const photo = e.photo === undefined ? 'main.jpg' : String(e.photo || '');
     const o = {
       slug,
-      titre: e.titre || slug,
+      format,
+      cloud,
+      titre: String(e.titre || slug),
       ebauche: e.ebauche === undefined ? !filled : !!e.ebauche,
-      resume: e.resume || '',
-      photo: e.photo === undefined ? 'main.jpg' : e.photo,
-      legende: e.legende || '',
-      infobox: Array.isArray(e.infobox) ? e.infobox : CHAMPS.map((c) => [c, '']),
+      resume: String(e.resume || ''),
+      photo: wiki ? WT.safeImage(photo, slug) : photo,
+      legende: String(e.legende || ''),
+      infobox: (Array.isArray(e.infobox) ? e.infobox : CHAMPS.map((c) => [c, ''])).map((r) => [String((r && r[0]) || ''), String((r && r[1]) || '')]),
       sections,
       galerie,
-      voirAussi: Array.isArray(e.voirAussi) ? e.voirAussi : [],
-      categories: Array.isArray(e.categories) ? e.categories : [],
+      voirAussi: Array.isArray(e.voirAussi) ? e.voirAussi.map(String) : [],
+      categories: Array.isArray(e.categories) ? e.categories.map(String) : [],
       statut: String(e.statut || ''),
-      cadrage: String(e.cadrage || ''),
+      cadrage: POS_RE.test(String(e.cadrage || '')) ? String(e.cadrage) : '',
       chapeau: String(e.chapeau || ''),
     };
     o.enrich = !o.ebauche && o.statut === 'enrichissement';
     o.mono = monogram(o.titre);
     o.cats = [...(o.ebauche ? AUTO_CATS_STUB : []), ...o.categories, ...(o.enrich ? ['Article en cours d\'enrichissement'] : [])];
     o.plainTitle = fold(o.titre);
-    o.plain = [textOf(o.resume), ...o.sections.map((s) => s.titre + ' ' + textOf(s.html)), ...o.infobox.map((r) => (r[1] ? r[0] + ' ' + textOf(r[1]) : ''))].join(' ').replace(/\s+/g, ' ').trim();
+    const pt = wiki ? WT.plain : textOf;
+    o.plain = [pt(o.resume), ...o.sections.map((s) => s.titre + ' ' + pt(s.html)), ...o.infobox.map((r) => (r[1] ? r[0] + ' ' + pt(r[1]) : ''))].join(' ').replace(/\s+/g, ' ').trim();
     o.foldPlain = fold(o.plain);
     return o;
   }
 
   function monogram(t) {
-    const words = String(t).replace(/^[^A-Za-zÀ-ÿ]+/, '').split(/[\s-]+/).map((w) => w.replace(/^[LlDd]['’]/, '').replace(/[^A-Za-zÀ-ÿ]/g, '')).filter(Boolean);
+    const words = String(t).replace(/^[^A-Za-zÀ-ÿ0-9]+/, '').split(/[\s-]+/).map((w) => w.replace(/^[LlDd]['’]/, '').replace(/[^A-Za-zÀ-ÿ0-9]/g, '')).filter(Boolean);
     if (!words.length) return '?';
     if (words.length === 1) return words[0][0].toUpperCase();
     return (words[0][0] + words[words.length - 1][0]).toUpperCase();
   }
 
-  const ENTRIES = (window.WIKI_ENTREES || []).map(normalize).filter((e) => e.slug);
-  const BY = new Map(ENTRIES.map((e) => [e.slug, e]));
+  // Une page en ligne (cloud.js) → entrée
+  const fromCloud = (p) => normalize({ slug: p.slug, ...p.data }, 'wiki', { revision: p.revision, modified: p.modified, author: p.author });
+  // Des données de page (éditeur, ancienne version) → entrée affichable
+  function entryFromData(slug, data, cloud = null) { return normalize({ ...(data || {}), slug }, 'wiki', cloud); }
+
+  const ENTRIES = [];
+  const BY = new Map();
+  function rebuild() {
+    const cloud = Cloud ? Cloud.pages() : {};
+    const list = DEFAULTS.map((raw) => (cloud[raw.slug] ? fromCloud(cloud[raw.slug]) : normalize(raw, 'html')));
+    const extra = Object.values(cloud).filter((p) => p && !DEFAULT_BY.has(p.slug) && WT.SLUG_RE.test(p.slug)).map(fromCloud)
+      .sort((a, b) => a.plainTitle.localeCompare(b.plainTitle, 'fr'));
+    ENTRIES.splice(0, ENTRIES.length, ...list, ...extra);
+    BY.clear();
+    for (const e of ENTRIES) BY.set(e.slug, e);
+  }
+  rebuild();
+
   const findEntry = (target) => {
     const t = String(target || '').trim();
     if (BY.has(t)) return BY.get(t);
     const f = fold(t);
     return ENTRIES.find((e) => e.plainTitle === f || fold(e.slug) === f) || null;
   };
+
+  // Données (wikitexte) d'une entrée, pour l'éditeur et l'historique.
+  // La version d'origine (HTML de data.js) est convertie en wikitexte à la 1re modification.
+  function defaultData(slug) {
+    const raw = DEFAULT_BY.get(slug);
+    if (!raw) return null;
+    const n = normalize(raw, 'html');
+    return {
+      titre: n.titre,
+      chapeau: WT.fromHtmlInline(n.chapeau),
+      resume: WT.fromHtml(n.resume),
+      photo: n.photo,
+      legende: WT.fromHtmlInline(n.legende),
+      cadrage: n.cadrage,
+      ebauche: n.ebauche,
+      statut: n.statut === 'enrichissement' ? 'enrichissement' : '',
+      infobox: n.infobox.map((r) => [r[0], WT.fromHtmlInline(r[1])]),
+      sections: n.sections.map((s) => [s.titre, WT.fromHtml(s.html), s.niveau]),
+      galerie: n.galerie.map((g) => [g.src, WT.fromHtmlInline(g.cap)]),
+      voirAussi: n.voirAussi.filter((x) => WT.SLUG_RE.test(x)),
+      categories: n.categories,
+    };
+  }
+  function dataOf(slug) {
+    const p = Cloud && Cloud.page(slug);
+    if (p) return JSON.parse(JSON.stringify(p.data));
+    return defaultData(slug);
+  }
 
   const imgPath = (e, f) => (!f ? '' : /^(\/|[a-z]+:)/i.test(f) ? f : `/assets/wiki/${e.slug}/${f}`);
   const shownPath = (p) => p.replace(/^\//, '');
@@ -72,15 +135,15 @@
   const prefs = Object.assign({ sidebar: 'open', toc: true }, FX.store.get('wiki.prefs', {}) || {});
   const savePrefs = () => FX.store.set('wiki.prefs', prefs);
 
-  // ------------------------------------------------------------------ mini-wikitexte
-  // [[slug|texte]]  {{réf}}  {{note|texte}}
+  // ------------------------------------------------------------------ liens et mini-wikitexte
+  function linkHtml(target, labelHtml) {
+    const e = findEntry(target);
+    if (e) return `<a class="wl" href="#${encodeURIComponent(e.slug)}" title="${esc(e.titre)}">${labelHtml ?? esc(e.titre)}</a>`;
+    return `<a class="wl new" href="#creer:${encodeURIComponent(String(target).slice(0, 120))}" data-missing="${esc(target)}" title="${esc(target)} (page inexistante : la créer)">${labelHtml ?? esc(target)}</a>`;
+  }
+  // HTML local de confiance (data.js) : [[slug|texte]] → lien
   function links(html) {
-    return String(html || '').replace(/\[\[([^\]|]+)(?:\|([^\]]*))?\]\]/g, (_m, target, label) => {
-      const e = findEntry(target);
-      const txt = label || (e ? e.titre : target);
-      if (e) return `<a class="wl" href="#${encodeURIComponent(e.slug)}" title="${esc(e.titre)}">${txt}</a>`;
-      return `<a class="wl new" data-missing="${esc(target)}" title="${esc(target)} (page inexistante)">${txt}</a>`;
-    });
+    return String(html || '').replace(/\[\[([^\]|]+)(?:\|([^\]]*))?\]\]/g, (_m, target, label) => linkHtml(target, label || null));
   }
   function wikify(html, ctx) {
     let s = String(html || '');
@@ -93,18 +156,33 @@
     });
     return links(s);
   }
+  // Vignette d'image dans un texte en ligne ([[Image:…|légende]]) : adresse déjà validée par WikiText.
+  function thumb(e, src, capHtml, capText, inl) {
+    return `<figure class="wt-thumb${inl ? ' inl' : ''}">${imgBox(src, { cls: 'ratio-43', mono: e.mono, label: 'Image', small: true, natural: true, cap: WT.plain(capText) || e.titre })}` +
+      `${capHtml ? `<figcaption>${capHtml}</figcaption>` : ''}</figure>`;
+  }
+  const wctx = (e, ctx) => ({ notes: ctx ? ctx.notes : null, slug: e.slug, link: linkHtml, image: (src, capHtml, capText, inl) => thumb(e, src, capHtml, capText, inl) });
+  // Bloc (résumé, section) et ligne (infobox, légende) selon la provenance du texte
+  const block = (e, text, ctx) => (e.format === 'wiki' ? WT.render(text, wctx(e, ctx)) : wikify(text, ctx));
+  const line = (e, text, ctx) => (e.format === 'wiki' ? WT.inline(text, wctx(e, ctx)) : wikify(text, ctx));
+  const noteHtml = (e, n) => (typeof n === 'string' ? links(n) : WT.inline(n.wiki, wctx(e, null)));
+  const plainOf = (e, text) => (e.format === 'wiki' ? WT.plain(text) : textOf(text));
 
   // ------------------------------------------------------------------ images (avec remplacement)
   // natural : la case prend le format réel de l'image une fois chargée (portrait ou paysage)
   // position : point de recadrage (object-position) quand la case garde un format imposé
   function imgBox(src, { cls = 'ratio-45', mono = '?', label = 'Photo à venir', small = false, contain = false, glow = false, natural = false, position = '', zoom = true, cap = '' } = {}) {
     const extra = [cls, contain ? 'contain' : '', glow ? 'glow' : '', zoom ? 'zoomable' : ''].filter(Boolean).join(' ');
-    const attrs = (natural ? ' data-fit="natural"' : '') + (position ? ` data-pos="${esc(position)}"` : '') + (cap ? ` data-cap="${esc(cap)}"` : '');
+    const attrs = (natural ? ' data-fit="natural"' : '') + (position && POS_RE.test(position) ? ` data-pos="${esc(position)}"` : '') + (cap ? ` data-cap="${esc(cap)}"` : '');
+    const remote = /^https:/.test(src);
     return `<div class="imgbox ${extra}" data-src="${esc(src)}"${attrs}>` +
-      `<div class="ph${small ? ' small' : ''}"><div class="ph-mono">${esc(mono)}</div><div class="ph-label">${esc(label)}</div>${src ? `<code title="${esc(shownPath(src))}">${esc(shownPath(src)).replace(/\//g, '/<wbr>')}</code>` : ''}</div>` +
+      `<div class="ph${small ? ' small' : ''}"><div class="ph-mono">${esc(mono)}</div><div class="ph-label">${esc(remote ? 'Chargement de la photo…' : label)}</div>${src && !remote ? `<code title="${esc(shownPath(src))}">${esc(shownPath(src)).replace(/\//g, '/<wbr>')}</code>` : ''}</div>` +
       '</div>';
   }
+  // Seules adresses chargées : /assets/… (local) et https://files.catbox.moe/… (photos envoyées)
+  const LOADABLE = /^(?:\/assets\/[\w./-]+|https:\/\/files\.catbox\.moe\/[\w-]+\.(?:jpe?g|png|gif|webp))$/i;
   function alternates(src) {
+    if (/^https:/.test(src)) return [src];
     const m = src.match(/^(.*)\.(jpe?g|png|webp)$/i);
     if (!m) return [src];
     const ext = m[2].toLowerCase();
@@ -115,11 +193,13 @@
       const src = box.dataset.src;
       if (!src || box.dataset.done) continue;
       box.dataset.done = '1';
+      if (!LOADABLE.test(src) || src.includes('..')) continue;
       const tries = alternates(src);
       let i = 0;
       const img = new Image();
       img.alt = '';
       img.decoding = 'async';
+      img.referrerPolicy = 'no-referrer';
       if (box.dataset.pos) img.style.objectPosition = box.dataset.pos;
       img.onload = () => {
         const r = img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : 1;
@@ -133,7 +213,12 @@
         box.appendChild(img);
         requestAnimationFrame(() => box.classList.add('loaded'));
       };
-      img.onerror = () => { i += 1; if (i < tries.length) img.src = tries[i]; };
+      img.onerror = () => {
+        i += 1;
+        if (i < tries.length) { img.src = tries[i]; return; }
+        const lab = box.querySelector('.ph-label');
+        if (lab && /^https:/.test(src)) lab.textContent = 'Photo indisponible (hors ligne ?)';
+      };
       img.src = tries[0];
     }
   }
@@ -145,6 +230,7 @@
   const searchBox = $('.search');
   let current = null;       // slug affiché (ou null)
   let kbIndex = -1;         // sélection clavier dans les résultats
+  let view = 'home';        // home | article | category | missing | editor…
 
   function setCollapsed(c, sound = true) {
     app.classList.toggle('collapsed', c);
@@ -182,12 +268,15 @@
     if (qf) rows = [...rows.filter((r) => r.inTitle), ...rows.filter((r) => !r.inTitle && r.inText)];
     list.classList.toggle('filtering', qf !== lastQ && lastQ !== null);
     lastQ = qf;
-    list.innerHTML = rows.map(({ e, inTitle }) =>
-      `<li class="item${e.slug === current ? ' on' : ''}" data-slug="${esc(e.slug)}" role="option" aria-selected="${e.slug === current}">` +
+    list.innerHTML = rows.map(({ e, inTitle }) => {
+      const fresh = Cloud && e.slug !== current && Cloud.isNew(e.slug);
+      return `<li class="item${e.slug === current ? ' on' : ''}" data-slug="${esc(e.slug)}" role="option" aria-selected="${e.slug === current}">` +
         `<a href="#${encodeURIComponent(e.slug)}" title="${esc(e.titre)}"><span class="t">${highlight(e.titre, inTitle ? qf : '')}</span>` +
         `${!inTitle && qf ? `<span class="snip">${snippet(e, qf)}</span>` : ''}</a>` +
+        (fresh ? '<span class="badge-mod" title="Modifiée depuis ta dernière visite">modifié</span>' : '') +
         '<button class="more" type="button" title="Options" aria-label="Options"><svg viewBox="0 0 24 24" width="16" height="16"><circle cx="6" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="18" cy="12" r="1.6" fill="currentColor"/></svg></button>' +
-      '</li>').join('');
+      '</li>';
+    }).join('');
     $('#count').textContent = qf ? `${rows.length} / ${ENTRIES.length}` : String(ENTRIES.length);
     $('#group-label').textContent = qf ? 'Résultats' : 'Articles';
     const none = qf && !rows.length;
@@ -206,9 +295,12 @@
       const on = li.dataset.slug === current;
       li.classList.toggle('on', on);
       li.setAttribute('aria-selected', String(on));
-      if (on) li.scrollIntoView({ block: 'nearest' });
+      if (on) { li.scrollIntoView({ block: 'nearest' }); const b = li.querySelector('.badge-mod'); if (b) b.remove(); }
     }
-    $('#nav-home').classList.toggle('on', current === null && !location.hash.replace(/^#/, ''));
+    const key = location.hash.replace(/^#/, '');
+    $('#nav-home').classList.toggle('on', !key);
+    $('#nav-create').classList.toggle('on', /^creer/.test(key));
+    $('#nav-recent').classList.toggle('on', key === 'recentes');
   }
 
   q.addEventListener('input', renderList);
@@ -227,8 +319,8 @@
   $('#clear').addEventListener('click', (ev) => { ev.preventDefault(); q.value = ''; renderList(); q.focus(); });
   $('#nr-create').addEventListener('click', () => createPage(q.value.trim()));
   function createPage(name) {
-    snd('error');
-    toast(`La page « ${name.slice(0, 40)} » n'existe pas encore. Seul le Grand Archiviste peut la créer.`);
+    snd('click');
+    go('creer:' + String(name || '').slice(0, 120));
   }
 
   list.addEventListener('click', (ev) => {
@@ -248,7 +340,7 @@
     const r = btn.getBoundingClientRect();
     menu.hidden = false;
     menu.style.left = Math.min(r.left, innerWidth - 240) + 'px';
-    menu.style.top = Math.min(r.bottom + 6, innerHeight - 110) + 'px';
+    menu.style.top = Math.min(r.bottom + 6, innerHeight - 200) + 'px';
     snd('tick');
   }
   function closeMenu() { menu.hidden = true; if (menuBtn) menuBtn.classList.remove('open'); menuBtn = null; }
@@ -259,6 +351,8 @@
     if (b.dataset.act === 'copy') {
       (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => toast('Lien copié : ' + url), () => toast(url));
     }
+    if (b.dataset.act === 'edit') go('modifier:' + menuSlug);
+    if (b.dataset.act === 'hist') go('historique:' + menuSlug);
     snd('click');
     closeMenu();
   });
@@ -273,40 +367,63 @@
     try { FX.burst(r.left + 24, r.top + r.height / 2, { count: 26, spread: 5, size: 2.4 }); } catch {}
     go(e.slug);
   });
-  $('#plus').addEventListener('click', () => { snd('coin'); toast('Wiki Shox Plus est déjà inclus. Gratuit. Comme l\'air chaud.'); });
   for (const b of $$('.tl')) b.addEventListener('click', () => { snd('click'); toast(b.dataset.toast); });
+
+  // ------------------------------------------------------------------ état de la synchronisation
+  function ago(t) { return window.WikiEditor ? WikiEditor.ago(t) : ''; }
+  function paintSync() {
+    const el = $('#sync');
+    if (!el || !Cloud) return;
+    const s = Cloud.state;
+    let cls = 'wait', title = 'Wiki partagé', sub = 'Connexion…';
+    if (!Cloud.available) { cls = 'off'; sub = 'Lecture seule (hors de Fire Shox)'; }
+    else if (s.syncing && s.online === null) { cls = 'wait'; sub = 'Synchronisation…'; }
+    else if (s.online === false) { cls = 'off'; title = 'Hors ligne'; sub = s.lastSync ? `Dernière version connue (${ago(s.lastSync)})` : 'Version d\'origine du wiki'; }
+    else if (s.online) { cls = 'on'; sub = s.syncing ? 'Synchronisation…' : `À jour · ${ago(s.lastSync)}`; }
+    el.className = 'sync ' + cls;
+    $('#sync-title').textContent = title;
+    $('#sync-sub').textContent = sub;
+  }
+  $('#sync').addEventListener('click', () => { if (Cloud) { snd('tick'); Cloud.sync(); } });
+  setInterval(paintSync, 15000);
 
   // raccourcis
   document.addEventListener('keydown', (ev) => {
     const mod = ev.ctrlKey || ev.metaKey;
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '');
     if (mod && !ev.shiftKey && !ev.altKey && ev.code === 'KeyK') {
       ev.preventDefault();
       if (app.classList.contains('collapsed')) setCollapsed(false, false);
       q.focus(); q.select();
-    } else if (mod && !ev.shiftKey && !ev.altKey && ev.code === 'KeyB') {
+    } else if (mod && !ev.shiftKey && !ev.altKey && ev.code === 'KeyB' && !typing) {
       ev.preventDefault();
       setCollapsed(!app.classList.contains('collapsed'));
-    } else if (ev.key === '/' && !/^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName || '')) {
+    } else if (ev.key === '/' && !typing) {
       ev.preventDefault(); q.focus();
     } else if (ev.key === 'Escape') closeMenu();
   });
 
   // ------------------------------------------------------------------ rendu : article
-  function articleHead(titre, { tabs = true, lang = true, kind = 'Article' } = {}) {
+  function articleHead(titre, { tabs = true, lang = true, kind = 'Article', slug = '', active = 'lire', inert = false } = {}) {
+    const href = (h) => (inert ? '' : ` href="${h}"`);
+    const s = encodeURIComponent(slug);
     return `<div class="title-row"><h1>${esc(titre)}</h1>${lang ? '<button class="lang-btn" type="button" data-toast="Wiki Shox existe en 1 langue : le français incandescent. Une version en Shox est en cours de rebond."><svg viewBox="0 0 24 24" width="17" height="17"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 12h17M12 3.5c2.6 2.6 3.6 5.4 3.6 8.5s-1 5.9-3.6 8.5c-2.6-2.6-3.6-5.4-3.6-8.5s1-5.9 3.6-8.5z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>1 langue <span aria-hidden="true">▾</span></button>' : ''}</div>` +
-      (tabs ? `<nav class="tabs"><div><button class="tab on" type="button">${kind}</button>` + '<button class="tab" type="button" data-toast="La page de discussion est fermée : tout le monde parlait en même temps.">Discussion</button></div>' +
-        '<div><button class="tab on" type="button">Lire</button><button class="tab" type="button" data-toast="Modification réservée au Grand Archiviste des Shox.">Modifier</button><button class="tab" type="button" data-toast="Historique : 1 version. Elle a pris feu, puis elle s\'est très bien remise.">Voir l\'historique</button></div></nav>' : '');
+      (tabs ? `<nav class="tabs"><div><a class="tab${active !== 'discussion' ? ' on' : ''}"${href('#' + s)}>${kind}</a>` + '<button class="tab" type="button" data-toast="La page de discussion est fermée : tout le monde parlait en même temps.">Discussion</button></div>' +
+        (slug
+          ? `<div><a class="tab${active === 'lire' ? ' on' : ''}"${href('#' + s)}>Lire</a><a class="tab${active === 'modifier' ? ' on' : ''}"${href('#modifier:' + s)}>Modifier</a><a class="tab${active === 'historique' ? ' on' : ''}"${href('#historique:' + s)}>Voir l'historique</a></div>`
+          : '<div><a class="tab on">Lire</a></div>') + '</nav>' : '');
   }
 
-  function renderArticle(e) {
+  // opts : { preview: true } (éditeur : rien de cliquable, pas de compteur), { version: { … } } (ancienne version)
+  function renderArticle(e, opts = {}) {
     const ctx = { notes: [] };
-    const pageNotes = [];
-    let lead = e.resume.trim();
-    if (!lead) {
-      lead = `<p><b>${esc(e.titre)}</b> est une entrée de Wiki Shox dont l'article attend encore ses archives officielles.{{note|Les documents (photos, anecdotes, citations) n'ont pas encore été transmis à la rédaction.}} ` +
-        'Elle figure néanmoins parmi les pages les plus attendues de l\'encyclopédie.{{réf}}</p>';
+    const inert = !!opts.preview;
+    let leadHtml;
+    if (e.resume.trim()) leadHtml = block(e, e.resume, ctx);
+    else {
+      leadHtml = wikify(`<p><b>${esc(e.titre)}</b> est une entrée de Wiki Shox dont l'article attend encore ses archives officielles.{{note|Les documents (photos, anecdotes, citations) n'ont pas encore été transmis à la rédaction.}} ` +
+        'Elle figure néanmoins parmi les pages les plus attendues de l\'encyclopédie.{{réf}}</p>', ctx);
     }
-    const leadHtml = wikify(lead, ctx);
 
     // infobox
     let rows = '';
@@ -320,33 +437,36 @@
       }
       if (!open) { rows += '<table class="ib-table">'; open = true; }
       const val = String(r[1] || '').trim();
-      rows += `<tr><th scope="row">${esc(label)}</th><td>${val ? wikify(val, ctx) : '<span class="todo">à compléter</span>'}</td></tr>`;
+      rows += `<tr><th scope="row">${esc(label)}</th><td>${val ? line(e, val, ctx) : '<span class="todo">à compléter</span>'}</td></tr>`;
     }
     if (open) rows += '</table>';
     const hasSub = e.infobox.some((r) => String(r[0] || '').startsWith('#'));
     const photo = imgPath(e, e.photo);
     const isLogo = /\/assets\/logo/.test(photo);
     const infobox = `<aside class="infobox"><div class="ib-title">${esc(e.titre)}</div>` +
-      (photo ? `<div class="ib-photo">${imgBox(photo, { mono: e.mono, label: 'Photo officielle à venir', contain: isLogo, glow: isLogo, natural: !e.cadrage, position: e.cadrage, cap: textOf(e.legende) || e.titre })}</div>` : '') +
-      `<div class="ib-caption">${e.legende ? wikify(e.legende, ctx) : `<span class="todo">${esc(e.titre)}, portrait officiel (en attente)</span>`}</div>` +
+      (photo || e.format === 'wiki' ? `<div class="ib-photo">${imgBox(photo, { cls: photo ? 'ratio-45' : 'ratio-43', mono: e.mono, label: photo ? 'Photo officielle à venir' : 'Pas encore de photo', contain: isLogo, glow: isLogo, natural: !!photo && !e.cadrage, position: e.cadrage, cap: plainOf(e, e.legende) || e.titre })}</div>` : '') +
+      (e.legende.trim() ? `<div class="ib-caption">${line(e, e.legende, ctx)}</div>`
+        : e.format === 'wiki' && photo ? '<div class="ib-caption"></div>'
+          : `<div class="ib-caption"><span class="todo">${esc(e.titre)}, ${photo ? 'portrait officiel (en attente)' : 'en attente d\'une photo'}</span></div>`) +
       (hasSub ? '' : '<div class="ib-sub">Informations</div>') + rows + '</aside>';
 
     // sections
     const secs = [];
-    e.sections.forEach((s, i) => secs.push({ ...s, id: 'sec-' + i, hasChildren: s.niveau === 2 && e.sections[i + 1] && e.sections[i + 1].niveau === 3 }));
-    secs.push({ titre: 'Galerie', id: 'sec-galerie', niveau: 2, special: 'galerie' });
-    secs.push({ titre: 'Voir aussi', id: 'sec-voir', niveau: 2, special: 'voir' });
+    e.sections.forEach((s, i) => secs.push({ ...s, id: 'sec-' + i, idx: i, hasChildren: s.niveau === 2 && e.sections[i + 1] && e.sections[i + 1].niveau === 3 }));
+    secs.push({ titre: 'Galerie', id: 'sec-galerie', niveau: 2, special: 'galerie', idx: 'galerie' });
+    secs.push({ titre: 'Voir aussi', id: 'sec-voir', niveau: 2, special: 'voir', idx: 'voir' });
 
+    const editLink = (idx) => (inert ? '' : `<span class="edit">[ <a href="#modifier:${encodeURIComponent(e.slug)}:${idx}">modifier</a> ]</span>`);
     const bodyParts = secs.map((s) => {
       const tag = s.niveau === 3 ? 'h3' : 'h2';
-      const head = `<${tag} class="sec" id="${s.id}"><span>${esc(s.titre)}</span><span class="edit">[ <button type="button" data-toast="Modification réservée au Grand Archiviste des Shox.">modifier</button> ]</span></${tag}>`;
+      const head = `<${tag} class="sec" id="${s.id}"><span>${esc(s.titre)}</span>${editLink(s.idx)}</${tag}>`;
       let body = '';
       if (s.special === 'galerie') {
         body = e.galerie.length
-          ? '<div class="gallery">' + e.galerie.map((g, gi) => {
+          ? '<div class="gallery">' + e.galerie.map((g) => {
             const p = imgPath(e, g.src);
             const logo = /\/assets\/logo/.test(p);
-            return `<figure class="g-item" style="--r:1">${imgBox(p, { cls: 'ratio-1', mono: e.mono, label: 'Photo à venir', small: true, contain: logo, glow: logo, natural: true, cap: textOf(g.cap) || e.titre })}<figcaption>${g.cap ? wikify(g.cap, ctx) : '<span class="todo">Légende à venir</span>'}</figcaption></figure>`;
+            return `<figure class="g-item" style="--r:1">${imgBox(p, { cls: 'ratio-1', mono: e.mono, label: 'Photo à venir', small: true, contain: logo, glow: logo, natural: true, cap: plainOf(e, g.cap) || e.titre })}<figcaption>${g.cap.trim() ? line(e, g.cap, ctx) : '<span class="todo">Légende à venir</span>'}</figcaption></figure>`;
           }).join('') + '</div>'
           : emptySec();
       } else if (s.special === 'voir') {
@@ -357,7 +477,7 @@
           `<li><a class="wl" href="#categorie:${encodeURIComponent(e.cats[0] || 'Ébauche Wiki Shox')}">Catégorie : ${esc(e.cats[0] || 'Ébauche Wiki Shox')}</a></li>` +
           '</ul>';
       } else if (s.html.trim()) {
-        body = wikify(s.html, ctx);
+        body = block(e, s.html, ctx);
       } else if (!s.hasChildren) {
         body = emptySec();
       }
@@ -368,10 +488,9 @@
     let notesHtml = '';
     if (ctx.notes.length) {
       notesHtml = '<h2 class="sec" id="sec-notes"><span>Notes et références</span></h2><ol class="notes">' +
-        ctx.notes.map((n, i) => `<li id="note-${i + 1}"><a class="up" data-cite="${i + 1}" title="Remonter au texte">↑</a>${links(n)}</li>`).join('') + '</ol>';
+        ctx.notes.map((n, i) => `<li id="note-${i + 1}"><a class="up" data-cite="${i + 1}" title="Remonter au texte">↑</a>${noteHtml(e, n)}</li>`).join('') + '</ol>';
       secs.push({ titre: 'Notes et références', id: 'sec-notes', niveau: 2 });
     }
-    void pageNotes;
 
     // sommaire
     let n2 = 0, n3 = 0, tocHtml = '<ol>';
@@ -392,29 +511,34 @@
     const toc = `<div class="toc${prefs.toc ? '' : ' closed'}" id="toc"><div class="toc-head"><span>Sommaire</span><button type="button" id="toc-toggle">[${prefs.toc ? 'masquer' : 'afficher'}]</button></div>${tocHtml}</div>`;
 
     const banner = e.ebauche
-      ? `<div class="ambox"><img src="/assets/logo-128.png" alt=""><div><b>Cette page attend ses archives officielles.</b>Les photos, anecdotes et citations de <i>${esc(e.titre)}</i> seront ajoutées par le Grand Archiviste des Shox dès leur réception. En attendant, l'article reste une ébauche.</div><div class="act"><button type="button" data-toast="Merci ! Le Grand Archiviste a bien noté ta motivation incandescente.">Je veux aider</button></div></div>`
+      ? `<div class="ambox"><img src="/assets/logo-128.png" alt=""><div><b>Cette page attend ses archives officielles.</b>Les photos, anecdotes et citations de <i>${esc(e.titre)}</i> peuvent être ajoutées par n'importe qui : clique sur « Modifier » pour compléter l'article.</div><div class="act">${inert ? '' : `<a class="amb-btn" href="#modifier:${encodeURIComponent(e.slug)}">Compléter la page</a>`}</div></div>`
       : e.enrich
         ? '<div class="ambox mini"><span class="mini-ico">📚</span><span><b>Article en cours d\'enrichissement</b> — d\'autres archives arrivent.</span></div>'
         : '';
-    const hatnote = e.chapeau ? `<div class="hatnote"><span aria-hidden="true">↳</span> <i>${wikify(e.chapeau, null)}</i></div>` : '';
+    const hatnote = e.chapeau.trim() ? `<div class="hatnote"><span aria-hidden="true">↳</span> <i>${line(e, e.chapeau, null)}</i></div>` : '';
 
     // vues
-    const vues = FX.store.get('wiki.vues', {}) || {};
-    vues[e.slug] = (vues[e.slug] || 0) + 1;
-    FX.store.set('wiki.vues', vues);
+    let vues = 0;
+    if (!inert && !opts.version) {
+      const all = FX.store.get('wiki.vues', {}) || {};
+      all[e.slug] = (all[e.slug] || 0) + 1;
+      vues = all[e.slug];
+      FX.store.set('wiki.vues', all);
+    }
 
-    return `<article class="view article">${articleHead(e.titre)}` +
+    return `<article class="view article${inert ? ' preview' : ''}">${articleHead(e.titre, { slug: e.slug, inert, active: opts.version ? 'historique' : 'lire' })}` +
       '<div class="tagline">Un article de Wiki Shox, l\'encyclopédie incandescente.</div>' +
+      (opts.version ? opts.version : '') +
       banner + hatnote +
       `<div class="prose">${infobox}${leadHtml}${toc}${bodyParts.join('')}${notesHtml}</div>` +
-      navbox(e.slug) + portals() + catlinks(e.cats) +
-      footer(vues[e.slug]) +
+      (inert ? '' : navbox(e.slug) + portals()) + catlinks(e.cats, inert) +
+      (inert ? '' : footer(vues, e)) +
       '</article>';
   }
 
   function emptySec() {
     return '<div class="empty-sec"><span class="ico"><svg viewBox="0 0 24 24" width="17" height="17"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>' +
-      '<span>Cette section est vide, insuffisamment détaillée ou incomplète. Les archives officielles arrivent bientôt !</span></div>';
+      '<span>Cette section est vide, insuffisamment détaillée ou incomplète. Tu peux la compléter avec « modifier ».</span></div>';
   }
   function navbox(cur) {
     return '<div class="navbox"><div class="nb-title"><img src="/assets/logo-64.png" alt="">Wiki Shox — l\'encyclopédie incandescente</div>' +
@@ -429,20 +553,26 @@
     return '<div class="portals">' +
       '<a class="portal" href="#"><span>🔥</span><span>Portail du feu</span></a>' +
       '<a class="portal" href="#les-shoxs"><span>👟</span><span>Portail de la chaussure à ressorts</span></a>' +
-      '<a class="portal" href="#"><span><img src="/assets/logo-32.png" alt="" width="18" height="18"></span><span>Portail de Fire Shox</span></a>' +
+      '<a class="portal" href="#recentes"><span>🕒</span><span>Modifications récentes</span></a>' +
       '</div>';
   }
-  function catlinks(cats) {
+  function catlinks(cats, inert) {
     if (!cats.length) return '';
     return '<div class="catlinks"><b>Catégories :</b>' +
-      cats.map((c) => `<a href="#categorie:${encodeURIComponent(c)}">${esc(c)}</a>`).join(' <span class="sep">|</span> ') + '</div>';
+      cats.map((c) => (inert ? `<a>${esc(c)}</a>` : `<a href="#categorie:${encodeURIComponent(c)}">${esc(c)}</a>`)).join(' <span class="sep">|</span> ') + '</div>';
   }
-  function footer(vues) {
-    return '<footer class="art-foot"><div>' +
-      '<p>La dernière modification de cette page a été faite par un ressort, à une heure incandescente.</p>' +
+  function footer(vues, e) {
+    let last;
+    if (e && e.cloud) {
+      const d = e.cloud.modified ? new Date(e.cloud.modified) : null;
+      last = `<p class="last-mod">Dernière modification par <b>${esc(e.cloud.author)}</b> ${esc(ago(e.cloud.modified))}${d ? ` <span class="abs">(${esc(d.toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' }))})</span>` : ''} · révision ${e.cloud.revision} · <a href="#historique:${encodeURIComponent(e.slug)}">historique</a></p>`;
+    } else if (e) {
+      last = `<p class="last-mod">Version d'origine de Wiki Shox : cette page n'a encore jamais été modifiée en ligne. <a href="#modifier:${encodeURIComponent(e.slug)}">Modifier</a></p>`;
+    } else last = '<p>Wiki Shox est modifiable par tous les possesseurs de Fire Shox : chaque modification est visible par tout le monde.</p>';
+    return '<footer class="art-foot"><div>' + last +
       (vues ? `<p>Cette page a été consultée ${FX.fmt(vues)} fois sur ce navigateur.</p>` : '') +
       '<p>Le texte est disponible sous licence <i>Creative Shox Attribution – Rebond à l\'identique</i> ; d\'autres conditions peuvent s\'appliquer (surtout la gravité).</p>' +
-      '<div class="links"><button type="button" data-toast="Nous ne collectons rien. Même pas les chaussettes.">Politique de confidentialité</button><button type="button" data-toast="Wiki Shox : écrit au feu de bois depuis toujours.">À propos de Wiki Shox</button><button type="button" data-toast="Attention : la lecture prolongée peut provoquer une envie soudaine de rebondir.">Avertissements</button></div>' +
+      '<div class="links"><button type="button" data-toast="Nous ne collectons rien. Même pas les chaussettes. (Les pages et photos publiées sont visibles par tous.)">Politique de confidentialité</button><button type="button" data-toast="Wiki Shox : écrit au feu de bois par toute la bande.">À propos de Wiki Shox</button><button type="button" data-toast="Attention : la lecture prolongée peut provoquer une envie soudaine de rebondir.">Avertissements</button></div>' +
       '</div><div class="badges"><span class="badge"><img src="/assets/logo-64.png" alt=""><span>propulsé par<b>Fire Shox</b></span></span></div></footer>';
   }
 
@@ -451,19 +581,24 @@
     const feat = BY.get(ACC.lumiere) || ENTRIES.find((x) => !x.ebauche) || ENTRIES[0];
     const stubs = ENTRIES.filter((x) => x.ebauche).length;
     const ctx = { notes: [] };
-    const featText = feat ? textOf(feat.resume).slice(0, 330).replace(/\s+\S*$/, '') + '…' : '';
+    const featText = feat ? plainOf(feat, feat.resume).slice(0, 330).replace(/\s+\S*$/, '') + '…' : '';
+    const featPhoto = feat ? imgPath(feat, feat.photo) : '';
     return '<div class="view home">' +
       '<section class="home-banner"><img class="logo" src="/assets/logo-256.png" alt="">' +
-      '<div><h1>Bienvenue sur <em class="fire-text">Wiki Shox</em></h1><p>L\'encyclopédie incandescente que chacun peut lire en rebondissant.</p></div>' +
+      '<div><h1>Bienvenue sur <em class="fire-text">Wiki Shox</em></h1><p>L\'encyclopédie incandescente que tout le monde peut modifier.</p></div>' +
       `<div class="home-stats"><span><b>${ENTRIES.length}</b>articles en français</span><span><b>${ENTRIES.length - stubs}</b>articles rédigés</span><span><b>${stubs}</b>ébauches en attente</span></div></section>` +
       '<div class="home-grid">' +
-      (feat ? `<section class="box"><div class="box-h"><span class="ico">✨</span>Lumière sur…</div><div class="box-b"><div class="feat">${imgBox(imgPath(feat, feat.photo), { cls: 'ratio-1', mono: feat.mono, contain: /logo/.test(feat.photo), glow: /logo/.test(feat.photo), small: true, zoom: false })}<div><h3><a href="#${encodeURIComponent(feat.slug)}">${esc(feat.titre)}</a></h3><p>${esc(featText)}</p><a class="more-link" href="#${encodeURIComponent(feat.slug)}">Lire l'article →</a></div></div></div></section>` : '') +
+      (feat ? `<section class="box"><div class="box-h"><span class="ico">✨</span>Lumière sur…</div><div class="box-b"><div class="feat">${imgBox(featPhoto, { cls: 'ratio-1', mono: feat.mono, contain: /logo/.test(featPhoto), glow: /logo/.test(featPhoto), small: true, zoom: false })}<div><h3><a href="#${encodeURIComponent(feat.slug)}">${esc(feat.titre)}</a></h3><p>${esc(featText)}</p><a class="more-link" href="#${encodeURIComponent(feat.slug)}">Lire l'article →</a></div></div></div></section>` : '') +
       `<section class="box"><div class="box-h"><span class="ico">💡</span>Le saviez-vous ?</div><div class="box-b"><ul class="dyk">${(ACC.saviezVous || []).map((t) => `<li>${wikify(t, ctx)}</li>`).join('')}</ul></div></section>` +
       '</div>' +
-      '<section class="box home-all"><div class="box-h"><span class="ico">📚</span>Toutes les entrées</div><div class="box-b"><div class="cards">' +
-      ENTRIES.map((x) => `<a class="card" href="#${encodeURIComponent(x.slug)}">${imgBox(imgPath(x, x.photo), { cls: 'ratio-1', mono: x.mono, label: 'Photo à venir', small: true, contain: /logo/.test(x.photo), glow: /logo/.test(x.photo), position: x.cadrage || '50% 30%', zoom: false })}<span class="ct">${esc(x.titre)}</span><span class="cs${x.ebauche ? '' : x.enrich ? ' new' : ' star'}">${x.ebauche ? 'Ébauche' : x.enrich ? '● Nouvel article' : '★ Article de qualité'}</span></a>`).join('') +
+      '<section class="box home-all"><div class="box-h"><span class="ico">📚</span>Toutes les entrées<a class="box-act" href="#creer">+ Créer une page</a></div><div class="box-b"><div class="cards">' +
+      ENTRIES.map((x) => {
+        const p = imgPath(x, x.photo);
+        const fresh = Cloud && Cloud.isNew(x.slug);
+        return `<a class="card" href="#${encodeURIComponent(x.slug)}">${imgBox(p, { cls: 'ratio-1', mono: x.mono, label: 'Photo à venir', small: true, contain: /logo/.test(p), glow: /logo/.test(p), position: x.cadrage || '50% 30%', zoom: false })}<span class="ct">${esc(x.titre)}</span><span class="cs${fresh ? ' mod' : x.ebauche ? '' : x.enrich ? ' new' : ' star'}">${fresh ? '● Modifié' : x.ebauche ? 'Ébauche' : x.enrich ? '● Nouvel article' : '★ Article de qualité'}</span></a>`;
+      }).join('') +
       '</div></div></section>' +
-      footer(0) +
+      footer(0, null) +
       '</div>';
   }
 
@@ -482,7 +617,7 @@
       '<div class="tagline">Une catégorie de Wiki Shox, l\'encyclopédie incandescente.</div>' +
       `<p class="cat-intro">Pages dans la catégorie « ${esc(name)} » : ${members.length} page${members.length > 1 ? 's' : ''}.</p>` +
       (members.length ? '<div class="cat-cols prose">' + keys.map((k) => `<h3>${k}</h3><ul>${groups.get(k).map((m) => `<li><a class="wl" href="#${encodeURIComponent(m.slug)}">${esc(m.titre)}</a></li>`).join('')}</ul>`).join('') + '</div>' : '<p class="todo">Cette catégorie est vide. Même les ressorts l\'ont quittée.</p>') +
-      navbox(null) + footer(0) + '</article>';
+      navbox(null) + footer(0, null) + '</article>';
   }
 
   function renderMissing(name) {
@@ -490,9 +625,9 @@
     const sugg = ENTRIES.filter((x) => x.plainTitle.includes(qf.slice(0, 3)) || qf.includes(fold(x.slug).slice(0, 3))).slice(0, 5);
     return `<article class="view">${articleHead(name, { lang: false })}` +
       '<div class="tagline">Un article de Wiki Shox, l\'encyclopédie incandescente.</div>' +
-      `<div class="ambox missing"><img src="/assets/logo-128.png" alt=""><div><b>Wiki Shox ne possède pas d'article avec ce nom exact.</b>La page « ${esc(name)} » a peut-être rebondi trop loin. Vérifie l'orthographe ou utilise la recherche à gauche.</div></div>` +
+      `<div class="ambox missing"><img src="/assets/logo-128.png" alt=""><div><b>Wiki Shox ne possède pas d'article avec ce nom exact.</b>La page « ${esc(name)} » a peut-être rebondi trop loin. Vérifie l'orthographe, utilise la recherche… ou crée-la !</div><div class="act"><a class="amb-btn" href="#creer:${encodeURIComponent(name.slice(0, 120))}">Créer la page</a></div></div>` +
       (sugg.length ? `<section class="box"><div class="box-h">Vouliez-vous dire…</div><div class="box-b prose"><ul>${sugg.map((m) => `<li><a class="wl" href="#${encodeURIComponent(m.slug)}">${esc(m.titre)}</a></li>`).join('')}</ul></div></section>` : '') +
-      navbox(null) + footer(0) + '</article>';
+      navbox(null) + footer(0, null) + '</article>';
   }
 
   // ------------------------------------------------------------------ routeur (#slug)
@@ -505,10 +640,11 @@
   function go(slug) {
     navByClick = true;
     if (location.hash.replace(/^#/, '') === slug) { route(); return; }
-    location.hash = slug ? '#' + encodeURIComponent(slug) : '';
+    location.hash = slug ? '#' + slug.split(':').map(encodeURIComponent).join(':') : '';
     if (!slug) history.replaceState(null, '', location.pathname + location.search);
   }
 
+  const EDITOR_ROUTES = /^(modifier|historique|version|diff|creer|recentes)(?::|$)/;
   function route() {
     let key = '';
     try { key = decodeURIComponent(location.hash.replace(/^#/, '')); } catch { key = location.hash.replace(/^#/, ''); }
@@ -517,23 +653,39 @@
     navByClick = false;
     lastKey = key;
     closeMenu();
+    if (window.WikiEditor) WikiEditor.leave();
 
-    let html;
     current = null;
+    let m;
+    if ((m = EDITOR_ROUTES.exec(key)) && window.WikiEditor) {
+      view = m[1];
+      const r = WikiEditor.route(m[1], key.slice(m[0].length)) || {};
+      current = r.current || null;
+      document.title = (r.title ? r.title + ' — ' : '') + 'Wiki Shox';
+      markActive();
+      main.scrollTop = 0;
+      return;
+    }
+    let html;
     if (!key) {
+      view = 'home';
       html = renderHome();
       document.title = 'Wiki Shox';
     } else if (/^cat[ée]gorie:/i.test(key)) {
+      view = 'category';
       const name = key.replace(/^cat[ée]gorie:/i, '');
       html = renderCategory(name);
       document.title = `Catégorie : ${name} — Wiki Shox`;
     } else {
       const e = findEntry(key);
       if (e) {
+        view = 'article';
         current = e.slug;
         html = renderArticle(e);
         document.title = `${e.titre} — Wiki Shox`;
+        if (Cloud && e.cloud) Cloud.seen(e.slug, e.cloud.revision);
       } else {
+        view = 'missing';
         html = renderMissing(key);
         document.title = `${key} — Wiki Shox`;
       }
@@ -544,6 +696,25 @@
     main.scrollTop = restoring ? scrolls.get(key) : 0;
   }
 
+  // Nouvelle version reçue : on rafraîchit la liste, et la page affichée si elle a changé (jamais l'éditeur).
+  function onCloud(type, changed) {
+    if (type === 'status') { paintSync(); return; }
+    if (type !== 'sync') return;
+    rebuild();
+    renderList();
+    markActive();
+    paintSync();
+    if (!changed || !changed.length) return;
+    // (« missing » : un lien vers une page créée par quelqu'un d'autre, arrivée avec cette synchronisation)
+    if ((view === 'article' && changed.includes(current)) || view === 'home' || view === 'missing' || view === 'category') {
+      const top = main.scrollTop;
+      navByClick = true;
+      route();
+      main.scrollTop = top;
+      if (view === 'article') toast('Cette page vient d\'être mise à jour par quelqu\'un.');
+    }
+  }
+
   // ------------------------------------------------------------------ visionneuse d'images
   const viewer = $('#viewer');
   const vStage = $('#v-stage');
@@ -551,7 +722,8 @@
   let vItems = [], vIdx = 0, vs = 1, vtx = 0, vty = 0, vDrag = null;
 
   function openViewer(box) {
-    const boxes = $$('.imgbox.zoomable.loaded', page);
+    const scope = box.closest('.ed-prev-body, .hist-view') || page;
+    const boxes = $$('.imgbox.zoomable.loaded', scope);
     vItems = boxes.map((b) => ({ src: b.querySelector('img').src, cap: b.dataset.cap || '' }));
     vIdx = Math.max(0, boxes.indexOf(box));
     viewer.hidden = false;
@@ -643,11 +815,26 @@
   }, true);
   window.addEventListener('hashchange', () => { if (!viewer.hidden) { viewer.hidden = true; } });
 
-  // clics dans la page : sommaire, notes, liens rouges, petites blagues
+  // clics dans la page : sommaire, notes, liens, petites blagues
   page.addEventListener('click', (ev) => {
     const t = ev.target;
+    // Aperçu de l'éditeur : rien n'y est cliquable (sauf les images)
+    const inPreview = t.closest('.article.preview');
     const zb = t.closest('.imgbox.zoomable.loaded');
     if (zb && !t.closest('a')) { openViewer(zb); return; }
+    const ext = t.closest('a[data-ext]');
+    if (ext) {
+      ev.preventDefault();
+      if (inPreview) return;
+      const href = WT.safeLink(ext.dataset.ext);
+      if (href) { snd('click'); FX.open(href); }
+      return;
+    }
+    if (inPreview) {
+      if (t.closest('a')) ev.preventDefault();
+      if (t.closest('[data-go]')) { const el = inPreview.querySelector('#' + CSS.escape(t.closest('[data-go]').dataset.go)); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      return;
+    }
     const goEl = t.closest('[data-go]');
     if (goEl) { scrollToEl(document.getElementById(goEl.dataset.go)); snd('tick'); return; }
     const note = t.closest('[data-note]');
@@ -662,8 +849,6 @@
       toast(FX.pick(['Référence introuvable : elle a dû rebondir.', 'Source : « tkt, c\'est vrai ».', 'Cette information a été vérifiée par personne.', 'La référence a pris feu. Respect.']));
       return;
     }
-    const miss = t.closest('[data-missing]');
-    if (miss) { createPage(miss.dataset.missing); return; }
     if (t.closest('#toc-toggle')) {
       prefs.toc = !prefs.toc; savePrefs();
       $('#toc').classList.toggle('closed', !prefs.toc);
@@ -688,9 +873,15 @@
   window.addEventListener('hashchange', route);
 
   // ------------------------------------------------------------------ démarrage
+  const api = {
+    entries: ENTRIES, findEntry, go, route, rebuild, renderList, markActive,
+    esc, fold, hydrate, imgBox, renderArticle, entryFromData, defaultData, dataOf, hasDefault: (slug) => DEFAULT_BY.has(slug),
+    page, main, scrollToEl, current: () => current, CHAMPS, toast, snd,
+  };
+  window.WikiShox = api;
+  if (window.WikiEditor) WikiEditor.attach(api);
   renderList();
   route();
-
-  // petit accès pour les tests
-  window.WikiShox = { entries: ENTRIES, go, findEntry };
+  paintSync();
+  if (Cloud) { Cloud.on(onCloud); Cloud.start(); }
 })();

@@ -1,0 +1,19 @@
+[
+  { "open": "fireshox://wiki/#theo", "size": [1024, 640] },
+  { "wait": 2500 },
+  { "js": "window.__errs = []; addEventListener('error', e => __errs.push(String(e.message))); addEventListener('unhandledrejection', e => __errs.push(String(e.reason))); JSON.stringify({ online: WikiCloud.state.online, err: WikiCloud.state.error, rev: WikiCloud.page('theo') && WikiCloud.page('theo').revision, sync: document.getElementById('sync').textContent.replace(/\\s+/g, ' ').trim() })" },
+  { "shot": ".cache/shots/wiki/cloud-60-hors-ligne-lecture-1024.png" },
+  { "js": "location.hash = '#modifier:theo'; 1" },
+  { "wait": 1200 },
+  { "js": "(() => { const ta = document.querySelector('[data-k=resume]'); ta.value = ta.value + '\\n\\nÉcrit pendant la panne de réseau.'; ta.dispatchEvent(new Event('input', { bubbles: true })); return 1; })()" },
+  { "wait": 800 },
+  { "js": "document.getElementById('ed-publish').click(); 1" },
+  { "wait": 3000 },
+  { "js": "JSON.stringify({ state: document.getElementById('ed-state').textContent, drafts: Object.keys(FX.store.get('wiki.brouillons', {})) })" },
+  { "shot": ".cache/shots/wiki/cloud-61-hors-ligne-publier-1024.png" },
+  { "js": "location.hash = '#historique:theo'; 1" },
+  { "wait": 2500 },
+  { "shot": ".cache/shots/wiki/cloud-62-hors-ligne-historique-1024.png" },
+  { "js": "JSON.stringify({ errs: __errs })" },
+  { "quit": true }
+]

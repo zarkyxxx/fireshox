@@ -1,0 +1,22 @@
+[
+  { "open": "fireshox://wiki/#page-piegee", "size": [1280, 800] },
+  { "wait": 2500 },
+  { "js": "location.hash = '#page-piegee'; 1" },
+  { "wait": 1200 },
+  { "js": "(() => { const P = document.getElementById('page'); const all = [...document.querySelectorAll('*')]; return JSON.stringify({ titre: document.title.slice(0, 90), pirate: document.title.startsWith('PIRATÉ'), scripts: document.querySelectorAll('body script:not([src])').length, onAttrs: all.filter(el => [...el.attributes].some(a => /^on/i.test(a.name))).length, styleAttrUrl: all.filter(el => /url\\(/i.test(el.getAttribute('style') || '')).length, imgs: [...document.querySelectorAll('img')].map(i => i.getAttribute('src')).filter(s => !/^\\/assets\\//.test(s || '')), hrefs: [...P.querySelectorAll('a[href]')].map(a => a.getAttribute('href')).filter(h => !/^#/.test(h)), ext: [...P.querySelectorAll('[data-ext]')].map(a => a.dataset.ext), slugs: Object.keys(WikiCloud.index()), sidebar: [...document.querySelectorAll('.item')].map(i => i.dataset.slug).filter(s => !/^[a-z0-9-]+$/.test(s)) }); })()" },
+  { "shot": ".cache/shots/wiki/cloud-80-securite-1280.png" },
+  { "js": "document.getElementById('main').scrollTop = 600; 1" },
+  { "wait": 400 },
+  { "shot": ".cache/shots/wiki/cloud-81-securite-bas-1280.png" },
+  { "js": "location.hash = '#historique:page-piegee'; 1" },
+  { "wait": 1500 },
+  { "js": "JSON.stringify({ pirate: document.title.startsWith('PIRATÉ'), titre: document.title.slice(0, 80), onAttrs: [...document.querySelectorAll('*')].filter(el => [...el.attributes].some(a => /^on/i.test(a.name))).length })" },
+  { "shot": ".cache/shots/wiki/cloud-82-securite-historique-1280.png" },
+  { "js": "location.hash = '#recentes'; 1" },
+  { "wait": 1500 },
+  { "js": "JSON.stringify({ pirate: document.title.startsWith('PIRATÉ'), titre: document.title.slice(0, 80), onAttrs: [...document.querySelectorAll('*')].filter(el => [...el.attributes].some(a => /^on/i.test(a.name))).length })" },
+  { "open": "fireshox://home/" },
+  { "wait": 1500 },
+  { "js": "JSON.stringify({ autrePage: location.href, wikiApi: typeof window.fireshoxWiki })" },
+  { "quit": true }
+]

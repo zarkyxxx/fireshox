@@ -222,6 +222,32 @@ function askClaudeButton() {
 }
 
 // ---------------------------------------------------------------------------
+// Wiki Shox partagé — la page fireshox://wiki/ (cadre principal) est la SEULE à recevoir l'API du wiki en
+// ligne. Tout passe par le processus principal (src/main/wiki-cloud.js), qui revérifie l'adresse de
+// l'expéditeur, ne parle qu'à textdb.dev et catbox.moe, et revalide chaque donnée.
+// ---------------------------------------------------------------------------
+if (location.protocol === 'fireshox:' && location.host === 'wiki' && window.top === window) {
+  const str = (v, max) => (typeof v === 'string' ? v.slice(0, max) : '');
+  contextBridge.exposeInMainWorld('fireshoxWiki', {
+    info: () => ipcRenderer.invoke('wiki:info'),
+    index: () => ipcRenderer.invoke('wiki:index'),
+    page: (slug) => ipcRenderer.invoke('wiki:page', str(slug, 80)),
+    history: (slug) => ipcRenderer.invoke('wiki:hist', str(slug, 80)),
+    publish: (req) => ipcRenderer.invoke('wiki:publish', req && typeof req === 'object' ? {
+      slug: str(req.slug, 80),
+      base: Number.isInteger(req.base) ? req.base : -1,
+      create: req.create === true,
+      data: req.data && typeof req.data === 'object' ? req.data : null,
+      summary: str(req.summary, 300),
+      author: str(req.author, 60),
+    } : null),
+    // { type: 'image/jpeg', bytes: Uint8Array } → { ok, url }
+    upload: (file) => ipcRenderer.invoke('wiki:upload', file && typeof file === 'object' && ArrayBuffer.isView(file.bytes)
+      ? { type: str(file.type, 40), bytes: file.bytes } : null),
+  });
+}
+
+// ---------------------------------------------------------------------------
 // ShoxVault — la page de gestion fireshox://passwords/ est la SEULE à recevoir l'API des mots de passe
 // (le processus principal vérifie aussi l'adresse de l'expéditeur à chaque appel).
 // ---------------------------------------------------------------------------
