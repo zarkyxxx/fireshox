@@ -748,6 +748,36 @@ async function runSteps(file) {
 }
 
 // ---------------------------------------------------------------------------
+// Chiffrement des cookies (fusible EnableCookieEncryption, depuis la 1.0.7) : les nouveaux cookies sont
+// chiffrés par Windows ; ceux d'avant restent lisibles mais en clair. Au premier lancement, on les
+// réécrit tous une fois pour qu'ils soient chiffrés à leur tour, sans déconnecter personne.
+// ---------------------------------------------------------------------------
+async function encryptOldCookies(ses) {
+  if (!app.isPackaged || store.get('cookiesEncrypted')) return;
+  let done = 0, failed = 0;
+  try {
+    const all = await ses.cookies.get({});
+    for (const c of all) {
+      if (c.session || !c.expirationDate) continue; // les cookies de session ne sont jamais écrits sur le disque
+      const host = c.domain.replace(/^\./, '');
+      const details = {
+        url: `${c.secure ? 'https' : 'http'}://${host}${c.path || '/'}`,
+        name: c.name, value: c.value, path: c.path, secure: c.secure, httpOnly: c.httpOnly,
+        expirationDate: c.expirationDate, sameSite: c.sameSite,
+      };
+      if (!c.hostOnly) details.domain = c.domain;
+      try { await ses.cookies.set(details); done++; } catch { failed++; }
+    }
+    await ses.cookies.flushStore();
+  } catch (e) {
+    console.error('[cookies] migration impossible', e);
+    return;
+  }
+  store.set('cookiesEncrypted', true);
+  console.log(`[cookies] ${done} cookie(s) réécrit(s) chiffrés, ${failed} ignoré(s)`);
+}
+
+// ---------------------------------------------------------------------------
 // Cycle de vie
 // ---------------------------------------------------------------------------
 app.on('second-instance', (_e, argv) => {
@@ -770,6 +800,7 @@ app.whenReady().then(() => {
   ses.on('session-created', () => {});
   app.on('session-created', (s) => { try { registerInternalProtocol(s); setupDownloads(s); setupPermissions(s); } catch {} });
 
+  encryptOldCookies(ses);
   if (devRun) { runSteps(path.resolve(String(args.run))); return; }
   createBrowserWindow(args.urls);
   setupUpdater();

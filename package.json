@@ -1,62 +1,71 @@
 {
-    "name":  "fireshox",
-    "productName":  "Fire Shox",
-    "version": "1.0.6",
-    "description":  "Fire Shox — le navigateur à amorti gravitationnel. 100% incandescent.",
-    "author":  "Fire Shox Corp",
-    "license":  "UNLICENSED",
-    "main":  "src/main/main.js",
-    "scripts":  {
-                    "start":  "electron .",
-                    "logo":  "node tools/logo.js",
-                    "dist":  "electron-builder --win nsis --publish never"
-                },
-    "build":  {
-                  "appId":  "com.fireshox.browser",
-                  "productName":  "Fire Shox",
-                  "artifactName":  "FireShox-Setup.${ext}",
-                  "directories":  {
-                                      "output":  "dist",
-                                      "buildResources":  "build"
-                                  },
-                  "files":  [
-                                "src/**/*",
-                                "assets/**/*",
-                                "package.json"
-                            ],
-                  "win":  {
-                              "target":  "nsis",
-                              "icon":  "build/icon.ico"
-                          },
-                  "nsis":  {
-                               "oneClick":  false,
-                               "perMachine":  false,
-                               "allowToChangeInstallationDirectory":  true,
-                               "createDesktopShortcut":  true,
-                               "createStartMenuShortcut":  true,
-                               "shortcutName":  "Fire Shox",
-                               "installerIcon":  "build/icon.ico",
-                               "uninstallerIcon":  "build/icon.ico",
-                               "runAfterFinish":  true
-                           },
-                  "publish":  [
-                                  {
-                                      "provider":  "github",
-                                      "owner":  "zarkyxxx",
-                                      "repo":  "fireshox"
-                                  }
-                              ]
-              },
-    "devDependencies":  {
-                            "electron":  "^44.9.0",
-                            "electron-builder":  "^26.15.3",
-                            "png-to-ico":  "^3.0.2",
-                            "sharp":  "^0.35.5",
-                            "@fontsource-variable/outfit":  "^5.3.0",
-                            "@fontsource/bungee":  "^5.3.0",
-                            "@fontsource/jetbrains-mono":  "^5.3.0"
-                        },
-    "dependencies":  {
-                         "electron-updater":  "^6.8.9"
-                     }
+  "name": "fireshox",
+  "productName": "Fire Shox",
+  "version": "1.0.7",
+  "description": "Fire Shox — le navigateur à amorti gravitationnel. 100% incandescent.",
+  "author": "Fire Shox Corp",
+  "license": "UNLICENSED",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "logo": "node tools/logo.js",
+    "dist": "electron-builder --win nsis --publish never",
+    "moteur": "node tools/update-engine.js"
+  },
+  "build": {
+    "appId": "com.fireshox.browser",
+    "productName": "Fire Shox",
+    "artifactName": "FireShox-Setup.${ext}",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Fire Shox",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "runAfterFinish": true
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "zarkyxxx",
+        "repo": "fireshox"
+      }
+    ],
+    "electronFuses": {
+      "runAsNode": false,
+      "enableCookieEncryption": true,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false,
+      "enableEmbeddedAsarIntegrityValidation": true,
+      "onlyLoadAppFromAsar": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^44.9.0",
+    "electron-builder": "^26.15.3",
+    "png-to-ico": "^3.0.2",
+    "sharp": "^0.35.5",
+    "@fontsource-variable/outfit": "^5.3.0",
+    "@fontsource/bungee": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
+  }
 }
