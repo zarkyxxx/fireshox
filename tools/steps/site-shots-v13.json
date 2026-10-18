@@ -1,0 +1,38 @@
+[
+  { "open": "fireshox://home/", "size": [1600, 1000] },
+  { "wait": 3000 },
+  { "ui": "document.activeElement && document.activeElement.blur(); 1" },
+  { "shot": "site/img/shots/accueil.png" },
+
+  { "ui": "FS.open('fireshox://opening/'); 1" },
+  { "wait": 3500 },
+  { "shot": "site/img/shots/opening.png" },
+
+  { "ui": "FS.open('fireshox://shoxbench/'); 1" },
+  { "wait": 1800 },
+  { "js": "window.SB && (SB.timeScale = 2.5, SB.runSpeed()); 1" },
+  { "wait": 9500 },
+  { "shot": "site/img/shots/shoxbench.png" },
+
+  { "ui": "FS.open('fireshox://wiki/#le-y'); 1" },
+  { "wait": 4000 },
+  { "shot": "site/img/shots/wiki.png" },
+
+  { "ui": "FS.open('fireshox://images/'); 1" },
+  { "wait": 2000 },
+  { "shot": "site/img/shots/galerie.png" },
+
+  { "ui": "FS.open('fireshox://jeux/'); 1" },
+  { "wait": 2500 },
+  { "shot": "site/img/shots/jeux.png" },
+
+  { "ui": "FS.open('https://fr.wikipedia.org/wiki/Nike_Shox'); 1" },
+  { "wait": 5000 },
+  { "ui": "FSTabs.group([1, 2, 3], 'Shox Squad', '#ff7a00'); FSTabs.group([4, 5], 'Révisions', '#3d9bff'); FSTabs.pin(0); 1" },
+  { "wait": 800 },
+  { "ui": "ShoxPanel.open('notes'); 1" },
+  { "wait": 3000 },
+  { "ui": "JSON.stringify(FSTabs.state().tabs.map(t => t.title + (t.active ? ' *' : '')))" },
+  { "shot": "site/img/shots/navigateur.png" },
+  { "quit": true }
+]
