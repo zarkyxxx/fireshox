@@ -1,0 +1,13 @@
+[
+  { "open": "https://www.google.com/", "size": [1100, 700] },
+  { "wait": 3000 },
+  { "js": "(async () => { const d = navigator.userAgentData; const hi = await d.getHighEntropyValues(['fullVersionList']); return JSON.stringify({ ua: navigator.userAgent, brands: d.brands.map(b => b.brand), full: hi.fullVersionList.map(b => b.brand + ' ' + b.version), chromeKeys: Object.keys(window.chrome), csi: typeof chrome.csi(), json: JSON.stringify(d).slice(0, 120) }); })()" },
+  { "ui": "FS.open('https://accounts.google.com/ServiceLogin?continue=https%3A%2F%2Fmail.google.com%2F'); 1" },
+  { "wait": 4000 },
+  { "js": "JSON.stringify({ host: location.host, ua: navigator.userAgent, brands: navigator.userAgentData && navigator.userAgentData.brands.map(b => b.brand) })" },
+  { "js": "location.href = 'https://accounts.google.com/v3/signin/rejected?continue=https%3A%2F%2Fmail.google.com%2F'; 1" },
+  { "wait": 6000 },
+  { "js": "JSON.stringify({ href: location.href.slice(0, 90), ua: navigator.userAgent, brands: navigator.userAgentData && navigator.userAgentData.brands.map(b => b.brand) })" },
+  { "shot": ".cache/shots/ui/31-google-retry.png" },
+  { "quit": true }
+]

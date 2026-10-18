@@ -44,10 +44,14 @@ Illustration pour la face avant d'un sachet de cartes à collectionner (seulemen
 Illustration pour la face avant d'un sachet de cartes à collectionner (seulement l'illustration imprimée, pas le sachet), format portrait 2:3 (1024×1536), plein cadre. Reprends l'image jointe comme référence : l'homme de profil au chignon bouclé, avec écouteurs filaires blancs et sweat noir, au centre d'une tornade de flammes orange et jaunes où tourbillonnent des baskets de running noires à semelle à ressorts (quatre colonnes cylindriques chromées sous le talon). Placé dans la moitié haute de l'image, braises et étincelles partout, fond rouge sombre presque noir. Le tiers inférieur reste plus sombre (un titre sera ajouté par-dessus). Style illustration numérique épique, très contrasté. Aucun texte, aucune lettre, aucun chiffre, aucun logo de marque (pas de virgule de marque sur les chaussures).
 ```
 
-### `assets/cards/boosters/lfi.png` — paquet LFI Shox
+### `assets/cards/boosters/lfi.png` — paquet LFI Shox (Mélenchon et Manon Aubry, en caricature)
 ```
-Illustration pour la face avant d'un sachet de cartes à collectionner (seulement l'illustration imprimée, pas le sachet), format portrait 2:3 (1024×1536), plein cadre. Style affiche militante rétro en sérigraphie : grand soleil de rayons rouge vif qui partent du centre, un gros mégaphone crème et rouge incliné dans le tiers supérieur, et en dessous une paire de baskets rouges à colonnes de ressorts chromées qui bondit, entourée de confettis. Ambiance festive et bon enfant. Le tiers inférieur reste plus sombre et uni (un titre sera ajouté par-dessus). Palette rouge, crème, bordeaux. Aucun texte, aucune lettre, aucun chiffre, aucun logo, aucun symbole de parti réel, aucune personnalité réelle.
+Illustration pour la face avant d'un sachet de cartes à collectionner (seulement l'illustration imprimée, pas le sachet), format portrait 2:3 (1024×1536), plein cadre. Caricature humoristique façon dessin de presse satirique (style illustration, pas une photo réaliste) de Jean-Luc Mélenchon et Manon Aubry, souriants, en plein meeting sur une estrade : chacun porte des baskets noires à colonnes de ressorts chromées sous le talon qui les font rebondir ; Mélenchon tient un mégaphone rouge, Manon Aubry lève le poing avec enthousiasme. Fond : grand soleil de rayons rouge vif façon affiche rétro en sérigraphie, confettis, foule joyeuse en silhouettes. Les deux personnages occupent les deux tiers supérieurs ; le tiers inférieur reste plus sombre et uni (un titre sera ajouté par-dessus). Palette rouge, crème, bordeaux. Ton bon enfant, sans moquerie méchante. Aucun texte, aucune lettre, aucun chiffre, aucun logo de marque ni de parti.
 ```
+Si ChatGPT refuse les vraies personnalités : envoyer deux photos d'eux, le montage sera fait à la main.
+
+### `assets/cards/boosters/squid.png` — image fournie par l'utilisateur
+L'utilisateur fournit sa propre image pour le paquet Squid Shox (le prompt ci-dessus reste une option).
 
 ---
 

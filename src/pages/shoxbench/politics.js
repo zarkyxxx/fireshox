@@ -146,7 +146,7 @@
     while (logEl.children.length > 3) logEl.firstChild.remove();
   }
   const fill = (t, r) => t.replace('{a}', Math.round(FX.rand(41, 99))).replace('{b}', Math.round(FX.rand(41, 99)))
-    .replace('{n}', COUNTED).replace('{eco}', r.eco).replace('{soc}', r.soc);
+    .replace('{n}', COUNTED).replace('{nb}', QS.length - COUNTED).replace('{eco}', r.eco).replace('{soc}', r.soc);
   function progress(p) { const v = Math.round(p * 100); pctEl.textContent = v + ' %'; barEl.style.width = v + '%'; }
 
   function phraseFor(r) {
@@ -189,31 +189,47 @@
   }
 
   // ------------------------------------------------------------ questionnaire
-  const quiz = $('#quiz'), qzText = $('#qzText'), qzAns = $('#qzAns'), qzQ = $('#qzQ');
+  // Réponses : rang dans la liste des choix (0…), −1 = question bonus passée, null = pas encore répondu.
+  const quiz = $('#quiz'), qzText = $('#qzText'), qzAns = $('#qzAns'), qzQ = $('#qzQ'), qzSkip = $('#qzSkip');
   const Q = { i: 0, ans: [], lock: false };
-  qzAns.innerHTML = D.answers.map((a, k) => `
-    <button class="lk lk${k}" data-k="${k}" role="radio" aria-checked="false">
+  const NB = QS.length - COUNTED;
+  const choicesOf = (q) => q.choices || D.answers;
+  let shownChoices = null;
+  function buildAnswers(q) {
+    const list = choicesOf(q);
+    if (shownChoices === list) return;
+    shownChoices = list;
+    qzAns.style.setProperty('--n', list.length);
+    qzAns.classList.toggle('custom', !!q.choices);
+    qzAns.innerHTML = list.map((a, k) => `
+    <button class="lk ${q.choices ? 'lkc' : 'lk' + k}" data-k="${k}" role="radio" aria-checked="false">
       <span class="lk-dot"><svg class="ic"><use href="#i-check"/></svg></span>
       <span class="lk-l">${SB.esc(a.label)}</span>
       <kbd>${k + 1}</kbd>
     </button>`).join('');
+  }
+  const answered = () => Q.ans.filter((v) => v != null).length;
 
   function setStep(step) { quiz.dataset.step = step; }
   function renderQ(dir) {
     const q = QS[Q.i];
     setStep('q');
+    buildAnswers(q);
     $('#qzCount').textContent = `${Q.i + 1} / ${NQ}`;
     const th = $('#qzTheme');
     th.className = 'qz-theme' + (q.bonus ? ' bonus' : '');
     th.innerHTML = q.bonus
-      ? '<svg class="ic"><use href="#i-spring"/></svg>Question bonus Shox · ne compte pas'
+      ? '<svg class="ic"><use href="#i-spring"/></svg>Question bonus · ne compte pas'
       : SB.esc((q.axis === 'eco' ? 'Économie' : 'Société') + ' · ' + q.theme);
     qzText.textContent = q.t;
+    qzText.classList.toggle('cliche', !q.bonus);
     $$('.lk', qzAns).forEach((b) => {
       const on = Q.ans[Q.i] === +b.dataset.k;
       b.classList.toggle('on', on); b.setAttribute('aria-checked', on);
     });
-    $('#qzBar').style.width = (Q.ans.filter((v) => v != null).length / NQ) * 100 + '%';
+    qzSkip.hidden = !q.bonus;
+    qzSkip.classList.toggle('on', Q.ans[Q.i] === -1);
+    $('#qzBar').style.width = (answered() / NQ) * 100 + '%';
     $('#qzBack').disabled = Q.i === 0;
     qzQ.classList.remove('in-next', 'in-prev'); void qzQ.offsetWidth;
     qzQ.classList.add(dir < 0 ? 'in-prev' : 'in-next');
@@ -224,19 +240,23 @@
     pol.dataset.state = 'quiz';
     FX.sound('whoosh');
     renderQ(1);
-    $('#pol').scrollIntoView({ block: 'start' });
     window.scrollTo({ top: 0 });
     quiz.focus({ preventScroll: true });
   }
   function answer(k) {
     if (Q.lock || quiz.dataset.step !== 'q') return;
+    const q = QS[Q.i];
+    if (k !== -1 && (k < 0 || k >= choicesOf(q).length)) return;
+    if (k === -1 && !q.bonus) return;
     Q.lock = true;
     Q.ans[Q.i] = k;
     $$('.lk', qzAns).forEach((b) => { const on = +b.dataset.k === k; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
-    $('#qzBar').style.width = (Q.ans.filter((v) => v != null).length / NQ) * 100 + '%';
-    FX.sound('pop');
+    qzSkip.classList.toggle('on', k === -1);
+    $('#qzBar').style.width = (answered() / NQ) * 100 + '%';
+    FX.sound(k === -1 ? 'whoosh' : 'pop');
     setTimeout(() => { Q.lock = false; next(); }, 230 * Math.min(1, SB.timeScale * 4));
   }
+  const skip = () => answer(-1);
   function next() {
     if (Q.i < NQ - 1) { Q.i++; renderQ(1); } else showEnd();
   }
@@ -244,6 +264,20 @@
     if (Q.lock) return;
     if (quiz.dataset.step === 'end') { Q.i = NQ - 1; renderQ(-1); FX.sound('click'); return; }
     if (Q.i > 0) { Q.i--; renderQ(-1); FX.sound('click'); }
+  }
+
+  // « Ton verdict Shox » : enthousiasme moyen aux questions bonus répondues
+  function bonusVerdict(ans) {
+    let sum = 0, n = 0;
+    QS.forEach((q, i) => {
+      const k = ans[i];
+      if (!q.bonus || k == null || k < 0) return;
+      sum += q.choices ? q.choices[k].fan : D.answers[k].v;
+      n++;
+    });
+    if (!n) return D.bonusSkipped;
+    const avg = sum / n;
+    return D.bonusVerdicts.find((v) => avg >= v.min).text;
   }
   function showEnd() {
     setStep('end');
@@ -253,9 +287,18 @@
     $('#qzBack').disabled = false;
     const counts = D.answers.map((_, k) => QS.filter((q, i) => !q.bonus && Q.ans[i] === k).length);
     const max = Math.max(1, ...counts);
-    $('#qzEndTxt').textContent = `${COUNTED} réponses comptées, et 2 bonus pour le plaisir. Prêt à envoyer tout ça dans les ressorts ?`;
+    const nb = QS.filter((q, i) => q.bonus && Q.ans[i] != null && Q.ans[i] >= 0).length;
+    $('#qzEndTxt').textContent = `${COUNTED} réponses comptées et ${nb} bonus sur ${NB} pour le plaisir. Prêt à envoyer tout ça dans les ressorts ?`;
     $('#qzMix').innerHTML = D.answers.map((a, k) => `
       <div class="mix lk${k}"><span class="mix-bar"><i style="height:${(counts[k] / max) * 100}%"></i></span><b class="mono">${counts[k]}</b><span>${SB.esc(a.label)}</span></div>`).join('');
+    $('#qzBonus').innerHTML = QS.map((q, i) => {
+      if (!q.bonus) return '';
+      const k = Q.ans[i];
+      const txt = k == null || k < 0 ? 'Passée' : q.choices ? q.choices[k].short : D.answersShort[k];
+      const cls = k == null || k < 0 ? 'skip' : q.choices ? 'c' : 'a' + k;
+      return `<li><span>${SB.esc(q.short)}</span><b class="bchip ${cls}">${SB.esc(txt)}</b></li>`;
+    }).join('');
+    $('#qzVerdict').innerHTML = `<b>Ton verdict Shox :</b> ${SB.esc(bonusVerdict(Q.ans))}`;
     const e = $('#qzEnd'); e.classList.remove('in-next'); void e.offsetWidth; e.classList.add('in-next');
     FX.sound('success');
     setTimeout(() => $('#qzGo').focus({ preventScroll: true }), 50);
@@ -265,6 +308,7 @@
     restore();
   }
   qzAns.addEventListener('click', (e) => { const b = e.target.closest('.lk'); if (b) answer(+b.dataset.k); });
+  qzSkip.addEventListener('click', skip);
   $('#qzBack').addEventListener('click', back);
   $('#qzQuit').addEventListener('click', quitQuiz);
   $('#qzGo').addEventListener('click', () => run());
@@ -274,15 +318,22 @@
   addEventListener('keydown', (e) => {
     if (SB.tab !== 'shoxometre' || pol.dataset.state !== 'quiz' || !$('#modal').hidden) return;
     if (e.ctrlKey || e.altKey || e.metaKey || (e.target.closest && e.target.closest('input, textarea'))) return;
-    const step = quiz.dataset.step;
-    if (step === 'q' && /^[1-5]$/.test(e.key)) { e.preventDefault(); answer(+e.key - 1); }
+    const step = quiz.dataset.step, q = QS[Q.i];
+    if (step === 'q' && /^[1-9]$/.test(e.key)) { e.preventDefault(); answer(+e.key - 1); }
     else if (e.key === 'ArrowLeft' || e.key === 'Backspace') { e.preventDefault(); back(); }
-    else if (step === 'q' && e.key === 'ArrowRight' && Q.ans[Q.i] != null) { e.preventDefault(); next(); }
+    else if (step === 'q' && e.key === 'ArrowRight') {
+      e.preventDefault();
+      if (Q.ans[Q.i] != null) next(); else if (q.bonus) skip();
+    }
     else if (step === 'end' && e.key === 'Enter') { e.preventDefault(); run(); }
   });
-  // Outil de test : remplit tout le questionnaire d’un coup (fn(question, i) → rang de réponse 0-4, au hasard sinon)
-  const fillAll = (fn) => { startQuiz(); Q.ans = QS.map((q, i) => (fn ? fn(q, i) : (Math.random() * 5) | 0)); showEnd(); };
-  SB.quiz = { start: startQuiz, answer, back, fill: fillAll, state: Q };
+  // Outil de test : remplit tout le questionnaire d’un coup (fn(question, i) → rang de réponse, −1 = passée ; au hasard sinon)
+  const fillAll = (fn) => {
+    startQuiz();
+    Q.ans = QS.map((q, i) => (fn ? fn(q, i) : ((Math.random() * (choicesOf(q).length + (q.bonus ? 1 : 0))) | 0) - (q.bonus ? 1 : 0)));
+    showEnd();
+  };
+  SB.quiz = { start: startQuiz, answer, skip, back, fill: fillAll, state: Q };
 
   // ------------------------------------------------------------ analyse (fausse, drôle) puis résultat calculé
   async function run() {

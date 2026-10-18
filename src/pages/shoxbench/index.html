@@ -39,6 +39,7 @@
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></symbol>
   <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.01"/></symbol>
   <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><path d="M4 12h16"/></symbol>
+  <symbol id="i-skip" viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M13 6l6 6-6 6"/></symbol>
   <symbol id="i-left" viewBox="0 0 24 24"><path d="M19 12H5.5M11 6l-6 6 6 6"/></symbol>
   <symbol id="i-key" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M7.5 14h9"/></symbol>
   <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></symbol>
@@ -185,7 +186,7 @@
         <div class="pol-main">
           <div class="pol-title">
             <h1>Shoxomètre <span class="fire-text">politique</span></h1>
-            <p>Vingt affirmations, deux axes, une aiguille : le Shoxomètre calcule ton bord politique à partir de tes réponses, puis le traduit en langage de ressorts.</p>
+            <p>Vingt clichés, deux axes, une aiguille : le Shoxomètre calcule ton bord politique à partir de tes réponses, puis le traduit en langage de ressorts.</p>
           </div>
           <div class="pol-gauge">
             <svg id="polSvg" viewBox="0 0 640 352" aria-label="Jauge du Shoxomètre"></svg>
@@ -207,12 +208,12 @@
           <div class="pp-intro">
             <div class="pp-head">
               <h3><svg class="ic"><use href="#i-list"/></svg>Le questionnaire</h3>
-              <span class="pp-chip">≈ 3 min</span>
+              <span class="pp-chip">≈ 4 min</span>
             </div>
-            <p class="pi-lead">Pour chaque affirmation, dis si tu es d’accord ou pas. Le Shoxomètre additionne tes réponses sur deux axes, puis place l’aiguille.</p>
+            <p class="pi-lead">Vingt clichés qu’on entend au repas de famille : dis si tu es d’accord ou pas. Le Shoxomètre additionne tes réponses sur deux axes, puis place l’aiguille.</p>
             <ul class="pi-list">
-              <li><span class="pi-ic"><svg class="ic"><use href="#i-bars"/></svg></span><span><b>20 affirmations</b> sur l’économie et la société, notées de 0 (gauche) à 100 (droite)</span></li>
-              <li><span class="pi-ic"><svg class="ic"><use href="#i-spring"/></svg></span><span><b>2 questions bonus Shox</b> pour rire : elles ne comptent pas</span></li>
+              <li><span class="pi-ic"><svg class="ic"><use href="#i-bars"/></svg></span><span><b>20 clichés</b> sur l’économie et la société, notés de 0 (gauche) à 100 (droite)</span></li>
+              <li><span class="pi-ic"><svg class="ic"><use href="#i-spring"/></svg></span><span><b>9 questions bonus</b> Fire Shox, facultatives : elles ne comptent pas</span></li>
               <li><span class="pi-ic"><svg class="ic"><use href="#i-key"/></svg></span><span>Touches <kbd>1</kbd> à <kbd>5</kbd> pour répondre, <kbd>←</kbd> pour revenir</span></li>
             </ul>
             <button class="fs-btn fire big-btn" id="quizStart"><svg class="ic fill"><use href="#i-play"/></svg><span>Commencer le questionnaire</span></button>
@@ -243,12 +244,17 @@
             <div class="qz-q" id="qzQ">
               <p class="qz-text" id="qzText"></p>
               <div class="likert" id="qzAns" role="radiogroup" aria-label="Ta réponse"></div>
+              <button class="ghost-btn qz-skip" id="qzSkip" hidden>Passer cette question<svg class="ic"><use href="#i-skip"/></svg></button>
             </div>
             <div class="qz-end" id="qzEnd">
               <span class="qz-done"><svg class="ic"><use href="#i-check"/></svg></span>
               <h2>Questionnaire terminé !</h2>
               <p id="qzEndTxt">20 réponses comptées, et 2 bonus pour le plaisir.</p>
-              <div class="qz-mix" id="qzMix"></div>
+              <div class="qz-recap">
+                <div class="qz-mix" id="qzMix"></div>
+                <div class="qz-bonus"><h4>Tes réponses bonus <small>ne comptent pas</small></h4><ul id="qzBonus"></ul></div>
+              </div>
+              <p class="qz-verdict" id="qzVerdict"></p>
               <div class="qz-end-btns">
                 <button class="fs-btn fire" id="qzGo"><svg class="ic fill"><use href="#i-play"/></svg>Lancer l’analyse</button>
               </div>
@@ -315,7 +321,7 @@
     <div class="foot-col">
       <b>Méthodologie</b>
       <span>Débit : un dé à 9 999 faces</span>
-      <span>Shoxomètre : 20 affirmations, 2 axes</span>
+      <span>Shoxomètre : 20 clichés, 2 axes</span>
     </div>
   </div>
   <div class="wrap foot-legal">© 2026 ShoxBench, une filiale imaginaire de Fire Shox. Aucune donnée ne quitte ton ordinateur, aucune donnée n’y entre non plus.</div>

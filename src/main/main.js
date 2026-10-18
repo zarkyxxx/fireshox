@@ -52,43 +52,113 @@ if (!devRun && !app.requestSingleInstanceLock()) {
 app.setName('Fire Shox');
 if (process.platform === 'win32') app.setAppUserModelId('com.fireshox.browser');
 
-// Un User-Agent de Chrome classique : beaucoup de sites boudent « Electron ».
-{
-  const major = process.versions.chrome.split('.')[0];
+// ---------------------------------------------------------------------------
+// Identité du navigateur. Fire Shox se présente comme Google Chrome (même version que son moteur
+// Chromium), jusque dans les détails que Google vérifie avant d'accepter une connexion : marque
+// « Google Chrome » dans les indices client (en-têtes sec-ch-ua et navigator.userAgentData) et objet
+// window.chrome complet (voir webview-preload.js). Si Google refuse malgré tout (« Couldn't sign you
+// in »), on essaie une autre identité sur ses pages de connexion (Edge, puis Firefox), on relance la
+// connexion et on retient celle qui passe (clé « googleLoginMode »).
+// ---------------------------------------------------------------------------
+const CHROME_FULL = process.versions.chrome;
+const CHROME_MAJOR = CHROME_FULL.split('.')[0];
+const CHROME_UA = (() => {
   const os = process.platform === 'win32' ? 'Windows NT 10.0; Win64; x64'
     : process.platform === 'darwin' ? 'Macintosh; Intel Mac OS X 10_15_7' : 'X11; Linux x86_64';
-  app.userAgentFallback = `Mozilla/5.0 (${os}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${major}.0.0.0 Safari/537.36`;
-}
-
-// Connexion Google : Google refuse les navigateurs basés sur Electron (« ce navigateur n'est peut-être
-// pas sécurisé »). Sur ses pages de connexion uniquement, Fire Shox se présente comme Firefox,
-// comme le font d'autres navigateurs Chromium (en-tête, navigator.userAgent, et indices client retirés).
+  return `Mozilla/5.0 (${os}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${CHROME_MAJOR}.0.0.0 Safari/537.36`;
+})();
 const FIREFOX_UA = (() => {
   const os = process.platform === 'win32' ? 'Windows NT 10.0; Win64; x64'
     : process.platform === 'darwin' ? 'Macintosh; Intel Mac OS X 10.15' : 'X11; Linux x86_64';
   return `Mozilla/5.0 (${os}; rv:150.0) Gecko/20100101 Firefox/150.0`;
 })();
+app.userAgentFallback = CHROME_UA;
+
+const IDENTITIES = {
+  chrome: { ua: CHROME_UA, brand: 'Google Chrome' },
+  edge: { ua: `${CHROME_UA} Edg/${CHROME_MAJOR}.0.0.0`, brand: 'Microsoft Edge' },
+  firefox: { ua: FIREFOX_UA, brand: null },
+};
+const LOGIN_MODES = ['chrome', 'edge', 'firefox'];
 const GOOGLE_LOGIN = /^https:\/\/(accounts\.google\.[a-z.]+|accounts\.youtube\.com)(\/|$)/i;
+const GOOGLE_REJECTED = /^https:\/\/accounts\.google\.[a-z.]+\/(v3\/)?signin\/rejected/i;
 const isGoogleLogin = (url) => GOOGLE_LOGIN.test(url || '');
 
-function setupGoogleLogin(ses) {
-  ses.webRequest.onBeforeSendHeaders({ urls: ['https://accounts.google.com/*', 'https://accounts.youtube.com/*'] }, (details, cb) => {
+let loginMode = null;
+function getLoginMode() {
+  if (!loginMode) {
+    const saved = store.get('googleLoginMode');
+    loginMode = LOGIN_MODES.includes(saved) ? saved : 'chrome';
+  }
+  return loginMode;
+}
+function setLoginMode(mode) {
+  loginMode = mode;
+  store.set('googleLoginMode', mode);
+}
+const identityFor = (url) => IDENTITIES[isGoogleLogin(url) ? getLoginMode() : 'chrome'];
+
+function brandList(brand, full) {
+  const v = full ? CHROME_FULL : CHROME_MAJOR;
+  const list = [{ brand: 'Not?A_Brand', version: full ? '24.0.0.0' : '24' }, { brand: 'Chromium', version: v }];
+  if (brand) list.push({ brand, version: v });
+  return list;
+}
+const brandHeader = (brand, full) => brandList(brand, full).map((b) => `"${b.brand}";v="${b.version}"`).join(', ');
+
+function setupIdentity(ses) {
+  ses.webRequest.onBeforeSendHeaders((details, cb) => {
+    if (!/^https?:/i.test(details.url)) { cb({}); return; }
+    const id = identityFor(details.url);
     const h = details.requestHeaders;
-    h['User-Agent'] = FIREFOX_UA;
-    for (const k of Object.keys(h)) if (/^sec-ch-ua/i.test(k)) delete h[k];
+    const uaKey = Object.keys(h).find((k) => k.toLowerCase() === 'user-agent') || 'User-Agent';
+    h[uaKey] = id.ua;
+    for (const k of Object.keys(h)) {
+      const lk = k.toLowerCase();
+      if (!lk.startsWith('sec-ch-ua')) continue;
+      if (!id.brand) delete h[k];
+      else if (lk === 'sec-ch-ua') h[k] = brandHeader(id.brand, false);
+      else if (lk === 'sec-ch-ua-full-version-list') h[k] = brandHeader(id.brand, true);
+    }
     cb({ requestHeaders: h });
   });
 }
 
+// Pour webview-preload.js : l'identité à afficher côté page (navigator.userAgentData, window.chrome).
+ipcMain.on('identity:get', (e, url) => {
+  const mode = isGoogleLogin(url) ? getLoginMode() : 'chrome';
+  e.returnValue = { mode, brand: IDENTITIES[mode].brand, major: CHROME_MAJOR, full: CHROME_FULL };
+});
+
+const loginTries = new WeakMap();
+const lastRejection = new WeakMap();
 function watchGoogleLogin(wc) {
-  let spoofed = false;
+  let currentUa = null;
   wc.on('did-start-navigation', (e) => {
     if (!e.isMainFrame || e.isSameDocument) return;
-    const google = isGoogleLogin(e.url);
-    if (google !== spoofed) {
-      spoofed = google;
-      wc.setUserAgent(google ? FIREFOX_UA : app.userAgentFallback);
-    }
+    const ua = identityFor(e.url).ua;
+    if (ua !== currentUa) { currentUa = ua; wc.setUserAgent(ua); }
+  });
+  wc.on('did-navigate', (e, maybeUrl) => {
+    const url = typeof maybeUrl === 'string' ? maybeUrl : e.url;
+    if (!GOOGLE_REJECTED.test(url || '')) return;
+    // Une seule bascule par refus (la page de refus peut se charger deux fois de suite).
+    if (Date.now() - (lastRejection.get(wc) || 0) < 5000) return;
+    lastRejection.set(wc, Date.now());
+    // Google a refusé cette identité : on passe à la suivante et on relance la connexion.
+    const tried = loginTries.get(wc) || new Set();
+    tried.add(getLoginMode());
+    loginTries.set(wc, tried);
+    const next = LOGIN_MODES.find((m) => !tried.has(m));
+    if (!next) return;
+    setLoginMode(next);
+    let cont = 'https://accounts.google.com/';
+    try { cont = new URL(url).searchParams.get('continue') || cont; } catch {}
+    currentUa = IDENTITIES[next].ua;
+    wc.setUserAgent(currentUa);
+    setTimeout(() => {
+      if (!wc.isDestroyed()) wc.loadURL('https://accounts.google.com/ServiceLogin?continue=' + encodeURIComponent(cont)).catch(() => {});
+    }, 400);
   });
 }
 
@@ -695,7 +765,7 @@ app.whenReady().then(() => {
   registerInternalProtocol(ses);
   setupDownloads(ses);
   setupPermissions(ses);
-  setupGoogleLogin(ses);
+  setupIdentity(ses);
   try { ses.setSpellCheckerLanguages(['fr', 'en-US']); } catch {}
   ses.on('session-created', () => {});
   app.on('session-created', (s) => { try { registerInternalProtocol(s); setupDownloads(s); setupPermissions(s); } catch {} });
